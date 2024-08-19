@@ -78,9 +78,12 @@ trait BasicUtil
 
 
 
-    public function getMainRoleId() {
+    public function getMainRoleId($user=NULL) {
         // Retrieve the authenticated user
-    $user = auth()->user();
+        if(empty($user)){
+            $user = auth()->user();
+        }
+
 
     // Get all roles of the authenticated user
     $roles = $user->roles;

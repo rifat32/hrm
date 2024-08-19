@@ -172,6 +172,7 @@ Route::middleware(['auth:api', "mail.setting",])->group(function () {
     Route::post('/v2.0/files/multiple-file-upload', [FileManagementController::class, "createFileMultipleV2"]);
     Route::get('/v1.0/file/{filename}', [FileManagementController::class, "getFile"]);
 
+
     Route::post('/v1.0/logout', [AuthController::class, "logout"]);
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
     Route::get('/v2.0/user', [AuthController::class, "getUserV2"]);
@@ -457,53 +458,24 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::put('/v2.0/users/update-work-shift', [UserManagementController::class, "updateUserWorkShift"]);
     Route::put('/v3.0/users', [UserManagementController::class, "updateUserV3"]);
     Route::put('/v4.0/users', [UserManagementController::class, "updateUserV4"]);
-
-
-
     Route::put('/v1.0/users/update-address', [UserManagementController::class, "updateUserAddress"]);
     Route::put('/v1.0/users/update-bank-details', [UserManagementController::class, "updateUserBankDetails"]);
-
     Route::put('/v1.0/users/update-joining-date', [UserManagementController::class, "updateUserJoiningDate"]);
-
-
     Route::put('/v1.0/users/update-emergency-contact', [UserManagementController::class, "updateEmergencyContact"]);
-
-
-
     Route::get('/v2.0/users/{id}', [UserManagementController::class, "getUserByIdV2"]);
-
     Route::get('/v3.0/users/{id}', [UserManagementController::class, "getUserByIdV3"]);
-
     Route::get('/v4.0/users/{id}', [UserManagementController::class, "getUserByIdV4"]);
-
-
-
-
     Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class, "generateEmployeeId"]);
     Route::get('/v1.0/users/validate/employee-id/{user_id}', [UserManagementController::class, "validateEmployeeId"]);
-
     Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);
-
     Route::get('/v1.0/users/load-data-for-leaves/{id}', [UserManagementController::class, "getLoadDataForLeaveByUserId"]);
-
-
     Route::get('/v1.0/users/load-data-for-attendances/{id}', [UserManagementController::class, "getLoadDataForAttendanceByUserId"]);
-
-
     Route::get('/v1.0/load-global-data-for-attendances', [UserManagementController::class, "getLoadGlobalDataForAttendance"]);
-
     Route::get('/v1.0/users/get-disable-days-for-attendances/{id}', [UserManagementController::class, "getDisableDaysForAttendanceByUserId"]);
-
     Route::get('/v1.0/users/get-attendances/{id}', [UserManagementController::class, "getAttendancesByUserId"]);
-
     Route::get('/v1.0/users/get-leaves/{id}', [UserManagementController::class, "getLeavesByUserId"]);
-
     Route::get('/v1.0/users/get-holiday-details/{id}', [UserManagementController::class, "getholidayDetailsByUserId"]);
-
     Route::get('/v1.0/users/get-schedule-information/by-user', [UserManagementController::class, "getScheduleInformation"]);
-
-
-
     Route::get('/v1.0/users/get-recruitment-processes/{id}', [UserManagementController::class, "getRecruitmentProcessesByUserId"]);
 
 
@@ -516,7 +488,6 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::post('/v1.0/roles', [RolesController::class, "createRole"]);
     Route::put('/v1.0/roles', [RolesController::class, "updateRole"]);
     Route::get('/v1.0/roles', [RolesController::class, "getRoles"]);
-
     Route::get('/v1.0/roles/{id}', [RolesController::class, "getRoleById"]);
     Route::delete('/v1.0/roles/{ids}', [RolesController::class, "deleteRolesByIds"]);
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -804,12 +775,10 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::post('/v1.0/businesses', [BusinessController::class, "createBusiness"]);
     Route::put('/v1.0/businesses/toggle-active', [BusinessController::class, "toggleActiveBusiness"]);
     Route::put('/v1.0/businesses', [BusinessController::class, "updateBusiness"]);
-
     Route::put('/v1.0/businesses-part-1', [BusinessController::class, "updateBusinessPart1"]);
     Route::put('/v1.0/businesses-part-2', [BusinessController::class, "updateBusinessPart2"]);
     Route::put('/v2.0/businesses-part-2', [BusinessController::class, "updateBusinessPart2V2"]);
     Route::put('/v1.0/businesses-part-3', [BusinessController::class, "updateBusinessPart3"]);
-
     Route::put('/v1.0/business-pension-information', [BusinessController::class, "updateBusinessPensionInformation"]);
 
 
@@ -927,9 +896,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
 
     Route::post('/v1.0/asset-types', [AssetTypeController::class, "createAssetType"]);
     Route::put('/v1.0/asset-types', [AssetTypeController::class, "updateAssetType"]);
-
     Route::put('/v1.0/asset-types/toggle-active', [AssetTypeController::class, "toggleActiveAssetType"]);
-
     Route::get('/v1.0/asset-types', [AssetTypeController::class, "getAssetTypes"]);
     Route::delete('/v1.0/asset-types/{ids}', [AssetTypeController::class, "deleteAssetTypesByIds"]);
 

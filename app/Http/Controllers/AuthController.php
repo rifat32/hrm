@@ -107,7 +107,7 @@ class AuthController extends Controller
     public function register(AuthRegisterRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $this->checkEmployeeCreationLimit(true);
 
 
@@ -124,23 +124,23 @@ class AuthController extends Controller
 
             $user =  User::create($request_data);
 
-              // verify email starts
-              $email_token = Str::random(30);
-              $user->email_verify_token = $email_token;
-              $user->email_verify_token_expires = Carbon::now()->subDays(-1);
-              $user->save();
+            // verify email starts
+            $email_token = Str::random(30);
+            $user->email_verify_token = $email_token;
+            $user->email_verify_token_expires = Carbon::now()->subDays(-1);
+            $user->save();
 
 
-             $user->assignRole("customer");
+            $user->assignRole("customer");
 
             $user->token = $user->createToken('Laravel Password Grant Client')->accessToken;
             $user->permissions = $user->getAllPermissions()->pluck('name');
             $user->roles = $user->roles->pluck('name');
 
 
-            if(env("SEND_EMAIL") == true) {
+            if (env("SEND_EMAIL") == true) {
 
-                $this->checkEmailSender($user->id,0);
+                $this->checkEmailSender($user->id, 0);
 
                 $business = $user->business;
                 if ($business && $business->emailSettings) {
@@ -159,15 +159,15 @@ class AuthController extends Controller
 
                 Mail::to($user->email)->send(new EmailVerificationMail($user));
 
-                $this->storeEmailSender($user->id,0);
+                $this->storeEmailSender($user->id, 0);
             }
 
-// verify email ends
+            // verify email ends
 
             return response($user, 201);
         } catch (Exception $e) {
 
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
 
@@ -234,7 +234,7 @@ class AuthController extends Controller
 
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $loginData = $request->validate([
                 'email' => 'email|required',
                 'password' => 'required'
@@ -283,51 +283,47 @@ class AuthController extends Controller
 
 
 
-            if(empty($user->is_active)) {
+            if (empty($user->is_active)) {
 
                 return response(['message' => 'User not active'], 403);
             }
 
             $accessRevocation = $user->accessRevocation;
 
-            if(!empty($accessRevocation)) {
+            if (!empty($accessRevocation)) {
 
-                if(!empty($accessRevocation->system_access_revoked_date)) {
-                    if(Carbon::parse($accessRevocation->system_access_revoked_date)->isPast() && !Carbon::parse($accessRevocation->system_access_revoked_date)->today()) {
-      return response(['message' => 'User access revoked active'], 403);
+                if (!empty($accessRevocation->system_access_revoked_date)) {
+                    if (Carbon::parse($accessRevocation->system_access_revoked_date)->isPast() && !Carbon::parse($accessRevocation->system_access_revoked_date)->today()) {
+                        return response(['message' => 'User access revoked active'], 403);
                     }
                 }
 
-                if(!empty($accessRevocation->email_access_revoked)) {
+                if (!empty($accessRevocation->email_access_revoked)) {
                     return response(['message' => 'User access revoked active'], 403);
                 }
-
-
-
             }
 
 
 
 
 
-            if($user->business_id) {
-                 $business = Business::where([
-                    "id" =>$user->business_id
-                 ])
-                 ->first();
-                 if(empty($business)) {
+            if ($user->business_id) {
+                $business = Business::where([
+                    "id" => $user->business_id
+                ])
+                    ->first();
+                if (empty($business)) {
                     return response(['message' => 'Your business not found'], 403);
-                 }
-                 if(!$business->is_active) {
+                }
+                if (!$business->is_active) {
 
                     return response(['message' => 'Business not active'], 403);
                 }
 
-                if($business->owner_id != $user->id){
-                    if($user->hasRole(("business_employee#" . $business->id))) {
+                if ($business->owner_id != $user->id) {
+                    if ($user->hasRole(("business_employee#" . $business->id))) {
                         $this->isModuleEnabled("employee_login");
                     }
-
                 }
 
                 // if(!$user->manages_department) {
@@ -342,18 +338,18 @@ class AuthController extends Controller
 
 
             $now = time(); // or your date as well
-$user_created_date = strtotime($user->created_at);
-$datediff = $now - $user_created_date;
+            $user_created_date = strtotime($user->created_at);
+            $datediff = $now - $user_created_date;
 
-            if(!$user->email_verified_at && (($datediff / (60 * 60 * 24))>1)){
+            if (!$user->email_verified_at && (($datediff / (60 * 60 * 24)) > 1)) {
                 $email_token = Str::random(30);
                 $user->email_verify_token = $email_token;
                 $user->email_verify_token_expires = Carbon::now()->subDays(-1);
 
-                if(env("SEND_EMAIL") == true) {
+                if (env("SEND_EMAIL") == true) {
 
 
-                    $this->checkEmailSender($user->id,0);
+                    $this->checkEmailSender($user->id, 0);
 
                     $business = $user->business;
                     if ($business && $business->emailSettings) {
@@ -372,7 +368,7 @@ $datediff = $now - $user_created_date;
 
                     Mail::to($user->email)->send(new EmailVerificationMail($user));
 
-                    $this->storeEmailSender($user->id,0);
+                    $this->storeEmailSender($user->id, 0);
                 }
                 $user->save();
 
@@ -406,11 +402,11 @@ $datediff = $now - $user_created_date;
             return response()->json(['data' => $user,   "ok" => true], 200);
         } catch (Exception $e) {
 
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
 
-     /**
+    /**
      *
      * @OA\Post(
      *      path="/v2.0/login",
@@ -470,7 +466,7 @@ $datediff = $now - $user_created_date;
 
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
 
@@ -525,82 +521,67 @@ $datediff = $now - $user_created_date;
 
 
 
-            if(empty($user->is_active)) {
+            if (empty($user->is_active)) {
                 return response(['message' => 'User not active'], 403);
             }
 
 
             $accessRevocation = $user->accessRevocation;
 
-            if(!empty($accessRevocation)) {
+            if (!empty($accessRevocation)) {
 
-                if(!empty($accessRevocation->system_access_revoked_date)) {
-                    if(Carbon::parse($accessRevocation->system_access_revoked_date)->isPast() && !Carbon::parse($accessRevocation->system_access_revoked_date)->today()) {
-      return response(['message' => 'User access revoked active'], 403);
+                if (!empty($accessRevocation->system_access_revoked_date)) {
+                    if (Carbon::parse($accessRevocation->system_access_revoked_date)->isPast() && !Carbon::parse($accessRevocation->system_access_revoked_date)->today()) {
+                        return response(['message' => 'User access revoked active'], 403);
                     }
                 }
 
-                if(!empty($accessRevocation->email_access_revoked)) {
+                if (!empty($accessRevocation->email_access_revoked)) {
                     return response(['message' => 'User access revoked active'], 403);
                 }
-
-
-
             }
 
 
 
 
-            if($user->business_id) {
-                 $business = Business::where([
-                    "id" =>$user->business_id
-                 ])
-                 ->first();
-                 if(empty($business)) {
+            if ($user->business_id) {
+                $business = Business::where([
+                    "id" => $user->business_id
+                ])
+                    ->first();
+                if (empty($business)) {
 
 
                     return response(['message' => 'Your business not found'], 403);
-                 }
-                 if(!$business->is_active) {
+                }
+                if (!$business->is_active) {
 
                     return response(['message' => 'Business not active'], 403);
                 }
 
 
-                if($business->owner_id != $user->id){
+                if ($business->owner_id != $user->id) {
 
-                    if($user->hasRole(("business_employee#" . $business->id))) {
+                    if ($user->hasRole(("business_employee#" . $business->id))) {
                         $this->isModuleEnabled("employee_login");
                     }
                 }
-
-
-
-                // if(!$user->manages_department) {
-                //     return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
-                // }
-
-
-
-
-
-
             }
 
 
 
 
             $now = time(); // or your date as well
-$user_created_date = strtotime($user->created_at);
-$datediff = $now - $user_created_date;
+            $user_created_date = strtotime($user->created_at);
+            $datediff = $now - $user_created_date;
 
-            if(!$user->email_verified_at && (($datediff / (60 * 60 * 24))>1)){
+            if (!$user->email_verified_at && (($datediff / (60 * 60 * 24)) > 1)) {
                 $email_token = Str::random(30);
                 $user->email_verify_token = $email_token;
                 $user->email_verify_token_expires = Carbon::now()->subDays(-1);
-                if(env("SEND_EMAIL") == true) {
+                if (env("SEND_EMAIL") == true) {
 
-                    $this->checkEmailSender($user->id,0);
+                    $this->checkEmailSender($user->id, 0);
 
                     $business = $user->business;
                     if ($business && $business->emailSettings) {
@@ -619,7 +600,7 @@ $datediff = $now - $user_created_date;
 
                     Mail::to($user->email)->send(new EmailVerificationMail($user));
 
-                    $this->storeEmailSender($user->id,0);
+                    $this->storeEmailSender($user->id, 0);
                 }
                 $user->save();
 
@@ -642,13 +623,16 @@ $datediff = $now - $user_created_date;
 
             $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business.service_plan.modules']);
 
-                // Creating token only once
-    $token = $user->createToken('authToken')->accessToken;
-             // Transforming manager departments and roles
-    $user->manager_departments = $user->manager_departments->map(fn($department) => [
-        'id' => $department->id,
-        'name' => $department->name,
-    ]);
+            // Creating token only once
+            $token = $user->createToken('authToken')->accessToken;
+            // Transforming manager departments and roles
+            $manager_departments = $user->manager_departments->map(function ($department) {
+                return [
+                    'id' => $department->id,
+                    'name' => $department->name,
+                ];
+            });
+
 
             $user->roles = $user->roles->map(function ($role) {
                 return [
@@ -658,35 +642,45 @@ $datediff = $now - $user_created_date;
             });
             $user->permissions = $user->permissions->pluck("name");
 
+            $manager_roles = [];
+            if (!empty($user->manager_departments)) {
+
+                $currentUserRole = $user->roles()->orderBy('id', 'asc')->first();
+                $manager_roles = Role::with('permissions:name,id', "users")
+                    ->where("roles.id", ">", $currentUserRole->id)
+                    ->where('business_id', $user->business_id)
+                    ->where("id", ">", $this->getMainRoleId($user))
+                    ->orderBy("id", "DESC")
+                    ->get();
+            }
 
             $business = $user->business;
 
-// Extracting only the required data
-$responseData = [
-    'id' => $user->id,
-    "manager_departments" => $user->manager_departments,
-    "token" =>  $token,
-    'business_id' => $user->business_id,
-    'first_Name' => $user->first_Name,
-    'middle_Name' => $user->middle_Name,
-    'last_Name' => $user->last_Name,
-    'image' => $user->image,
-    'roles' => $user->roles,
-    'permissions' => $user->permissions,
-    'manages_department' => $user->manages_department,
-    'color_theme_name' => $user->color_theme_name,
-    'business' => [
-        'is_subscribed' => $business ? $business->is_subscribed : null,
-        'name' => $business ? $business->name : null,
-        'logo' => $business ? $business->logo : null,
-        'start_date' => $business ? $business->start_date : null,
-        'currency' => $business ? $business->currency : null,
-        'service_plan' => $business ? $business->service_plan : null,
-        'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
-    ]
-
-
-];
+            // Extracting only the required data
+            $responseData = [
+                'id' => $user->id,
+                "manager_roles" => $manager_roles,
+                "manager_departments" => $manager_departments,
+                "token" =>  $token,
+                'business_id' => $user->business_id,
+                'first_Name' => $user->first_Name,
+                'middle_Name' => $user->middle_Name,
+                'last_Name' => $user->last_Name,
+                'image' => $user->image,
+                'roles' => $user->roles,
+                'permissions' => $user->permissions,
+                'manages_department' => $user->manages_department,
+                'color_theme_name' => $user->color_theme_name,
+                'business' => [
+                    'is_subscribed' => $business ? $business->is_subscribed : null,
+                    'name' => $business ? $business->name : null,
+                    'logo' => $business ? $business->logo : null,
+                    'start_date' => $business ? $business->start_date : null,
+                    'currency' => $business ? $business->currency : null,
+                    'service_plan' => $business ? $business->service_plan : null,
+                    'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
+                ]
+            ];
 
             Auth::login($user);
             $this->storeActivity($request, "logged in", "User successfully logged into the system.");
@@ -696,8 +690,7 @@ $responseData = [
 
             return response()->json(['data' => $responseData,   "ok" => true], 200);
         } catch (Exception $e) {
-
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
 
@@ -706,7 +699,7 @@ $responseData = [
 
 
 
- /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/logout",
@@ -770,11 +763,11 @@ $responseData = [
             return response()->json(["ok" => true], 200);
         } catch (Exception $e) {
 
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
 
-  /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/token-regenerate",
@@ -833,30 +826,30 @@ $responseData = [
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $request_data = $request->validated();
             $user = User::where([
                 "id" => $request_data["user_id"],
             ])
-            ->first();
+                ->first();
 
 
 
-            $site_redirect_token_db = (json_decode($user->site_redirect_token,true));
+            $site_redirect_token_db = (json_decode($user->site_redirect_token, true));
 
-            if($site_redirect_token_db["token"] !== $request_data["site_redirect_token"]) {
+            if ($site_redirect_token_db["token"] !== $request_data["site_redirect_token"]) {
 
-               return response()
-               ->json([
-                  "message" => "invalid token"
-               ],409);
+                return response()
+                    ->json([
+                        "message" => "invalid token"
+                    ], 409);
             }
 
             $now = time(); // or your date as well
 
             $timediff = $now - $site_redirect_token_db["created_at"];
 
-            if ($timediff > 20){
+            if ($timediff > 20) {
 
                 return response(['message' => 'token expired'], 409);
             }
@@ -875,12 +868,12 @@ $responseData = [
             return response()->json(['data' => $user,   "ok" => true], 200);
         } catch (Exception $e) {
 
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
 
-   /**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/forgetpassword",
      *      operationId="storeToken",
@@ -930,13 +923,14 @@ $responseData = [
      *     )
      */
 
-    public function storeToken(ForgetPasswordRequest $request) {
+    public function storeToken(ForgetPasswordRequest $request)
+    {
 
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                $request_data = $request->validated();
+            $request_data = $request->validated();
 
             $user = User::where(["email" => $request_data["email"]])->first();
             if (!$user) {
@@ -952,33 +946,32 @@ $responseData = [
 
 
 
-            if(env("SEND_EMAIL") == true) {
-            $this->checkEmailSender($user->id,1);
+            if (env("SEND_EMAIL") == true) {
+                $this->checkEmailSender($user->id, 1);
 
-            $business = $user->business;
-            if ($business && $business->emailSettings) {
+                $business = $user->business;
+                if ($business && $business->emailSettings) {
 
-                $emailSettings = $business->emailSettings;
+                    $emailSettings = $business->emailSettings;
 
-                Config::set('mail.driver', $emailSettings->mail_driver);
-                Config::set('mail.host', $emailSettings->mail_host);
-                Config::set('mail.port', $emailSettings->mail_port);
-                Config::set('mail.username', $emailSettings->mail_username);
-                Config::set('mail.password', $emailSettings->mail_password);
-                Config::set('mail.encryption', $emailSettings->mail_encryption);
-                Config::set('mail.from.address', $emailSettings->mail_from_address);
-                Config::set('mail.from.name', $emailSettings->mail_from_name);
-            }
+                    Config::set('mail.driver', $emailSettings->mail_driver);
+                    Config::set('mail.host', $emailSettings->mail_host);
+                    Config::set('mail.port', $emailSettings->mail_port);
+                    Config::set('mail.username', $emailSettings->mail_username);
+                    Config::set('mail.password', $emailSettings->mail_password);
+                    Config::set('mail.encryption', $emailSettings->mail_encryption);
+                    Config::set('mail.from.address', $emailSettings->mail_from_address);
+                    Config::set('mail.from.name', $emailSettings->mail_from_name);
+                }
 
-            $result = Mail::to($request_data["email"])->send(new ResetPasswordMail($user, $request_data["client_site"]));
+                $result = Mail::to($request_data["email"])->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
-            $this->storeEmailSender($user->id,1);
+                $this->storeEmailSender($user->id, 1);
             }
 
             if (count(Mail::failures()) > 0) {
                 // Handle failed recipients and log the error messages
                 foreach (Mail::failures() as $emailFailure) {
-
                 }
                 throw new Exception("Failed to send email to:" . $emailFailure);
             }
@@ -986,25 +979,15 @@ $responseData = [
             DB::commit();
             return response()->json([
                 "message" => "Please check your email."
-            ],200);
-
-
-
-
-
-
-
-
-
+            ], 200);
         } catch (Exception $e) {
             DB::rollBack();
 
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
-
     }
-/**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/v2.0/forgetpassword",
      *      operationId="storeTokenV2",
@@ -1054,13 +1037,14 @@ $responseData = [
      *     )
      */
 
-     public function storeTokenV2(ForgetPasswordV2Request $request) {
+    public function storeTokenV2(ForgetPasswordV2Request $request)
+    {
 
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                $request_data = $request->validated();
+            $request_data = $request->validated();
 
             $user = User::where(["id" => $request_data["id"]])->first();
             if (!$user) {
@@ -1076,9 +1060,9 @@ $responseData = [
 
 
 
-            if(env("SEND_EMAIL") == true) {
+            if (env("SEND_EMAIL") == true) {
 
-                $this->checkEmailSender($user->id,1);
+                $this->checkEmailSender($user->id, 1);
 
                 $business = $user->business;
                 if ($business && $business->emailSettings) {
@@ -1097,10 +1081,7 @@ $responseData = [
 
                 $result = Mail::to($user->email)->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
-                $this->storeEmailSender($user->id,1);
-
-
-
+                $this->storeEmailSender($user->id, 1);
             }
 
             if (count(Mail::failures()) > 0) {
@@ -1114,25 +1095,17 @@ $responseData = [
 
             return response()->json([
                 "message" => "Please check your email."
-            ],200);
-
-
-
-
-
-
-
+            ], 200);
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
 
-      /**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/resend-email-verify-mail",
      *      operationId="resendEmailVerifyToken",
@@ -1180,13 +1153,14 @@ $responseData = [
      *     )
      */
 
-    public function resendEmailVerifyToken(EmailVerifyTokenRequest $request) {
+    public function resendEmailVerifyToken(EmailVerifyTokenRequest $request)
+    {
 
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                $request_data = $request->validated();
+            $request_data = $request->validated();
 
             $user = User::where(["email" => $request_data["email"]])->first();
             if (!$user) {
@@ -1199,11 +1173,11 @@ $responseData = [
             $email_token = Str::random(30);
             $user->email_verify_token = $email_token;
             $user->email_verify_token_expires = Carbon::now()->subDays(-1);
-            if(env("SEND_EMAIL") == true) {
+            if (env("SEND_EMAIL") == true) {
 
 
 
-                $this->checkEmailSender($user->id,0);
+                $this->checkEmailSender($user->id, 0);
 
                 $business = $user->business;
                 if ($business && $business->emailSettings) {
@@ -1222,10 +1196,7 @@ $responseData = [
 
                 Mail::to($user->email)->send(new EmailVerificationMail($user));
 
-                $this->storeEmailSender($user->id,0);
-
-
-
+                $this->storeEmailSender($user->id, 0);
             }
 
             $user->save();
@@ -1234,32 +1205,26 @@ $responseData = [
             return response()->json([
                 "message" => "please check email"
             ]);
-
-
-
-
-
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
-/**
-        *
+    /**
+     *
      * @OA\Patch(
      *      path="/forgetpassword/reset/{token}",
      *      operationId="changePasswordByToken",
      *      tags={"auth"},
      *  @OA\Parameter(
-* name="token",
-* in="path",
-* description="token",
-* required=true,
-* example="1"
-* ),
+     * name="token",
+     * in="path",
+     * description="token",
+     * required=true,
+     * example="1"
+     * ),
      *      summary="This method is to change password",
      *      description="This method is to change password",
 
@@ -1311,44 +1276,38 @@ $responseData = [
     {
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                $request_data = $request->validated();
-                $user = User::where([
-                    "resetPasswordToken" => $token,
-                ])
-                    ->where("resetPasswordExpires", ">", now())
-                    ->first();
-                if (!$user) {
+            $request_data = $request->validated();
+            $user = User::where([
+                "resetPasswordToken" => $token,
+            ])
+                ->where("resetPasswordExpires", ">", now())
+                ->first();
+            if (!$user) {
 
-                    return response()->json([
-                        "message" => "Invalid Token Or Token Expired"
-                    ], 400);
-                }
-
-                $password = Hash::make($request_data["password"]);
-                $user->password = $password;
-
-                $user->login_attempts = 0;
-                $user->last_failed_login_attempt_at = null;
-
-
-                $user->save();
-
-                DB::commit();
                 return response()->json([
-                    "message" => "password changed"
-                ], 200);
+                    "message" => "Invalid Token Or Token Expired"
+                ], 400);
+            }
+
+            $password = Hash::make($request_data["password"]);
+            $user->password = $password;
+
+            $user->login_attempts = 0;
+            $user->last_failed_login_attempt_at = null;
 
 
+            $user->save();
 
-
-
+            DB::commit();
+            return response()->json([
+                "message" => "password changed"
+            ], 200);
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->sendError($e, 500,$request);
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
@@ -1357,13 +1316,13 @@ $responseData = [
 
 
 
- /**
-        *
+    /**
+     *
      * @OA\Get(
      *      path="/v1.0/user",
      *      operationId="getUser",
      *      tags={"auth"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
 
@@ -1407,35 +1366,35 @@ $responseData = [
      */
 
 
-public function getUser (Request $request) {
-    try{
-        $this->storeActivity($request, "DUMMY activity","DUMMY description");
-        $user = $request->user();
-        $user->token = auth()->user()->createToken('authToken')->accessToken;
-        $user->permissions = $user->getAllPermissions()->pluck('name');
-        $user->roles = $user->roles->pluck('name');
-        $user->business = $user->business;
+    public function getUser(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $user = $request->user();
+            $user->token = auth()->user()->createToken('authToken')->accessToken;
+            $user->permissions = $user->getAllPermissions()->pluck('name');
+            $user->roles = $user->roles->pluck('name');
+            $user->business = $user->business;
 
 
 
-        return response()->json(
-            $user,
-            200
-        );
-    }catch(Exception $e) {
-        return $this->sendError($e, 500,$request);
+            return response()->json(
+                $user,
+                200
+            );
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
     }
 
-}
 
-
- /**
-        *
+    /**
+     *
      * @OA\Get(
      *      path="/v2.0/user",
      *      operationId="getUserV2",
      *      tags={"auth"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
 
@@ -1479,57 +1438,76 @@ public function getUser (Request $request) {
      */
 
 
-     public function getUserV2 (Request $request) {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function getUserV2(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-          // Eager load relationships
-          $user = $request->user();
-    $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business.service_plan.modules']);
+            // Eager load relationships
+            $user = $request->user();
+            $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business.service_plan.modules']);
 
-    // Creating token only once
-    $token = $user->createToken('authToken')->accessToken;
+            // Creating token only once
+            $token = $user->createToken('authToken')->accessToken;
 
-    // Transforming manager departments and roles
-    $user->manager_departments = $user->manager_departments->map(fn($department) => [
-        'id' => $department->id,
-        'name' => $department->name,
-    ]);
+            // Transforming manager departments and roles
+            // Transforming manager departments and roles
+            $manager_departments = $user->manager_departments->map(function ($department) {
+                return [
+                    'id' => $department->id,
+                    'name' => $department->name,
+                ];
+            });
 
-    $user->roles = $user->roles->map(fn($role) => [
-        'name' => $role->name,
-        'permissions' => $role->permissions->pluck('name'),
-    ]);
-    $user->permissions = $user->permissions->pluck("name");
+            $user->roles = $user->roles->map(function ($role) {
+                return [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name'),
+                ];
+            });
+            $user->permissions = $user->permissions->pluck("name");
             // Extracting only the required data
+            $manager_roles = [];
+            if (!empty($user->manager_departments)) {
 
-$business = $user->business;
-// Extracting only the required data
-$responseData = [
-    'id' => $user->id,
-    "manager_departments" => $user->manager_departments,
-    "token" =>  $token,
-    'business_id' => $user->business_id,
-    'first_Name' => $user->first_Name,
-    'middle_Name' => $user->middle_Name,
-    'last_Name' => $user->last_Name,
-    'image' => $user->image,
-    'roles' => $user->roles,
-    'permissions' => $user->permissions,
-    'manages_department' => $user->manages_department,
-    'color_theme_name' => $user->color_theme_name,
-    'business' => [
-        'is_subscribed' => $business ? $business->is_subscribed : null,
-        'name' => $business ? $business->name : null,
-        'logo' => $business ? $business->logo : null,
-        'start_date' => $business ? $business->start_date : null,
-        'currency' => $business ? $business->currency : null,
-        'service_plan' => $business ? $business->service_plan : null,
-        'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
+                $currentUserRole = $user->roles()->orderBy('id', 'asc')->first();
+                $manager_roles = Role::with('permissions:name,id', "users")
+                    ->where("roles.id", ">", $currentUserRole->id)
+                    ->where('business_id', $user->business_id)
+                    ->where("id", ">", $this->getMainRoleId($user))
+                    ->orderBy("id", "DESC")
+                    ->get();
+            }
 
-    ]
-];
+
+            $business = $user->business;
+            // Extracting only the required data
+            $responseData = [
+                'id' => $user->id,
+                "manager_roles" => $manager_roles,
+                "manager_departments" => $manager_departments,
+                "token" =>  $token,
+                'business_id' => $user->business_id,
+                'first_Name' => $user->first_Name,
+                'middle_Name' => $user->middle_Name,
+                'last_Name' => $user->last_Name,
+                'image' => $user->image,
+                'roles' => $user->roles,
+                'permissions' => $user->permissions,
+                'manages_department' => $user->manages_department,
+                'color_theme_name' => $user->color_theme_name,
+                'business' => [
+                    'is_subscribed' => $business ? $business->is_subscribed : null,
+                    'name' => $business ? $business->name : null,
+                    'logo' => $business ? $business->logo : null,
+                    'start_date' => $business ? $business->start_date : null,
+                    'currency' => $business ? $business->currency : null,
+                    'service_plan' => $business ? $business->service_plan : null,
+                    'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
+
+                ]
+            ];
 
 
 
@@ -1537,21 +1515,20 @@ $responseData = [
                 $responseData,
                 200
             );
-        }catch(Exception $e) {
-            return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
 
 
-/**
-        *
+    /**
+     *
      * @OA\Get(
      *      path="/v3.0/user",
      *      operationId="getUserV3",
      *      tags={"auth"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
 
@@ -1595,9 +1572,10 @@ $responseData = [
      */
 
 
-     public function getUserV3 (Request $request) {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function getUserV3(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
             $user = $request->user();
@@ -1614,20 +1592,20 @@ $responseData = [
             $user->permissions = $user->permissions->pluck("name");
 
             // Extracting only the required data
-$responseData = [
-    'id' => $user->id,
-    "token" =>  $user->createToken('Laravel Password Grant Client')->accessToken,
-    'business_id' => $user->business_id,
-    'first_Name' => $user->first_Name,
-    'middle_Name' => $user->middle_Name,
-    'last_Name' => $user->last_Name,
-    'image' => $user->image,
-    'roles' => $user->roles,
-    'permissions' => $user->permissions,
-    'manages_department' => $user->manages_department,
-    'color_theme_name' => $user->color_theme_name,
-    'email' => $user->email,
-];
+            $responseData = [
+                'id' => $user->id,
+                "token" =>  $user->createToken('Laravel Password Grant Client')->accessToken,
+                'business_id' => $user->business_id,
+                'first_Name' => $user->first_Name,
+                'middle_Name' => $user->middle_Name,
+                'last_Name' => $user->last_Name,
+                'image' => $user->image,
+                'roles' => $user->roles,
+                'permissions' => $user->permissions,
+                'manages_department' => $user->manages_department,
+                'color_theme_name' => $user->color_theme_name,
+                'email' => $user->email,
+            ];
 
 
 
@@ -1635,19 +1613,18 @@ $responseData = [
                 $responseData,
                 200
             );
-        }catch(Exception $e) {
-            return $this->sendError($e, 500,$request);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
     }
 
-  /**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/auth/check/email",
      *      operationId="checkEmail",
      *      tags={"auth"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *      summary="This method is to check user",
@@ -1695,37 +1672,38 @@ $responseData = [
      */
 
 
-    public function checkEmail(Request $request) {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function checkEmail(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $user = User::where([
                 "email" => $request->email
-               ])
-               ->when(
-                !empty($request->user_id),
-                function($query) use($request){
-                    $query->whereNotIn("id",[$request->user_id]);
-                })
+            ])
+                ->when(
+                    !empty($request->user_id),
+                    function ($query) use ($request) {
+                        $query->whereNotIn("id", [$request->user_id]);
+                    }
+                )
 
-               ->first();
-               if($user) {
-       return response()->json(["data" => true],200);
-               }
-               return response()->json(["data" => false],200);
-        }catch(Exception $e) {
-            return $this->sendError($e, 500,$request);
+                ->first();
+            if ($user) {
+                return response()->json(["data" => true], 200);
+            }
+            return response()->json(["data" => false], 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
+    }
 
- }
 
-
-  /**
-        *
+    /**
+     *
      * @OA\Post(
      *      path="/auth/check/business/email",
      *      operationId="checkBusinessEmail",
      *      tags={"auth"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *      summary="This method is to check user",
@@ -1773,42 +1751,43 @@ $responseData = [
      */
 
 
-     public function checkBusinessEmail(Request $request) {
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function checkBusinessEmail(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $user = Business::where([
                 "email" => $request->email
-               ])
-               ->when(
-                !empty($request->business_id),
-                function($query) use($request){
-                    $query->whereNotIn("id",[$request->business_id]);
-                })
+            ])
+                ->when(
+                    !empty($request->business_id),
+                    function ($query) use ($request) {
+                        $query->whereNotIn("id", [$request->business_id]);
+                    }
+                )
 
-               ->first();
-               if($user) {
-       return response()->json(["data" => true],200);
-               }
-               return response()->json(["data" => false],200);
-        }catch(Exception $e) {
-            return $this->sendError($e, 500,$request);
+                ->first();
+            if ($user) {
+                return response()->json(["data" => true], 200);
+            }
+            return response()->json(["data" => false], 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
         }
-
- }
-
+    }
 
 
 
-  /**
-        *
+
+    /**
+     *
      * @OA\Patch(
      *      path="/auth/changepassword",
      *      operationId="changePassword",
      *      tags={"auth"},
- *
+     *
      *      summary="This method is to change password",
      *      description="This method is to change password",
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *  @OA\RequestBody(
@@ -1817,7 +1796,7 @@ $responseData = [
      *            required={"password","cpassword"},
      *
      *     @OA\Property(property="password", type="string", format="string",* example="aaaaaaaa"),
-    *  * *  @OA\Property(property="password_confirmation", type="string", format="string",example="aaaaaaaa"),
+     *  * *  @OA\Property(property="password_confirmation", type="string", format="string",example="aaaaaaaa"),
      *     @OA\Property(property="current_password", type="string", format="string",* example="aaaaaaaa"),
      *         ),
      *      ),
@@ -1858,53 +1837,52 @@ $responseData = [
 
     public function changePassword(PasswordChangeRequest $request)
     {
-try{
-    $this->storeActivity($request, "DUMMY activity","DUMMY description");
-    $client_request = $request->validated();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $client_request = $request->validated();
 
-    $user = $request->user();
+            $user = $request->user();
 
 
 
-    if (!Hash::check($client_request["current_password"],$user->password)) {
+            if (!Hash::check($client_request["current_password"], $user->password)) {
 
-        return response()->json([
-            "message" => "Invalid password"
-        ], 400);
+                return response()->json([
+                    "message" => "Invalid password"
+                ], 400);
+            }
+
+            $password = Hash::make($client_request["password"]);
+            $user->password = $password;
+
+
+
+            $user->login_attempts = 0;
+            $user->last_failed_login_attempt_at = null;
+            $user->save();
+
+
+
+            return response()->json([
+                "message" => "password changed"
+            ], 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
     }
 
-    $password = Hash::make($client_request["password"]);
-    $user->password = $password;
-
-
-
-    $user->login_attempts = 0;
-    $user->last_failed_login_attempt_at = null;
-    $user->save();
-
-
-
-    return response()->json([
-        "message" => "password changed"
-    ], 200);
-}catch(Exception $e) {
-    return $this->sendError($e,500,$request);
-}
-
-    }
 
 
 
 
 
-
- /**
-        *
+    /**
+     *
      * @OA\Put(
      *      path="/v1.0/update-user-info",
      *      operationId="updateUserInfo",
      *      tags={"auth"},
-    *       security={
+     *       security={
      *           {"bearerAuth": {}}
      *       },
      *      summary="This method is to update user by user",
@@ -1969,12 +1947,12 @@ try{
     public function updateUserInfo(UserInfoUpdateRequest $request)
     {
 
-        try{
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             $request_data = $request->validated();
 
 
-            if(!empty($request_data['password'])) {
+            if (!empty($request_data['password'])) {
                 $request_data['password'] = Hash::make($request_data['password']);
             } else {
                 unset($request_data['password']);
@@ -1982,31 +1960,31 @@ try{
             // $request_data['is_active'] = true;
             $request_data['remember_token'] = Str::random(10);
 
-            $user  =  tap(User::where(["id" => $request->user()->id]))->update(collect($request_data)->only([
-                'first_Name' ,
-                'middle_Name',
-                'last_Name',
-                'password',
-                'phone',
-                'address_line_1',
-                'address_line_2',
-                'country',
-                'city',
-                'postcode',
-                "lat",
-                "long",
-                'gender',
-                "image"
-            ])->toArray()
+            $user  =  tap(User::where(["id" => $request->user()->id]))->update(
+                collect($request_data)->only([
+                    'first_Name',
+                    'middle_Name',
+                    'last_Name',
+                    'password',
+                    'phone',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    "lat",
+                    "long",
+                    'gender',
+                    "image"
+                ])->toArray()
             )
                 // ->with("somthing")
 
                 ->first();
-                if(!$user) {
-                    return response()->json([
-                        "message" => "no user found"
-                        ]);
-
+            if (!$user) {
+                return response()->json([
+                    "message" => "no user found"
+                ]);
             }
 
 
@@ -2014,19 +1992,9 @@ try{
 
 
             return response($user, 200);
-        } catch(Exception $e){
+        } catch (Exception $e) {
             error_log($e->getMessage());
-        return $this->sendError($e,500,$request);
+            return $this->sendError($e, 500, $request);
         }
     }
-
-
-
-
-
-
-
-
-
-
 }

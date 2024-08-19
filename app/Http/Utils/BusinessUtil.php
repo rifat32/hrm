@@ -934,6 +934,7 @@ trait BusinessUtil
 
         if (env("SEND_EMAIL") == true) {
             $this->checkEmailSender($user->id, 0);
+            
 
             Mail::to($request_data['user']['email'])->send(new BusinessWelcomeMail($user, $password));
 
