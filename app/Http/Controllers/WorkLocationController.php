@@ -536,11 +536,11 @@ class WorkLocationController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('work_location_view')) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
-            }
+            // if (!$request->user()->hasPermissionTo('work_location_view')) {
+            //     return response()->json([
+            //         "message" => "You can not perform this action"
+            //     ], 401);
+            // }
 
    $work_locations = $this->workLocationComponent->getWorkLocations();
 

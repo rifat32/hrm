@@ -797,10 +797,8 @@ class CommentController extends Controller
             }
             $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
-            $existingIds = Comment::where([
-                "business_id" => $business_id
-            ])
-                ->where("created_by", auth()->user()->id)
+            $existingIds = Comment::
+                where("created_by", auth()->user()->id)
                 ->whereIn('id', $idsArray)
                 ->select('id')
                 ->get()

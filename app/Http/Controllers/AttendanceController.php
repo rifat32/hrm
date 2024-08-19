@@ -1412,11 +1412,16 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            // if (!$request->user()->hasPermissionTo('attendance_view')) {
-            //     return response()->json([
-            //         "message" => "You can not perform this action"
-            //     ], 401);
-            // }
+
+            $user_id = intval(!empty(request()->user_id)?request()->user_id :0);
+            $auth_user_id = auth()->user()->id;
+            if (!$request->user()->hasPermissionTo('attendance_view') && ($auth_user_id !== $user_id)) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
