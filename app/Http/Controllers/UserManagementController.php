@@ -9644,11 +9644,14 @@ class UserManagementController extends Controller
         // }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('user_view')) {
+            $user_id = intval(!empty($id)?$id :0);
+            $auth_user_id = auth()->user()->id;
+            if (!$request->user()->hasPermissionTo('user_view') && ($auth_user_id !== $user_id)) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
             $start_date = !empty(request()->start_date) ? request()->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
             $end_date = !empty(request()->end_date) ? request()->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
 

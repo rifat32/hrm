@@ -1413,9 +1413,8 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-            $user_id = intval(!empty(request()->user_id)?request()->user_id :0);
-            $auth_user_id = auth()->user()->id;
-            if (!$request->user()->hasPermissionTo('attendance_view') && ($auth_user_id !== $user_id)) {
+
+            if (!$request->user()->hasPermissionTo('attendance_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);

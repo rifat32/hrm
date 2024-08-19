@@ -602,11 +602,11 @@ class HolidayController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            // if (!$request->user()->hasPermissionTo('holiday_view')) {
-            //     return response()->json([
-            //         "message" => "You can not perform this action"
-            //     ], 401);
-            // }
+            if (!$request->user()->hasPermissionTo('holiday_view') && !request()->boolean("show_my_data") ) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             $business_id =  auth()->user()->business_id;
 

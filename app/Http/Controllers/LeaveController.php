@@ -1697,14 +1697,13 @@ class LeaveController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            $user_id = intval(!empty(request()->user_id)?request()->user_id :0);
-            $auth_user_id = auth()->user()->id;
-            if (!$request->user()->hasPermissionTo('leave_view') && ($auth_user_id !== $user_id)) {
+
+            if (!$request->user()->hasPermissionTo('leave_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
-                    "message" => "You can not perform this action"
+                    "message" => "You can not perform this action" . request()->boolean("show_my_data")
                 ], 401);
             }
-          
+
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
 
 
