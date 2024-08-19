@@ -634,7 +634,7 @@ class AuthController extends Controller
             });
 
 
-            $user->roles = $user->roles->map(function ($role) {
+            $roles = $user->roles->map(function ($role) {
                 return [
                     'name' => $role->name,
                     'permissions' => $role->permissions->pluck('name'),
@@ -645,13 +645,18 @@ class AuthController extends Controller
             $manager_roles = [];
             if (!empty($user->manager_departments)) {
 
-                $currentUserRole = $user->roles()->orderBy('id', 'asc')->first();
+
                 $manager_roles = Role::with('permissions:name,id', "users")
-                    ->where("roles.id", ">", $currentUserRole->id)
                     ->where('business_id', $user->business_id)
                     ->where("id", ">", $this->getMainRoleId($user))
                     ->orderBy("id", "DESC")
-                    ->get();
+                    ->get(["id","name"])
+                    ->map(function ($role) {
+                        return [
+                            'id' => $role->id,
+                            'name' => $role->name,
+                        ];
+                    });
             }
 
             $business = $user->business;
@@ -667,7 +672,7 @@ class AuthController extends Controller
                 'middle_Name' => $user->middle_Name,
                 'last_Name' => $user->last_Name,
                 'image' => $user->image,
-                'roles' => $user->roles,
+                'roles' => $roles,
                 'permissions' => $user->permissions,
                 'manages_department' => $user->manages_department,
                 'color_theme_name' => $user->color_theme_name,
@@ -760,6 +765,7 @@ class AuthController extends Controller
 
 
             $request->user()->token()->revoke();
+
             return response()->json(["ok" => true], 200);
         } catch (Exception $e) {
 
@@ -1460,7 +1466,7 @@ class AuthController extends Controller
                 ];
             });
 
-            $user->roles = $user->roles->map(function ($role) {
+            $roles = $user->roles->map(function ($role) {
                 return [
                     'name' => $role->name,
                     'permissions' => $role->permissions->pluck('name'),
@@ -1471,13 +1477,17 @@ class AuthController extends Controller
             $manager_roles = [];
             if (!empty($user->manager_departments)) {
 
-                $currentUserRole = $user->roles()->orderBy('id', 'asc')->first();
                 $manager_roles = Role::with('permissions:name,id', "users")
-                    ->where("roles.id", ">", $currentUserRole->id)
                     ->where('business_id', $user->business_id)
                     ->where("id", ">", $this->getMainRoleId($user))
                     ->orderBy("id", "DESC")
-                    ->get();
+                    ->get(["id","name"])
+                    ->map(function ($role) {
+                        return [
+                            'id' => $role->id,
+                            'name' => $role->name,
+                        ];
+                    });
             }
 
 
@@ -1493,7 +1503,7 @@ class AuthController extends Controller
                 'middle_Name' => $user->middle_Name,
                 'last_Name' => $user->last_Name,
                 'image' => $user->image,
-                'roles' => $user->roles,
+                'roles' => $roles,
                 'permissions' => $user->permissions,
                 'manages_department' => $user->manages_department,
                 'color_theme_name' => $user->color_theme_name,

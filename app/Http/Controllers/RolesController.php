@@ -316,10 +316,10 @@ class RolesController extends Controller
 
             $currentUser = auth()->user();
 
-            $currentUserRole = $currentUser->roles()->orderBy('id', 'asc')->first();
+
 
             $roles = Role::with('permissions:name,id', "users")
-            ->where("roles.id", ">", $currentUserRole->id)
+
 
                 ->when((empty(auth()->user()->business_id)), function ($query) use ($request) {
                     return $query->where('business_id', NULL)->where('is_default', 1)

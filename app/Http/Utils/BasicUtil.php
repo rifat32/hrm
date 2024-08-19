@@ -93,6 +93,7 @@ trait BasicUtil
 
     // Find the minimum role ID
     $minRoleId = $roleIds->min();
+
     return $minRoleId;
     }
 

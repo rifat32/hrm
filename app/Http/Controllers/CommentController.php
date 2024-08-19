@@ -46,8 +46,11 @@ class CommentController extends Controller
      *     @OA\Property(property="hidden_note", type="string", format="string", example="Hidden note details"),
      *
      *     @OA\Property(property="related_task_id", type="integer", format="int64", example=123),
-     * *     @OA\Property(property="project_id", type="integer", format="int64", example=456),
-     *     @OA\Property(property="task_id", type="integer", format="int64", example=456)
+     *     @OA\Property(property="project_id", type="integer", format="int64", example=456),
+     *     @OA\Property(property="task_id", type="integer", format="int64", example=456),
+     *     @OA\Property(property="parent_comment_id", type="integer", format="int64", example=456),
+     *
+     *
      *
 
      *
@@ -274,7 +277,7 @@ class CommentController extends Controller
 
             $comment_query_params = [
                 "id" => $request_data["id"],
-                "business_id" => $business_id
+                // "business_id" => $business_id
             ];
             // $comment_prev = Comment::where($comment_query_params)
             //     ->first();
@@ -343,7 +346,8 @@ class CommentController extends Controller
             //         'user_id' => $mentioned_user->id,
             //     ];
             // });
-            $comment->mentions()->sync($mentions_data);
+            $comment->mentions()->delete();
+            $comment->mentions()->createMany($mentions_data);
 
             // Determine old and new mentions
             $new_mentions = array_diff($mentions_data->pluck("user_id")->toArray(), $current_mentions);
@@ -533,6 +537,18 @@ class CommentController extends Controller
                         'users.last_Name'
                     );
                 },
+                "assigned_by",
+                "assignees",
+                "mentions" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "recursiveChildren"
+
 
 
 
@@ -665,7 +681,31 @@ class CommentController extends Controller
                 ], 401);
             }
             $business_id =  auth()->user()->business_id;
-            $comment =  Comment::with("assigned_by", "assignees")
+            $comment =  Comment::with(
+                [
+                    "creator" => function ($query) {
+                        $query->select(
+                            'users.id',
+                            'users.first_Name',
+                            'users.middle_Name',
+                            'users.last_Name'
+                        );
+                    },
+                    "assigned_by",
+                    "assignees",
+                    "mentions" => function ($query) {
+                        $query->select(
+                            'users.id',
+                            'users.first_Name',
+                            'users.middle_Name',
+                            'users.last_Name'
+                        );
+                    },
+                    "recursiveChildren"
+
+                     ]
+
+                )
                 ->where([
                     "id" => $id,
                     "business_id" => $business_id

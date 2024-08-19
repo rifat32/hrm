@@ -114,6 +114,7 @@ class UpdateDatabaseController extends Controller
                         echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
                     }
                 }
+
             }
 
             if ($i == 4) {
@@ -216,6 +217,13 @@ if (Schema::hasColumn('candidates', 'feedback')) {
 
 
                     $this->setupAssetTypes();
+                }
+                   // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+                   if ($i == 9) {
+                    if (Schema::hasColumn('comments', 'description')) {
+
+                        DB::statement('ALTER TABLE comments MODIFY feedback description NULL');
+                    }
                 }
 
         }

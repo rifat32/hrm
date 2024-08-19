@@ -26,6 +26,7 @@ class CommentCreateRequest extends BaseFormRequest
             public function rules()
             {
                 return [
+                    "parent_comment_id"=>["nullable", "numeric", "exists:comments,id"],
                     'description' => 'required|string',
                     'attachments' => 'nullable|array',
                     'status' => 'string|in:open,closed',

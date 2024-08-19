@@ -11,6 +11,7 @@ class Comment extends Model
     protected $dateFormat = 'Y-m-d H:i:s';
 
     protected $fillable = [
+        'parent_comment_id',
         'description',
         'attachments',
         'status',
@@ -32,6 +33,39 @@ class Comment extends Model
         'attachments' => 'array',
         'feedback' => 'array',
     ];
+
+    public function recursiveChildren()
+    {
+        return $this->children()->with([
+            [
+                "creator" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "assigned_by",
+                "assignees",
+                "mentions" => function ($query) {
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
+                },
+                "recursiveChildren"
+
+                 ]
+        ]);
+    }
+    public function children()
+    {
+        return $this->hasMany(Comment::class, 'parent_comment_id', 'id');
+    }
+
 
     public function creator()
     {
