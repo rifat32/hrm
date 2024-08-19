@@ -36,7 +36,7 @@ class Comment extends Model
 
     public function recursiveChildren()
     {
-        return $this->children()->with([
+        return $this->children()->with(
             [
                 "creator" => function ($query) {
                     $query->select(
@@ -57,7 +57,7 @@ class Comment extends Model
                 },
                 "recursiveChildren"
 
-                 ]
+
         ]);
     }
     public function children()
@@ -86,9 +86,9 @@ class Comment extends Model
         return $this->hasMany(TaskCommentMention::class,'comment_id','id');
     }
 
-    public function mentioned_users()
-    {
-        return $this->belongsToMany(User::class,"task_comment_mentions",'comment_id','user_id');
+
+    public function mentioned_users() {
+        return $this->belongsToMany(User::class, 'task_comment_mentions', 'comment_id', 'user_id');
     }
 
 
