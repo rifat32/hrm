@@ -12,6 +12,7 @@ use App\Http\Requests\ForgetPasswordRequest;
 use App\Http\Requests\ForgetPasswordV2Request;
 use App\Http\Requests\PasswordChangeRequest;
 use App\Http\Requests\UserInfoUpdateRequest;
+use App\Http\Utils\BasicEmailUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\EmailLogUtil;
@@ -36,7 +37,7 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil, EmailLogUtil, UserDetailsUtil, ModuleUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, EmailLogUtil, UserDetailsUtil, ModuleUtil, BasicEmailUtil;
     /**
      *
      * @OA\Post(
@@ -142,20 +143,9 @@ class AuthController extends Controller
 
                 $this->checkEmailSender($user->id, 0);
 
-                $business = $user->business;
-                if ($business && $business->emailSettings) {
+                $this->emailConfigure($user);
 
-                    $emailSettings = $business->emailSettings;
 
-                    Config::set('mail.driver', $emailSettings->mail_driver);
-                    Config::set('mail.host', $emailSettings->mail_host);
-                    Config::set('mail.port', $emailSettings->mail_port);
-                    Config::set('mail.username', $emailSettings->mail_username);
-                    Config::set('mail.password', $emailSettings->mail_password);
-                    Config::set('mail.encryption', $emailSettings->mail_encryption);
-                    Config::set('mail.from.address', $emailSettings->mail_from_address);
-                    Config::set('mail.from.name', $emailSettings->mail_from_name);
-                }
 
                 Mail::to($user->email)->send(new EmailVerificationMail($user));
 
@@ -351,20 +341,7 @@ class AuthController extends Controller
 
                     $this->checkEmailSender($user->id, 0);
 
-                    $business = $user->business;
-                    if ($business && $business->emailSettings) {
-
-                        $emailSettings = $business->emailSettings;
-
-                        Config::set('mail.driver', $emailSettings->mail_driver);
-                        Config::set('mail.host', $emailSettings->mail_host);
-                        Config::set('mail.port', $emailSettings->mail_port);
-                        Config::set('mail.username', $emailSettings->mail_username);
-                        Config::set('mail.password', $emailSettings->mail_password);
-                        Config::set('mail.encryption', $emailSettings->mail_encryption);
-                        Config::set('mail.from.address', $emailSettings->mail_from_address);
-                        Config::set('mail.from.name', $emailSettings->mail_from_name);
-                    }
+                    $this->emailConfigure($user);
 
                     Mail::to($user->email)->send(new EmailVerificationMail($user));
 
@@ -583,20 +560,7 @@ class AuthController extends Controller
 
                     $this->checkEmailSender($user->id, 0);
 
-                    $business = $user->business;
-                    if ($business && $business->emailSettings) {
-
-                        $emailSettings = $business->emailSettings;
-
-                        Config::set('mail.driver', $emailSettings->mail_driver);
-                        Config::set('mail.host', $emailSettings->mail_host);
-                        Config::set('mail.port', $emailSettings->mail_port);
-                        Config::set('mail.username', $emailSettings->mail_username);
-                        Config::set('mail.password', $emailSettings->mail_password);
-                        Config::set('mail.encryption', $emailSettings->mail_encryption);
-                        Config::set('mail.from.address', $emailSettings->mail_from_address);
-                        Config::set('mail.from.name', $emailSettings->mail_from_name);
-                    }
+                    $this->emailConfigure($user);
 
                     Mail::to($user->email)->send(new EmailVerificationMail($user));
 
@@ -955,20 +919,7 @@ class AuthController extends Controller
             if (env("SEND_EMAIL") == true) {
                 $this->checkEmailSender($user->id, 1);
 
-                $business = $user->business;
-                if ($business && $business->emailSettings) {
-
-                    $emailSettings = $business->emailSettings;
-
-                    Config::set('mail.driver', $emailSettings->mail_driver);
-                    Config::set('mail.host', $emailSettings->mail_host);
-                    Config::set('mail.port', $emailSettings->mail_port);
-                    Config::set('mail.username', $emailSettings->mail_username);
-                    Config::set('mail.password', $emailSettings->mail_password);
-                    Config::set('mail.encryption', $emailSettings->mail_encryption);
-                    Config::set('mail.from.address', $emailSettings->mail_from_address);
-                    Config::set('mail.from.name', $emailSettings->mail_from_name);
-                }
+                $this->emailConfigure($user);
 
                 $result = Mail::to($request_data["email"])->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
@@ -1070,20 +1021,7 @@ class AuthController extends Controller
 
                 $this->checkEmailSender($user->id, 1);
 
-                $business = $user->business;
-                if ($business && $business->emailSettings) {
-
-                    $emailSettings = $business->emailSettings;
-
-                    Config::set('mail.driver', $emailSettings->mail_driver);
-                    Config::set('mail.host', $emailSettings->mail_host);
-                    Config::set('mail.port', $emailSettings->mail_port);
-                    Config::set('mail.username', $emailSettings->mail_username);
-                    Config::set('mail.password', $emailSettings->mail_password);
-                    Config::set('mail.encryption', $emailSettings->mail_encryption);
-                    Config::set('mail.from.address', $emailSettings->mail_from_address);
-                    Config::set('mail.from.name', $emailSettings->mail_from_name);
-                }
+                $this->emailConfigure($user);
 
                 $result = Mail::to($user->email)->send(new ResetPasswordMail($user, $request_data["client_site"]));
 
@@ -1185,20 +1123,7 @@ class AuthController extends Controller
 
                 $this->checkEmailSender($user->id, 0);
 
-                $business = $user->business;
-                if ($business && $business->emailSettings) {
-
-                    $emailSettings = $business->emailSettings;
-
-                    Config::set('mail.driver', $emailSettings->mail_driver);
-                    Config::set('mail.host', $emailSettings->mail_host);
-                    Config::set('mail.port', $emailSettings->mail_port);
-                    Config::set('mail.username', $emailSettings->mail_username);
-                    Config::set('mail.password', $emailSettings->mail_password);
-                    Config::set('mail.encryption', $emailSettings->mail_encryption);
-                    Config::set('mail.from.address', $emailSettings->mail_from_address);
-                    Config::set('mail.from.name', $emailSettings->mail_from_name);
-                }
+                $this->emailConfigure($user);
 
                 Mail::to($user->email)->send(new EmailVerificationMail($user));
 

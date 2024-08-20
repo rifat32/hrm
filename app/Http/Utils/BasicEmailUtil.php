@@ -4,9 +4,38 @@ namespace App\Http\Utils;
 
 use App\Models\Business;
 use App\Models\EmailTemplate;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 trait BasicEmailUtil
 {
+    public function emailConfigure($user=NULL){
+
+        if(empty($user)){
+            $user = auth()->user();
+        }
+
+        if (!empty($user)) {
+
+            $business = $user->business;
+            if (!empty($business) && !empty($business->emailSettings)) {
+
+                $emailSettings = $business->emailSettings;
+
+                Config::set('mail.driver', $emailSettings->mail_driver);
+                Config::set('mail.host', $emailSettings->mail_host);
+                Config::set('mail.port', $emailSettings->mail_port);
+                Config::set('mail.username', $emailSettings->mail_username);
+                Config::set('mail.password', $emailSettings->mail_password);
+                Config::set('mail.encryption', $emailSettings->mail_encryption);
+                Config::set('mail.from.address', $emailSettings->mail_from_address);
+                Config::set('mail.from.name', $emailSettings->mail_from_name);
+
+                Log::info('Mail setting touched');
+            }
+        }
+
+    }
 
     public function convertBladeToString($template)
     {
