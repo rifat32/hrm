@@ -556,6 +556,7 @@ class AuthController extends Controller
                 $email_token = Str::random(30);
                 $user->email_verify_token = $email_token;
                 $user->email_verify_token_expires = Carbon::now()->subDays(-1);
+
                 if (env("SEND_EMAIL") == true) {
 
                     $this->checkEmailSender($user->id, 0);
@@ -566,6 +567,7 @@ class AuthController extends Controller
 
                     $this->storeEmailSender($user->id, 0);
                 }
+
                 $user->save();
 
                 return response(['message' => 'please activate your email first'], 409);

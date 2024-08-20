@@ -6,9 +6,12 @@ use App\Http\Requests\UpdateEmailSettingRequest;
 use App\Http\Requests\UpdateSystemSettingRequest;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Mail\TestEmail;
 use App\Models\BusinessEmailSetting;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 
 class BusinessEmailSettingController extends Controller
 {
@@ -85,13 +88,41 @@ class BusinessEmailSettingController extends Controller
                  ], 401);
              }
              $request_data = $request->validated();
+             $user = auth()->user();
 
-             $emailSettings = BusinessEmailSetting::updateOrCreate(
-                ['business_id' => auth()->user()->business_id],
-                $request_data
-            );
+             Config::set('mail.driver', $request_data["mail_driver"]);
+             Config::set('mail.host', $request_data["mail_host"]);
+             Config::set('mail.port', $request_data["mail_port"]);
+             Config::set('mail.username', $request_data["mail_username"]);
+             Config::set('mail.password', $request_data["mail_password"]);
+             Config::set('mail.encryption', $request_data["mail_encryption"]);
+             Config::set('mail.from.address', $request_data["mail_from_address"]);
+             Config::set('mail.from.name', $request_data["mail_from_name"]);
 
-            return response()->json($emailSettings,200);
+             try {
+                // Check if SEND_EMAIL is true in the environment and send a test email
+                if (env('SEND_EMAIL', false)) {
+                    $user = auth()->user();
+
+                    $this->checkEmailSender($user->id, 0);
+
+                    // Send test email
+                    Mail::to($user->email)->send(new TestEmail($user));
+
+                    $this->storeEmailSender($user->id, 0);
+                }
+
+                // Save or update the email settings in the database
+                $emailSettings = BusinessEmailSetting::updateOrCreate(
+                    ['business_id' => auth()->user()->business_id],
+                    $request_data
+                );
+
+                return response()->json(['message' => 'Email settings saved successfully, and test email sent!'], 200);
+
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Failed to send test email. Please check your settings and try again.'], 400);
+            }
 
 
          } catch (Exception $e) {
@@ -162,6 +193,7 @@ class BusinessEmailSettingController extends Controller
 
 
              $emailSettings = BusinessEmailSetting::where('business_id', auth()->user()->business_id)->first();
+
 
              return response()->json($emailSettings,200);
          } catch (Exception $e) {
