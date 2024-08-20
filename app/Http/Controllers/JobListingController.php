@@ -496,12 +496,10 @@ class JobListingController extends Controller
 
                 ->when(!empty($request->number_of_candidates), function ($query) use ($request) {
 
-                    $number_query = explode(',', str_replace(' ', ',', $request->worked_hour));
+                    $number_query = explode(',', str_replace(' ', ',', $request->number_of_candidates));
 
                     $query->whereHas("candidates", function ($query) use ($request, $number_query) {
-
                         $query->havingRaw('COUNT(*) ' . $number_query[0] .' ?', [$number_query[1]]);
-
                     });
 
                 })

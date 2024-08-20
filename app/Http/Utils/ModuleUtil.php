@@ -21,30 +21,31 @@ trait ModuleUtil
         }
 
 
+
         $query_params = [
             'name' => $module_name,
         ];
         $module = Module::where($query_params)->first();
         if (empty($module)) {
-            return false;
+            throw new Exception('No Module Found', 401);
         }
         if (empty($module->is_enabled)) {
 
-            return false;
+            throw new Exception('Module is not enabled', 401);
         }
+
 
         $business = Business::find($user->business_id);
         if (empty($business)) {
 
-            return false;
+            throw new Exception('No Business Found', 401);
         }
+
 
         $business_tier_id = $business->service_plan ? $business->service_plan->business_tier->id : 1;
 
 
-
         $is_enabled = false;
-
 
 
         $businessTierModule =    BusinessTierModule::where([
@@ -82,6 +83,7 @@ trait ModuleUtil
         if (!empty($businessModule)) {
             $is_enabled = $businessModule->is_enabled;
         }
+
 
 
         if (!$is_enabled && $throwErr) {
