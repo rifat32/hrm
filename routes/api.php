@@ -1508,7 +1508,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
 
     Route::post('/v1.0/task-categories', [TaskCategoryController::class, "createTaskCategory"]);
     Route::put('/v1.0/task-categories', [TaskCategoryController::class, "updateTaskCategory"]);
-    Route::put('/v1.0/task-categories/position', [TaskCategoryController::class, "updateTaskCategory"]);
+    Route::put('/v1.0/task-categories/position', [TaskCategoryController::class, "updateTaskCategoryPosition"]);
 
     Route::get('/v1.0/task-categories', [TaskCategoryController::class, "getTaskCategories"]);
     Route::get('/v2.0/task-categories', [TaskCategoryController::class, "getTaskCategoriesV2"]);

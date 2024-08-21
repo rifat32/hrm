@@ -341,7 +341,7 @@ class TaskCategoryController extends Controller
                 ];
 
 
-                $task_category_prev = Task::where($task_category_query_params)
+                $task_category_prev = TaskCategory::where($task_category_query_params)
                      ->first();
 
 
@@ -356,6 +356,7 @@ class TaskCategoryController extends Controller
                 $task_category  =  tap(TaskCategory::where($task_category_query_params))->update(
                     collect($request_data)->only([
                         'project_id',
+                        "order_no"
 
 
                     ])->toArray()
@@ -370,7 +371,7 @@ class TaskCategoryController extends Controller
                 }
 
 
-                $order_no_overlapped = Task::where([
+                $order_no_overlapped = TaskCategory::where([
                     'project_id' => $task_category->project_id,
                     'order_no' => $task_category->order_no,
                 ])
@@ -378,7 +379,7 @@ class TaskCategoryController extends Controller
                 ->exists();
 
                 if ($order_no_overlapped) {
-                    Task::where([
+                    TaskCategory::where([
                         'project_id' => $task_category->project_id,
                     ])
                     ->where('order_no', '>=', $task_category->order_no)
