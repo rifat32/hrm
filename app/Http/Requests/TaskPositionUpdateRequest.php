@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Utils\BasicUtil;
 use App\Rules\ValidateTaskCategory;
 use App\Rules\ValidateTaskId;
 use App\Rules\ValidateProject;
@@ -9,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class TaskPositionUpdateRequest extends FormRequest
 {
+    use BasicUtil;
     /**
      * Determine if the user is authorized to make this request.
      *
