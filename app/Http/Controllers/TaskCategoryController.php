@@ -925,14 +925,17 @@ class TaskCategoryController extends Controller
                  $created_by = auth()->user()->business->created_by;
              }
 
-             $task_categories = TaskCategory::
-             with([
-                "tasks" => function($query) {
-                    $query->when(empty(request()->project_id), function($query) {
-                            $query->where("project_id",request()->project_id);
-                    });
+             $task_categories = TaskCategory::with([
+                'tasks' => function ($query) {
+                    $query->where('business_id', auth()->user()->business_id) // Ensure business_id condition
+                          ->when(request()->project_id, function ($query) {
+                              $query->where('project_id', request()->project_id); // Apply project_id condition only if it's present
+                          });
+                },
+                'tasks.labels' => function ($query) {
+                    // Optionally, you can add constraints for the labels here if needed
                 }
-             ])
+            ])
 
              ->when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
                  if (auth()->user()->hasRole('superadmin')) {
