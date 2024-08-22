@@ -58,7 +58,7 @@ class UpdateDatabaseController extends Controller
 
 
 
-        for ($i; $i <= 10; $i++) {
+        for ($i; $i <= 20; $i++) {
             // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
             if ($i == 1) {
                 $this->storeEmailTemplates();
@@ -225,6 +225,12 @@ if (Schema::hasColumn('candidates', 'feedback')) {
                         DB::statement('ALTER TABLE comments MODIFY feedback description NULL');
                     }
                 }
+
+                if ($i == 10) {
+                   EmailTemplate::where("type", "send_password_mail")->delete();
+                }
+
+
 
         }
 

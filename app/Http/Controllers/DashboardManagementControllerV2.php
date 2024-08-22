@@ -178,10 +178,13 @@ class DashboardManagementControllerV2 extends Controller
         $show_my_data = false
     ) {
 
-        $data_query  = LeaveRecord::whereHas("leave", function ($query) use ($all_manager_department_ids) {
+        $data_query  = LeaveRecord::whereHas("leave", function ($query) {
             $query->where([
                 "leaves.business_id" => auth()->user()->business_id,
-            ])->whereIn("leaves.user_id", $all_manager_department_ids);
+            ]);
+        })
+        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
         });
 
 
@@ -349,14 +352,16 @@ class DashboardManagementControllerV2 extends Controller
         $end_date_of_this_week,
         $start_date_of_previous_week,
         $end_date_of_previous_week,
-        $all_manager_department_ids,
+        $all_manager_department_ids
     ) {
 
-        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) use ($all_manager_department_ids) {
+        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) {
             $query->where([
                 "leaves.business_id" => auth()->user()->business_id,
-            ])
-                ->whereIn("leaves.user_id", $all_manager_department_ids);
+            ]);
+        })
+        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
         });
 
         $leave_statuses = ['pending_approval', 'in_progress', 'approved', 'rejected'];
@@ -427,11 +432,13 @@ class DashboardManagementControllerV2 extends Controller
         }
 
 
-        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) use ($all_manager_department_ids) {
+        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) {
             $query->where([
                 "leaves.business_id" => auth()->user()->business_id,
-            ])
-                ->whereIn("leaves.user_id", $all_manager_department_ids);
+            ]);
+        })
+        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
         });
 
 

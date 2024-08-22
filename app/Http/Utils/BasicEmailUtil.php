@@ -89,7 +89,8 @@ trait BasicEmailUtil
         $template = $this->convertBladeToString($templateString);
         $templateVariables = $this->extractVariables($template);
 
-error_log("template creating");
+        error_log("template creating");
+
         $email_content = EmailTemplate::create(
             [
                 "name" => "",
@@ -107,7 +108,6 @@ error_log("template creating");
 
 
         if($customForBusiness && empty($business_id)){
-
 
                 $business_ids = Business::pluck("id");
 
