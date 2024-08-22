@@ -125,9 +125,9 @@ class TaskController extends Controller
 
 
                 $task =  Task::create($request_data);
+
                 $task->order_no = Task::where(collect($request_data)->only(
                     "business_id",
-                    "is_active",
                     )->toArray()
                     )->count();
                 $task->save();
@@ -524,7 +524,6 @@ Notification::create([
                 }
 
 
-
                  DB::commit();
                  return response($task, 201);
 
@@ -533,6 +532,9 @@ Notification::create([
              return $this->sendError($e, 500, $request);
          }
      }
+
+
+
     /**
      *
      * @OA\Get(

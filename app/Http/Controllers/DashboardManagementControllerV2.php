@@ -510,12 +510,17 @@ class DashboardManagementControllerV2 extends Controller
 
     ) {
 
-        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) use ($all_manager_department_ids) {
+        $leaves_query  = LeaveRecord::whereHas("leave", function ($query) {
             $query->where([
                 "leaves.business_id" => auth()->user()->business_id,
-            ])
-                ->whereIn("leaves.user_id", $all_manager_department_ids);
-        });
+            ]);
+        })
+        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                $query->whereIn("departments.id", $all_manager_department_ids);
+        })
+
+
+        ;
         $leave_statuses = ['pending_approval', 'in_progress', 'approved', 'rejected'];
 
         foreach ($leave_statuses as $leave_status) {

@@ -12,6 +12,7 @@ use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\HolidayUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Holiday;
 use App\Models\User;
@@ -25,7 +26,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class HolidayController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, BasicUtil, ModuleUtil;
 
 
     protected $departmentComponent;
@@ -822,7 +823,7 @@ class HolidayController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            
+
             if(request()->boolean("show_my_data")) {
                 $this->isModuleEnabled("employee_login");
             }

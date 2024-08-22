@@ -13,6 +13,7 @@ use App\Models\EmailTemplate;
 use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
 use App\Models\Project;
+use App\Models\RecruitmentProcess;
 use App\Models\Role;
 use App\Models\ServicePlanModule;
 use App\Models\SettingAttendance;
@@ -153,7 +154,50 @@ trait BusinessUtil
             $setting_leave_type  = SettingLeaveType::create($insertableData);
         }
     }
+    public function loadDefaultRecruitmentProcesses($business = NULL)
+    {
+        $defaultRecruitmentProcesses = RecruitmentProcess::where(function ($query) use($business) {
+            $query->where(function ($query) use($business) {
+                $query->where('recruitment_processes.business_id', NULL)
+                    ->where('recruitment_processes.is_default', 1)
+                    ->where('recruitment_processes.is_active', 1)
+                    ->whereDoesntHave("disabled", function ($q) use($business) {
+                        $q->whereIn("recruitment_processes.created_by", [$business->created_by]);
+                    });
+            })
+                ->orWhere(function ($query) use($business) {
+                    $query->where('recruitment_processes.business_id', NULL)
+                        ->where('recruitment_processes.is_default', 0)
+                        ->where('recruitment_processes.created_by', $business->created_by)
+                        ->where('recruitment_processes.is_active', 1);
+                });
+        })
+            ->get();
 
+
+
+
+        foreach ($defaultRecruitmentProcesses as $defaultRecruitmentProcess) {
+            error_log($defaultRecruitmentProcess);
+            $insertableData = [
+                'name' => $defaultRecruitmentProcess->name,
+                'description'=> $defaultRecruitmentProcess->name,
+                "is_active" => 1,
+                "is_default" => 0,
+                "business_id" => $business->id,
+                "use_in_employee" => $defaultRecruitmentProcess->use_in_employee,
+                "use_in_on_boarding" => $defaultRecruitmentProcess->use_in_on_boarding,
+                "is_required" => $defaultRecruitmentProcess->is_required,
+
+                "employee_order_no" => $defaultRecruitmentProcess->employee_order_no,
+                "candidate_order_no" => $defaultRecruitmentProcess->candidate_order_no,
+                "created_by" => $business->created_by,
+
+            ];
+
+            $recruitment_process  = RecruitmentProcess::create($insertableData);
+        }
+    }
 
 
     public function loadDefaultSettingLeave($business = NULL)
@@ -520,6 +564,8 @@ trait BusinessUtil
 
 
         $this->loadDefaultSettingLeaveType($business);
+
+        $this->loadDefaultRecruitmentProcesses($business);
 
 
         $this->loadDefaultSettingLeave($business);
@@ -934,7 +980,7 @@ trait BusinessUtil
 
         if (env("SEND_EMAIL") == true) {
             $this->checkEmailSender($user->id, 0);
-            
+
 
             Mail::to($request_data['user']['email'])->send(new BusinessWelcomeMail($user, $password));
 

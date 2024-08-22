@@ -40,6 +40,8 @@ class RecruitmentProcessController extends Controller
      * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
      * @OA\Property(property="use_in_employee", type="string", format="string", example="tttttt"),
      * @OA\Property(property="use_in_on_boarding", type="string", format="string", example="tttttt"),
+     * @OA\Property(property="is_required", type="string", format="string", example=""),
+     *
      *
      *
      *
@@ -110,6 +112,16 @@ class RecruitmentProcessController extends Controller
 
                 $recruitment_process =  RecruitmentProcess::create($request_data);
 
+                $order_no = RecruitmentProcess::where(collect($request_data)->only(
+                    "business_id",
+                    )->toArray()
+                    )->count();
+
+                    $recruitment_process->employee_order_no = $order_no;
+                    $recruitment_process->candidate_order_no = $order_no;
+
+                $recruitment_process->save();
+
 
 
 
@@ -141,7 +153,9 @@ class RecruitmentProcessController extends Controller
      * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
      * @OA\Property(property="use_in_employee", type="string", format="string", example="tttttt"),
      * @OA\Property(property="use_in_on_boarding", type="string", format="string", example="tttttt"),
-
+     * @OA\Property(property="employee_order_no", type="string", format="string", example="tttttt"),
+     * @OA\Property(property="candidate_order_no", type="string", format="string", example="tttttt"),
+     *   * @OA\Property(property="is_required", type="string", format="string", example=""),
      *
      *         ),
      *      ),
@@ -203,7 +217,11 @@ class RecruitmentProcessController extends Controller
                         'name',
                         'description',
                         "use_in_employee",
-                        "use_in_on_boarding"
+                        "use_in_on_boarding",
+                        "is_required",
+
+                        "employee_order_no",
+                        "candidate_order_no",
 
                         // "is_default",
                         // "is_active",
@@ -219,6 +237,41 @@ class RecruitmentProcessController extends Controller
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
+                }
+
+                $employee_order_no_overlapped = RecruitmentProcess::where([
+                    'business_id' => $recruitment_process->business_id,
+                    'employee_order_no' => $recruitment_process->employee_order_no,
+                ])
+                ->whereNotIn('id', [$recruitment_process->id])
+                ->exists();
+
+                if ($employee_order_no_overlapped) {
+                    RecruitmentProcess::
+                    where([
+                        'business_id' => $recruitment_process->business_id,
+
+                    ])
+                    ->where('employee_order_no', '>=', $recruitment_process->order_no)
+                    ->whereNotIn('id', [$recruitment_process->id])
+                    ->increment('employee_order_no');
+                }
+
+                $candidate_order_no_overlapped = RecruitmentProcess::where([
+                    'business_id' => $recruitment_process->business_id,
+                    'employee_order_no' => $recruitment_process->employee_order_no,
+                ])
+                ->whereNotIn('id', [$recruitment_process->id])
+                ->exists();
+
+                if ($candidate_order_no_overlapped) {
+                    RecruitmentProcess::
+                    where([
+                        'business_id' => $recruitment_process->business_id,
+                    ])
+                    ->where('candidate_order_no', '>=', $recruitment_process->order_no)
+                    ->whereNotIn('id', [$recruitment_process->id])
+                    ->increment('candidate_order_no');
                 }
 
 
@@ -569,47 +622,50 @@ class RecruitmentProcessController extends Controller
                      ->where(function($query) use($request, $created_by) {
 
 
-                         $query->where('recruitment_processes.business_id', NULL)
-                         ->where('recruitment_processes.is_default', 1)
-                         ->where('recruitment_processes.is_active', 1)
-                         ->whereDoesntHave("disabled", function($q) use($created_by) {
-                             $q->whereIn("disabled_recruitment_processes.created_by", [$created_by]);
-                         })
-                         ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                             if(intval($request->is_active)) {
-                                 return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                     $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
-                                 });
-                             }
+                         $query
+                        //  ->where('recruitment_processes.business_id', NULL)
+                        //  ->where('recruitment_processes.is_default', 1)
+                        //  ->where('recruitment_processes.is_active', 1)
+                        //  ->whereDoesntHave("disabled", function($q) use($created_by) {
+                        //      $q->whereIn("disabled_recruitment_processes.created_by", [$created_by]);
+                        //  })
+                        //  ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
+                        //      if(intval($request->is_active)) {
+                        //          return $query->whereDoesntHave("disabled", function($q) use($created_by) {
+                        //              $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
+                        //          });
+                        //      }
 
-                         })
-
-
-                         ->orWhere(function ($query) use($request, $created_by){
-                             $query->where('recruitment_processes.business_id', NULL)
-                                 ->where('recruitment_processes.is_default', 0)
-                                 ->where('recruitment_processes.created_by', $created_by)
-                                 ->where('recruitment_processes.is_active', 1)
-
-                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                     if(intval($request->is_active)) {
-                                         return $query->whereDoesntHave("disabled", function($q) {
-                                             $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
-                                         });
-                                     }
-
-                                 })
+                        //  })
 
 
-                                 ;
-                         })
-                         ->orWhere(function ($query) use($request) {
+                        //  ->orWhere(function ($query) use($request, $created_by){
+                        //      $query->where('recruitment_processes.business_id', NULL)
+                        //          ->where('recruitment_processes.is_default', 0)
+                        //          ->where('recruitment_processes.created_by', $created_by)
+                        //          ->where('recruitment_processes.is_active', 1)
+
+                        //          ->when(isset($request->is_active), function ($query) use ($request) {
+                        //              if(intval($request->is_active)) {
+                        //                  return $query->whereDoesntHave("disabled", function($q) {
+                        //                      $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
+                        //                  });
+                        //              }
+
+                        //          })
+
+
+                        //          ;
+                        //  })
+                         ->where(function ($query) use($request) {
                              $query->where('recruitment_processes.business_id', auth()->user()->business_id)
                                  ->where('recruitment_processes.is_default', 0)
                                  ->when(isset($request->is_active), function ($query) use ($request) {
                                      return $query->where('recruitment_processes.is_active', intval($request->is_active));
                                  });
                          });
+
+
                      });
 
 

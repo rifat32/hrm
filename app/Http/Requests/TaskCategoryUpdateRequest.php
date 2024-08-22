@@ -66,8 +66,10 @@ class TaskCategoryUpdateRequest extends FormRequest
 
                 },
 
-
             ],
+
+
+
             'name' => [
                 "required",
                 'string',

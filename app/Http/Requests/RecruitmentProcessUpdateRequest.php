@@ -82,6 +82,12 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
              new   ValidateRecruitmentProcessName($this->id)
 
             ],
+            "use_in_employee" => "required|boolean",
+            "use_in_on_boarding" => "required|boolean",
+            "is_required" => "required|boolean",
+
+            "employee_order_no" => "required|numeric",
+            "candidate_order_no" => "required|numeric",
         ];
 
 

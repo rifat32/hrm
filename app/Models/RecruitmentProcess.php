@@ -17,6 +17,9 @@ class RecruitmentProcess extends Model
         "business_id",
         "use_in_employee",
         "use_in_on_boarding",
+        "is_required",
+        "employee_order_no",
+        "candidate_order_no",
 
         "created_by"
     ];

@@ -1155,6 +1155,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Models\\ProductVariation' => __DIR__ . '/../..' . '/app/Models/ProductVariation.php',
         'App\\Models\\Project' => __DIR__ . '/../..' . '/app/Models/Project.php',
         'App\\Models\\RecruitmentProcess' => __DIR__ . '/../..' . '/app/Models/RecruitmentProcess.php',
+        'App\\Models\\RecruitmentProcessOrder' => __DIR__ . '/../..' . '/app/Models/RecruitmentProcessOrder.php',
         'App\\Models\\Reminder' => __DIR__ . '/../..' . '/app/Models/Reminder.php',
         'App\\Models\\Role' => __DIR__ . '/../..' . '/app/Models/Role.php',
         'App\\Models\\SalaryHistory' => __DIR__ . '/../..' . '/app/Models/SalaryHistory.php',

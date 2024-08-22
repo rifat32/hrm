@@ -443,6 +443,7 @@ return array(
     'App\\Models\\ProductVariation' => $baseDir . '/app/Models/ProductVariation.php',
     'App\\Models\\Project' => $baseDir . '/app/Models/Project.php',
     'App\\Models\\RecruitmentProcess' => $baseDir . '/app/Models/RecruitmentProcess.php',
+    'App\\Models\\RecruitmentProcessOrder' => $baseDir . '/app/Models/RecruitmentProcessOrder.php',
     'App\\Models\\Reminder' => $baseDir . '/app/Models/Reminder.php',
     'App\\Models\\Role' => $baseDir . '/app/Models/Role.php',
     'App\\Models\\SalaryHistory' => $baseDir . '/app/Models/SalaryHistory.php',

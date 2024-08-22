@@ -108,17 +108,10 @@ class TaskCategoryController extends Controller
 
                 $task_category =  TaskCategory::create($request_data);
 
-              $task_category->order_no = TaskCategory::where(
-                collect($request_data)->only(
-                    "is_active",
-                    "is_default",
-                )
-                ->where(function($query) {
-                    $query->where("business_id" , auth()->user()->business_id)
-                    ->orWhereNull("business_id");
-                })
-                ->toArray()
-                )->count();
+              $task_category->order_no = TaskCategory::where(function($query) {
+                $query->where("business_id" , auth()->user()->business_id)
+                ->orWhereNull("business_id");
+            })->count();
 
                 $task_category->save();
 
@@ -414,7 +407,7 @@ class TaskCategoryController extends Controller
 
 
                 DB::commit();
-                
+
                 return response(["ok" => true], 201);
 
         } catch (Exception $e) {
