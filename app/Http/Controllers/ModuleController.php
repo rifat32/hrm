@@ -541,7 +541,6 @@ class ModuleController extends Controller
 
              $businessQuery  = Business::where(["id" => $business_id]);
 
-
              if (!auth()->user()->hasRole('superadmin')) {
                  $businessQuery = $businessQuery->where(function ($query) {
                      return   $query

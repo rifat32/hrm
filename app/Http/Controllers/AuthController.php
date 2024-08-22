@@ -1427,6 +1427,9 @@ class AuthController extends Controller
 
 
             $business = $user->business;
+            if(!empty($business)) {
+                $modules = $this->getModulesFunc($business);
+            }
             // Extracting only the required data
             $responseData = [
                 'id' => $user->id,
@@ -1448,9 +1451,8 @@ class AuthController extends Controller
                     'logo' => $business ? $business->logo : null,
                     'start_date' => $business ? $business->start_date : null,
                     'currency' => $business ? $business->currency : null,
-                    'service_plan' => $business ? $business->service_plan : null,
+                    'modules' => $modules,
                     'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
-
                 ]
             ];
 

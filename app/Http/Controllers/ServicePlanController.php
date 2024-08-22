@@ -10,6 +10,7 @@ use App\Http\Utils\DiscountUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Business;
+use App\Models\BusinessModule;
 use App\Models\Module;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
@@ -262,6 +263,7 @@ class ServicePlanController extends Controller
                     ], 500);
                 }
 
+
                 foreach ($request_data['discount_codes'] as $discountCode) {
                     $service_plan->discount_codes()->updateOrCreate(
                         ['id' => $discountCode['id']],
@@ -269,33 +271,56 @@ class ServicePlanController extends Controller
                     );
                 }
 
-                ServicePlanModule::where([
-                    "service_plan_id" => $service_plan->id
-                 ])
-                 ->delete();
+              // Step 1: Clear existing ServicePlanModule records
+ServicePlanModule::where('service_plan_id', $service_plan->id)->delete();
 
-            foreach($request_data["active_module_ids"] as $active_module_id){
-                ServicePlanModule::create([
-                "is_enabled" => 1,
-                "service_plan_id" => $service_plan->id,
-                "module_id" => $active_module_id,
-                'created_by' => auth()->user()->id
-               ]);
-            }
+// Step 2: Determine active and disabled module IDs
+$active_module_ids = $request_data['active_module_ids'];
+$all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
 
 
-            $disabled_modules = Module::where('modules.is_enabled', 1)
-            ->whereNotIn("id",$request_data["active_module_ids"])
-            ->pluck("id")->toArray();
+// Step 3: Prepare ServicePlanModule data for bulk insertion
+$service_plan_modules = [];
+foreach ($all_module_ids as $module_id) {
+    $service_plan_modules[] = [
+        'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+        'service_plan_id' => $service_plan->id,
+        'module_id' => $module_id,
+        'created_by' => auth()->user()->id,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+}
 
-            foreach($disabled_modules as $inactive_module_id) {
-                ServicePlanModule::create([
-                    "is_enabled" => 0,
-                    "service_plan_id" => $service_plan->id,
-                    "module_id" => $inactive_module_id,
-                    'created_by' => auth()->user()->id
-                   ]);
-          }
+// Bulk insert ServicePlanModule records
+ServicePlanModule::insert($service_plan_modules);
+
+// Step 4: Retrieve all businesses associated with the service plan
+$service_business_ids = Business::where('service_plan_id', $service_plan->id)->pluck('id')->toArray();
+
+// Step 5: Prepare BusinessModule data for bulk insertion
+$business_modules = [];
+foreach ($service_business_ids as $business_id) {
+    foreach ($all_module_ids as $module_id) {
+        $business_modules[] = [
+            'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+            'business_id' => $business_id,
+            'module_id' => $module_id,
+            'created_by' => auth()->user()->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
+}
+
+// Step 6: Delete existing BusinessModule records for these businesses
+BusinessModule::whereIn('business_id', $service_business_ids)->delete();
+
+// Step 7: Bulk insert new BusinessModule records
+BusinessModule::insert($business_modules);
+
+
+
 
 
 

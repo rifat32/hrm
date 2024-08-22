@@ -90,7 +90,6 @@ trait ModuleUtil
             throw new Exception('Module is not enabled', 401);
         }
 
-
         return $is_enabled;
     }
 
