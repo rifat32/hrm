@@ -29,8 +29,12 @@ class TaskCategory extends Model
 
         ])->first();
 
+        if (!empty($task_category_order)) {
+            return $task_category_order->order_no;
+        }
 
-        return 1;
+
+        return $value;
     }
 
     public function disabled()
