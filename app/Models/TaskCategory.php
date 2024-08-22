@@ -19,6 +19,19 @@ class TaskCategory extends Model
         "order_no",
         "created_by"
     ];
+    public function getOrderNoAttribute($value)
+    {
+
+      $task_category_order = TaskCategoryOrder::where([
+        "task_category_id" => $this->id,
+        'project_id'  => request()->project_id,
+        "business_id"  => auth()->user()->business_id
+
+        ])->first();
+
+
+        return 1;
+    }
 
     public function disabled()
     {

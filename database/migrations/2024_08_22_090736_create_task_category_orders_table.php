@@ -19,7 +19,7 @@ class CreateTaskCategoryOrdersTable extends Migration
             $table->unsignedBigInteger("task_category_id");
             $table->foreign('task_category_id')->references('id')->on('task_categories')->onDelete('cascade');
 
-            
+
             $table->unsignedBigInteger("project_id")->nullable();
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
 
@@ -31,7 +31,7 @@ class CreateTaskCategoryOrdersTable extends Migration
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
 
-            $table->unsignedBigInteger("created_by");
+
 
 
             $table->timestamps();

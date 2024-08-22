@@ -506,7 +506,7 @@ class DashboardManagementControllerV2 extends Controller
         $end_date_of_this_week,
         $start_date_of_previous_week,
         $end_date_of_previous_week,
-        $all_manager_department_ids,
+        $all_manager_department_ids
 
     ) {
 
