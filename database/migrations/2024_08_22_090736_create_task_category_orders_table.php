@@ -15,6 +15,25 @@ class CreateTaskCategoryOrdersTable extends Migration
     {
         Schema::create('task_category_orders', function (Blueprint $table) {
             $table->id();
+
+            $table->unsignedBigInteger("task_category_id");
+            $table->foreign('task_category_id')->references('id')->on('task_categories')->onDelete('cascade');
+
+            
+            $table->unsignedBigInteger("project_id")->nullable();
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+
+
+
+            $table->integer('order_no')->default(0);
+
+            $table->unsignedBigInteger("business_id")->nullable();
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+
+            $table->unsignedBigInteger("created_by");
+
+
             $table->timestamps();
         });
     }
