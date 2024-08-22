@@ -17,12 +17,38 @@ class RecruitmentProcess extends Model
         "business_id",
         "use_in_employee",
         "use_in_on_boarding",
-        "is_required",
+
         "employee_order_no",
         "candidate_order_no",
-
         "created_by"
     ];
+    public function getEmployeeOrderNoAttribute($value)
+    {
+        $recruitment_process_order = RecruitmentProcessOrder::where([
+            "recruitment_process_id" => $this->id,
+            "business_id" => auth()->user()->business_id
+        ])->first();
+
+        if (!empty($recruitment_process_order)) {
+            return $recruitment_process_order->employee_order_no;
+        }
+
+        return $value;
+    }
+
+    public function getCandidateOrderNoAttribute($value)
+    {
+        $recruitment_process_order = RecruitmentProcessOrder::where([
+            "recruitment_process_id" => $this->id,
+            "business_id" => auth()->user()->business_id
+        ])->first();
+
+        if (!empty($recruitment_process_order)) {
+            return $recruitment_process_order->candidate_order_no;
+        }
+
+        return $value;
+    }
 
     public function disabled()
     {
@@ -114,4 +140,12 @@ class RecruitmentProcess extends Model
     // {
     //     return (new Carbon($value))->format('d-m-Y');
     // }
+
+    public function orders()
+    {
+        return $this->hasMany(RecruitmentProcessOrder::class, 'recruitment_process_id');
+    }
+
+
+
 }

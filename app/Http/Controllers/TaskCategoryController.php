@@ -333,8 +333,8 @@ class TaskCategoryController extends Controller
 
 
                 $no_order_task_categories = TaskCategory::
-                where("is_active",1)
-                ->where(function($query) {
+
+                where(function($query) {
                     $query->where("business_id" , auth()->user()->business_id)
                     ->orWhereNull("business_id");
                 })

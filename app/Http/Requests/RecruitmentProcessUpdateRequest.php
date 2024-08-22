@@ -74,7 +74,7 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
             ],
 
 
-            'name' => 'required|string',
+
             'description' => 'nullable|string',
             'name' => [
                 "required",
@@ -86,8 +86,7 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
             "use_in_on_boarding" => "required|boolean",
             "is_required" => "required|boolean",
 
-            "employee_order_no" => "required|numeric",
-            "candidate_order_no" => "required|numeric",
+         
         ];
 
 

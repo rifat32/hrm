@@ -15,7 +15,7 @@ class AddOrderNumbersToRecruitmentProcessesTable extends Migration
     {
         Schema::table('recruitment_processes', function (Blueprint $table) {
 
-            $table->boolean('is_required')->default(0);
+
             $table->unsignedBigInteger('employee_order_no')->default(0);
             $table->unsignedBigInteger('candidate_order_no')->default(0);
         });
@@ -29,7 +29,7 @@ class AddOrderNumbersToRecruitmentProcessesTable extends Migration
     public function down()
     {
         Schema::table('recruitment_processes', function (Blueprint $table) {
-            $table->dropColumn(['is_required','employee_order_no', 'candidate_order_no']);
+            $table->dropColumn(['employee_order_no', 'candidate_order_no']);
         });
     }
 }

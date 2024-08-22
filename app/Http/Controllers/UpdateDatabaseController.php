@@ -221,8 +221,7 @@ if (Schema::hasColumn('candidates', 'feedback')) {
                    // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
                    if ($i == 9) {
                     if (Schema::hasColumn('comments', 'description')) {
-
-                        DB::statement('ALTER TABLE comments MODIFY feedback description NULL');
+                        DB::statement('ALTER TABLE comments MODIFY description LONGTEXT NULL');
                     }
                 }
 

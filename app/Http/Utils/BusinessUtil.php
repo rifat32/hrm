@@ -192,7 +192,6 @@ trait BusinessUtil
                 "employee_order_no" => $defaultRecruitmentProcess->employee_order_no,
                 "candidate_order_no" => $defaultRecruitmentProcess->candidate_order_no,
                 "created_by" => $business->created_by,
-
             ];
 
             $recruitment_process  = RecruitmentProcess::create($insertableData);
@@ -565,7 +564,7 @@ trait BusinessUtil
 
         $this->loadDefaultSettingLeaveType($business);
 
-        $this->loadDefaultRecruitmentProcesses($business);
+        // $this->loadDefaultRecruitmentProcesses($business);
 
 
         $this->loadDefaultSettingLeave($business);
