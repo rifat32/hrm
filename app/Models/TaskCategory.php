@@ -25,6 +25,11 @@ class TaskCategory extends Model
         return $this->hasMany(DisabledTaskCategory::class, 'task_category_id', 'id');
     }
 
+    public function order()
+    {
+        return $this->hasMany(TaskCategoryOrder::class, 'task_category_id', 'id');
+    }
+
 
     public function getIsActiveAttribute($value)
     {

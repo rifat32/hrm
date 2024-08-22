@@ -13,7 +13,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\DisabledTaskCategory;
 use App\Models\Task;
 use App\Models\TaskCategory;
-
+use App\Models\TaskCategoryOrder;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -112,8 +112,11 @@ class TaskCategoryController extends Controller
                 collect($request_data)->only(
                     "is_active",
                     "is_default",
-                    "business_id"
                 )
+                ->where(function($query) {
+                    $query->where("business_id" , auth()->user()->business_id)
+                    ->orWhereNull("business_id");
+                })
                 ->toArray()
                 )->count();
 
@@ -332,67 +335,87 @@ class TaskCategoryController extends Controller
                 }
                 // $business_id =  auth()->user()->business_id;
                 $request_data = $request->validated();
+                $request_data["business_id"] = auth()->user()->business_id?auth()->user()->business_id:NULL;
+                $request_data["project_id"] = !empty($request_data["project_id"])?$request_data["project_id"]:NULL;
+
+
+                $no_order_task_categories = TaskCategory::
+                where("is_active",1)
+                ->where(function($query) {
+                    $query->where("business_id" , auth()->user()->business_id)
+                    ->orWhereNull("business_id");
+                })
+                ->whereDoesntHave("order", function($query) use($request_data){
+                    $query->when(!empty(auth()->user()->business_id), function($query) use($request_data) {
+                        $query->where("task_category_orders.business_id",auth()->user()->business_id)
+                        ->where("task_category_orders.project_id",$request_data["project_id"]);
+                    }, function($query) {
+                        $query->whereNull("task_category_orders.business_id");
+                    });
+
+    //    add business project conditions
+                })
+
+                ->get();
+
+                foreach ($no_order_task_categories as $no_order_task_category ) {
+                    TaskCategoryOrder::create([
+                        'task_category_id' => $no_order_task_category->id,
+                        'order_no' => $no_order_task_category->order_no,
+                        'project_id' => $request_data["project_id"],
+                        "business_id" => $request_data["business_id"]
+                    ]);
+                }
 
 
 
-                $task_category_query_params = [
-                    "id" => $request_data["id"],
-                    // "business_id" => $business_id
+                $task_category_order_query_params = [
+                    "task_category_id" => $request_data["id"],
+                    'project_id' => $request_data["project_id"],
+                    "business_id" => $request_data["business_id"]
                 ];
 
 
-                $task_category_prev = TaskCategory::where($task_category_query_params)
-                     ->first();
-
-
-                 if (!$task_category_prev) {
-                     return response()->json([
-                         "message" => "no task category found"
-                     ], 404);
-                 }
+                $task_category_order = TaskCategoryOrder::updateOrCreate(
+                    // The condition to check if a record exists
+                    $task_category_order_query_params,
+                    // The data to update or create
+                    collect($request_data)->only(['order_no'])->toArray()
+                );
 
 
 
-                $task_category  =  tap(TaskCategory::where($task_category_query_params))->update(
-                    collect($request_data)->only([
-                        'project_id',
-                        "order_no"
 
-
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
-                if (!$task_category) {
+                if (!$task_category_order) {
                     return response()->json([
                         "message" => "something went wrong."
                     ], 500);
                 }
 
 
-                $order_no_overlapped = TaskCategory::where([
-                    'project_id' => $task_category->project_id,
-                    'order_no' => $task_category->order_no,
+                $order_no_overlapped = TaskCategoryOrder::where([
+                    'business_id' => $task_category_order->business_id,
+                    'project_id' => $task_category_order->project_id,
+                    'order_no' => $task_category_order->order_no,
                 ])
-                ->whereNotIn('id', [$task_category->id])
+                ->whereNotIn('id', [$task_category_order->id])
                 ->exists();
 
                 if ($order_no_overlapped) {
-                    TaskCategory::where([
-                        'project_id' => $task_category->project_id,
+                    TaskCategoryOrder::where([
+                        'business_id' => $task_category_order->business_id,
+                        'project_id' => $task_category_order->project_id,
+                        'order_no' => $task_category_order->order_no,
                     ])
-                    ->where('order_no', '>=', $task_category->order_no)
-                    ->whereNotIn('id', [$task_category->id])
+                    ->where('order_no', '>=', $task_category_order->order_no)
+                    ->whereNotIn('id', [$task_category_order->id])
                     ->increment('order_no');
                 }
 
 
-
-
-
                 DB::commit();
-                return response($task_category, 201);
+                
+                return response(["ok" => true], 201);
 
         } catch (Exception $e) {
             DB::rollBack();
