@@ -7151,6 +7151,179 @@
                 ]
             }
         },
+        "/v1.0/email-settings": {
+            "get": {
+                "tags": [
+                    "email_setting"
+                ],
+                "summary": "This method is to get email setting",
+                "description": "This method is to get  setting",
+                "operationId": "getEmailSetting",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "email_setting"
+                ],
+                "summary": "This method is to toggle module active",
+                "description": "This method is to toggle module active",
+                "operationId": "updateEmailSetting",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "mail_driver": {
+                                        "type": "string",
+                                        "example": "smtp"
+                                    },
+                                    "mail_host": {
+                                        "type": "string",
+                                        "example": "mail.example.com"
+                                    },
+                                    "mail_port": {
+                                        "type": "integer",
+                                        "example": 465
+                                    },
+                                    "mail_username": {
+                                        "type": "string",
+                                        "example": "_mainaccount@example.com"
+                                    },
+                                    "mail_password": {
+                                        "type": "string",
+                                        "example": "?x(mujD}h}ZV"
+                                    },
+                                    "mail_encryption": {
+                                        "type": "string",
+                                        "example": "ssl"
+                                    },
+                                    "mail_from_address": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "_mainaccount@example.com"
+                                    },
+                                    "mail_from_name": {
+                                        "type": "string",
+                                        "example": "Your App Name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/business-tiers": {
             "get": {
                 "tags": [
@@ -8843,6 +9016,11 @@
                                         "example": 456
                                     },
                                     "task_id": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 456
+                                    },
+                                    "parent_comment_id": {
                                         "type": "integer",
                                         "format": "int64",
                                         "example": 456
@@ -27432,6 +27610,21 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "tttttt"
+                                    },
+                                    "employee_order_no": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "candidate_order_no": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "is_required": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": ""
                                     }
                                 },
                                 "type": "object"
@@ -27527,6 +27720,128 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "tttttt"
+                                    },
+                                    "is_required": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/recruitment-processes/position": {
+            "put": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to update recruitment process  ",
+                "description": "This method is to update recruitment process ",
+                "operationId": "updateRecruitmentProcessPosition",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "Updated Christmas"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "erg ear ga&nbsp;"
+                                    },
+                                    "use_in_employee": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "use_in_on_boarding": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "employee_order_no": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "candidate_order_no": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "tttttt"
+                                    },
+                                    "is_required": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": ""
                                     }
                                 },
                                 "type": "object"
@@ -37855,6 +38170,11 @@
                                         "format": "string",
                                         "example": "sign_required"
                                     },
+                                    "letter_view_required": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "letter_view_required"
+                                    },
                                     "user_id": {
                                         "type": "string",
                                         "format": "string",
@@ -37960,6 +38280,11 @@
                                         "format": "string",
                                         "example": "sign_required"
                                     },
+                                    "letter_view_required": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "letter_view_required"
+                                    },
                                     "user_id": {
                                         "type": "string",
                                         "format": "string",
@@ -38051,6 +38376,11 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "sign_required"
+                                    },
+                                    "letter_view_required": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "letter_view_required"
                                     },
                                     "user_id": {
                                         "type": "string",
@@ -38286,6 +38616,93 @@
                     },
                     "404": {
                         "description": "Not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/user-letters/view": {
+            "put": {
+                "tags": [
+                    "user_letters"
+                ],
+                "summary": "This method is to update user letters ",
+                "description": "This method is to update user letters ",
+                "operationId": "updateUserLetterView",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "number",
+                                        "format": "number",
+                                        "example": "1"
+                                    },
+                                    "letter_viewed": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "issue_date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
                         "content": {
                             "application/json": {
                                 "schema": {}

@@ -71,51 +71,7 @@ class UpdateDatabaseController extends Controller
                 }
             }
 
-            // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
-            if ($i == 3) {
 
-                $foreignKeys = [
-                    'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
-                    'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
-                    'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
-                    'disabled_job_types' => 'disabled_job_types_business_id_foreign',
-                    'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
-                    'disabled_recruitment_processes' => 'disabled_recruitment_processes_business_id_foreign',
-                    'disabled_banks' => 'disabled_banks_business_id_foreign',
-                    'disabled_termination_types' => 'disabled_termination_types_business_id_foreign',
-                    'disabled_termination_reasons' => 'disabled_termination_reasons_business_id_foreign',
-                ];
-
-                foreach ($foreignKeys as $table => $foreignKey) {
-                    $foreignKeyExists = DB::select(DB::raw("
-                    SELECT CONSTRAINT_NAME
-                    FROM information_schema.KEY_COLUMN_USAGE
-                    WHERE TABLE_NAME = '{$table}'
-                    AND CONSTRAINT_NAME = '{$foreignKey}'
-                "));
-
-                    if (!empty($foreignKeyExists)) {
-                        try {
-                            DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
-                        } catch (\Exception $e) {
-                            // Log the error or handle it as needed
-                            echo "Failed to drop foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
-                        }
-                    } else {
-                        echo "Foreign key '{$foreignKey}' does not exist on table '{$table}'. Skipping...\n";
-                    }
-                }
-
-                foreach ($foreignKeys as $table => $foreignKey) {
-                    try {
-                        DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
-                    } catch (\Exception $e) {
-                        // Log the error or handle it as needed
-                        echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
-                    }
-                }
-
-            }
 
             if ($i == 4) {
 
@@ -228,6 +184,74 @@ if (Schema::hasColumn('candidates', 'feedback')) {
                 if ($i == 10) {
                    EmailTemplate::where("type", "send_password_mail")->delete();
                 }
+
+  // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
+
+
+  if ($i == 11) {
+      $foreignKeys = [
+          'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
+          'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
+          'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
+          'disabled_job_types' => 'disabled_job_types_business_id_foreign',
+          'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
+          'disabled_recruitment_processes' => 'disabled_recruitment_processes_business_id_foreign',
+          'disabled_banks' => 'disabled_banks_business_id_foreign',
+          'disabled_termination_types' => 'disabled_termination_types_business_id_foreign',
+          'disabled_termination_reasons' => 'disabled_termination_reasons_business_id_foreign',
+      ];
+
+      // Disable foreign key checks to avoid errors during deletion
+      DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+      // Delete invalid records from tables
+      foreach ($foreignKeys as $table => $foreignKey) {
+          // Delete records with invalid business_id
+          DB::statement("
+              DELETE FROM {$table}
+              WHERE business_id IS NOT NULL
+              AND business_id NOT IN (SELECT id FROM businesses);
+          ");
+      }
+
+      // Enable foreign key checks
+      DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+      // Drop foreign key constraints if they exist
+      foreach ($foreignKeys as $table => $foreignKey) {
+          try {
+              // Check if the foreign key exists before attempting to drop it
+              $foreignKeyExists = DB::select(DB::raw("
+                  SELECT CONSTRAINT_NAME
+                  FROM information_schema.KEY_COLUMN_USAGE
+                  WHERE TABLE_NAME = '{$table}'
+                  AND CONSTRAINT_NAME = '{$foreignKey}'
+              "));
+
+              if (!empty($foreignKeyExists)) {
+                  DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
+                  echo "Foreign key '{$foreignKey}' dropped successfully on table '{$table}'.\n";
+              } else {
+                  echo "Foreign key '{$foreignKey}' does not exist on table '{$table}'. Skipping...\n";
+              }
+          } catch (\Exception $e) {
+              // Log the error or handle it as needed
+              echo "Failed to drop foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
+          }
+      }
+
+      // Re-add foreign key constraints
+      foreach ($foreignKeys as $table => $foreignKey) {
+          try {
+              DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
+              echo "Foreign key '{$foreignKey}' added successfully on table '{$table}'.\n";
+          } catch (\Exception $e) {
+              // Log the error or handle it as needed
+              echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
+          }
+      }
+  }
+
 
 
 
