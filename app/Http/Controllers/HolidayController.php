@@ -25,7 +25,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class HolidayController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, BasicUtil;
 
 
     protected $departmentComponent;
@@ -102,6 +102,8 @@ class HolidayController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             $this->isModuleEnabled("employee_login");
+
              return DB::transaction(function () use ($request) {
 
 
@@ -602,11 +604,17 @@ class HolidayController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            if (!$request->user()->hasPermissionTo('holiday_view') && !request()->boolean("show_my_data") ) {
+
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('holiday_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
 
             $business_id =  auth()->user()->business_id;
 
@@ -814,11 +822,17 @@ class HolidayController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('holiday_view')) {
+            
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('holiday_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $all_user_of_manager = $this->get_all_user_of_manager($all_manager_department_ids);

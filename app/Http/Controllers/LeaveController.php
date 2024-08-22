@@ -20,6 +20,7 @@ use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\LeaveUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\PayrunUtil;
 use App\Http\Utils\UserActivityUtil;
 
@@ -45,7 +46,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LeaveController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil, PayrunUtil, BasicNotificationUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, LeaveUtil, PayrunUtil, BasicNotificationUtil, BasicUtil, ModuleUtil;
 
     protected $authorizationComponent;
     protected $leaveComponent;
@@ -134,6 +135,8 @@ class LeaveController extends Controller
         DB::beginTransaction();
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+                $this->isModuleEnabled("employee_login");
 
 
             $request_data = $request->validated();
@@ -1210,11 +1213,20 @@ class LeaveController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+
+
+
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('leave_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
 
 
@@ -1434,11 +1446,17 @@ class LeaveController extends Controller
         try {
 
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+           if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('leave_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
 
 
@@ -1698,9 +1716,13 @@ class LeaveController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
             if (!$request->user()->hasPermissionTo('leave_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
-                    "message" => "You can not perform this action" . request()->boolean("show_my_data")
+                    "message" => "You can not perform this action"
                 ], 401);
             }
 
@@ -1906,11 +1928,17 @@ class LeaveController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('leave_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
+
+
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
             $business_id =  auth()->user()->business_id;
             $employees = User::with(
@@ -2190,7 +2218,12 @@ class LeaveController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('leave_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -2267,7 +2300,11 @@ class LeaveController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('leave_view')) {
+             if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('leave_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);

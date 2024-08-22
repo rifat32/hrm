@@ -1232,6 +1232,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
 
 
     Route::post('/v1.0/leaves/self', [LeaveController::class, "createSelfLeave"]);
+
     Route::post('/v1.0/leaves', [LeaveController::class, "createLeave"]);
     Route::put('/v1.0/leaves/approve', [LeaveController::class, "approveLeave"]);
 
@@ -1290,6 +1291,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
 
 
     Route::post('/v1.0/attendances/self/check-in', [AttendanceController::class, "createSelfAttendanceCheckIn"]);
+
     Route::put('/v1.0/attendances/self/check-out', [AttendanceController::class, "createSelfAttendanceCheckOut"]);
 
 

@@ -146,6 +146,7 @@ class AttendanceController extends Controller
         try {
 
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("employee_login");
 
             $request_data = $request->validated();
 
@@ -368,6 +369,10 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
         try {
 
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+                $this->isModuleEnabled("employee_login");
+
+
 
             $request_data = $request->validated();
                         // Ensure the authenticated user exists and has a business_id
@@ -1413,6 +1418,9 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
 
             if (!$request->user()->hasPermissionTo('attendance_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
@@ -1568,7 +1576,11 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('attendance_view')) {
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('attendance_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -1695,7 +1707,11 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('attendance_view')) {
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('attendance_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -2096,7 +2112,12 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('attendance_view')) {
+
+            if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('attendance_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
@@ -2248,7 +2269,12 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('attendance_view')) {
+
+             if(request()->boolean("show_my_data")) {
+                $this->isModuleEnabled("employee_login");
+            }
+
+            if (!$request->user()->hasPermissionTo('attendance_view') && !request()->boolean("show_my_data")) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
