@@ -310,11 +310,11 @@ class AuthController extends Controller
                     return response(['message' => 'Business not active'], 403);
                 }
 
-                if ($business->owner_id != $user->id) {
-                    if ($user->hasRole(("business_employee#" . $business->id))) {
-                        $this->isModuleEnabled("employee_login");
-                    }
-                }
+                // if ($business->owner_id != $user->id) {
+                //     if ($user->hasRole(("business_employee#" . $business->id))) {
+                //         $this->isModuleEnabled("employee_login");
+                //     }
+                // }
 
                 // if(!$user->manages_department) {
                 //     return response(['message' => 'You are not a manager or admin of any department. Currently login is not available for normal users'], 403);
@@ -537,12 +537,13 @@ class AuthController extends Controller
                 }
 
 
-                if ($business->owner_id != $user->id) {
+                // if ($business->owner_id != $user->id) {
 
-                    if ($user->hasRole(("business_employee#" . $business->id))) {
-                        $this->isModuleEnabled("employee_login");
-                    }
-                }
+                //     if ($user->hasRole(("business_employee#" . $business->id))) {
+                //         $this->isModuleEnabled("employee_login");
+                //     }
+                // }
+
             }
 
 
@@ -611,7 +612,6 @@ class AuthController extends Controller
             $manager_roles = [];
             if (!empty($user->manager_departments)) {
 
-
                 $manager_roles = Role::with('permissions:name,id', "users")
                     ->where('business_id', $user->business_id)
                     ->where("id", ">", $this->getMainRoleId($user))
@@ -626,6 +626,14 @@ class AuthController extends Controller
             }
 
             $business = $user->business;
+
+            $modules=[];
+
+            if(!empty($business)) {
+                $modules = $this->getModulesFunc($business);
+            }
+
+
 
             // Extracting only the required data
             $responseData = [
@@ -648,7 +656,7 @@ class AuthController extends Controller
                     'logo' => $business ? $business->logo : null,
                     'start_date' => $business ? $business->start_date : null,
                     'currency' => $business ? $business->currency : null,
-                    'service_plan' => $business ? $business->service_plan : null,
+                    'modules' => $modules,
                     'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
                 ]
             ];

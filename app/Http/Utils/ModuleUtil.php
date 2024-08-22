@@ -95,4 +95,58 @@ trait ModuleUtil
     }
 
 
+
+    public function getModulesFunc($business) {
+        $service_plan_modules =   ServicePlanModule::where([
+            "service_plan_id" => $business->service_plan_id,
+         ])
+         ->get();
+
+
+
+         $modules = Module::where('modules.is_enabled', 1)
+             ->orderBy("modules.name", "ASC")
+
+             ->select("id","name")
+            ->get()
+
+            ->map(function($item) use($business, $service_plan_modules) {
+                $item->is_enabled = 0;
+
+                $service_plan_module = $service_plan_modules->first(function ($plan) use ($item) {
+                    return $plan->module_id == $item->id;
+                });
+
+                if(!empty($service_plan_module)) {
+
+                        $item->is_enabled = $service_plan_module->is_enabled;
+
+
+                }
+
+
+
+            $businessModule =    BusinessModule::where([
+                "business_id" => $business->id,
+                "module_id" => $item->id
+            ])
+            ->first();
+
+            if(!empty($businessModule)) {
+                $item->is_enabled = $businessModule->is_enabled;
+
+            }
+
+            $item->businessModule = $businessModule;
+
+            $item->service_plan_module = $service_plan_module;
+
+                return $item;
+            });
+
+            return $modules;
+
+    }
+
+
 }
