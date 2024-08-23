@@ -233,7 +233,7 @@ class SettingPaymentDateController extends Controller
                         return $query->where('setting_payment_dates.business_id', NULL)
                             ->where('setting_payment_dates.is_default', 1)
                             ->when(isset($request->is_active), function ($query) use ($request) {
-                                return $query->where('setting_payment_dates.is_active', intval($request->is_active));
+                                return $query->where('setting_payment_dates.is_active', request()->boolean("is_active"));
                             });
                     } else {
                         return   $query->where('setting_payment_dates.business_id', NULL)

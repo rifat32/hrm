@@ -12,7 +12,8 @@ class SystemSetting extends Model
     protected $fillable = [
         'self_registration_enabled',
         'STRIPE_KEY',
-        "STRIPE_SECRET"
+        "STRIPE_SECRET",
+        "is_frontend_setup"
     ];
 
     protected $hidden = [

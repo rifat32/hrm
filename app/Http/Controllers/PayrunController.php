@@ -708,7 +708,7 @@ class PayrunController extends Controller
                 //     });
                 // })
                 ->when(isset($request->is_active), function ($query) use ($request) {
-                    return $query->where('payruns.is_active', intval($request->is_active));
+                    return $query->where('payruns.is_active', request()->boolean("is_active"));
                 })
                 ->when(!empty($request->start_date), function ($query) use ($request) {
                     return $query->where('payruns.start_date', ">=", $request->start_date);

@@ -61,7 +61,7 @@ return $formattedBreakTime;
                     $q->whereIn('disabled_setting_leave_types.created_by', [$created_by]);
                 })
                 ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
-                    if (intval($request->is_active)) {
+                    if (request()->boolean("is_active")) {
                         return $query->whereDoesntHave('disabled', function ($q) use ($created_by) {
                             $q->whereIn('disabled_setting_leave_types.business_id', [auth()->user()->business_id]);
                         });
@@ -75,7 +75,7 @@ return $formattedBreakTime;
                         ->where('setting_leave_types.is_active', 1)
 
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            if (intval($request->is_active)) {
+                            if (request()->boolean("is_active")) {
                                 return $query->whereDoesntHave('disabled', function ($q) {
                                     $q->whereIn('disabled_setting_leave_types.business_id', [auth()->user()->business_id]);
                                 });
@@ -87,7 +87,7 @@ return $formattedBreakTime;
                         ->where('setting_leave_types.business_id', auth()->user()->business_id)
                         ->where('setting_leave_types.is_default', 0)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('setting_leave_types.is_active', intval($request->is_active));
+                            return $query->where('setting_leave_types.is_active', request()->boolean("is_active"));
                         });
                 });
         })->get();

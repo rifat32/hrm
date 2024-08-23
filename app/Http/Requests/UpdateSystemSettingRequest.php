@@ -26,7 +26,10 @@ class UpdateSystemSettingRequest extends FormRequest
         return [
             'self_registration_enabled'=> "required|boolean",
             'STRIPE_KEY' => "string|required_if:self_registration_enabled,1",
-            "STRIPE_SECRET" => "string|required_if:self_registration_enabled,1"
+            "STRIPE_SECRET" => "string|required_if:self_registration_enabled,1",
+            'is_frontend_setup'=> "nullable|boolean",
+
+
         ];
     }
 }

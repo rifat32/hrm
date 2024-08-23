@@ -710,7 +710,7 @@ class RecruitmentProcessController extends Controller
                      return $query->where('recruitment_processes.business_id', NULL)
                          ->where('recruitment_processes.is_default', 1)
                          ->when(isset($request->is_active), function ($query) use ($request) {
-                             return $query->where('recruitment_processes.is_active', intval($request->is_active));
+                             return $query->where('recruitment_processes.is_active', request()->boolean("is_active"));
                          });
                  } else {
                      return $query
@@ -720,7 +720,7 @@ class RecruitmentProcessController extends Controller
                          ->where('recruitment_processes.is_default', 1)
                          ->where('recruitment_processes.is_active', 1)
                          ->when(isset($request->is_active), function ($query) use ($request) {
-                             if(intval($request->is_active)) {
+                             if(request()->boolean("is_active")) {
                                  return $query->whereDoesntHave("disabled", function($q) {
                                      $q->whereIn("disabled_recruitment_processes.created_by", [auth()->user()->id]);
                                  });
@@ -732,7 +732,7 @@ class RecruitmentProcessController extends Controller
                                  ->where('recruitment_processes.is_default', 0)
                                  ->where('recruitment_processes.created_by', auth()->user()->id)
                                  ->when(isset($request->is_active), function ($query) use ($request) {
-                                     return $query->where('recruitment_processes.is_active', intval($request->is_active));
+                                     return $query->where('recruitment_processes.is_active', request()->boolean("is_active"));
                                  });
                          });
 
@@ -752,7 +752,7 @@ class RecruitmentProcessController extends Controller
                              $q->whereIn("disabled_recruitment_processes.created_by", [$created_by]);
                          })
                          ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                             if(intval($request->is_active)) {
+                             if(request()->boolean("is_active")) {
                                  return $query->whereDoesntHave("disabled", function($q) use($created_by) {
                                      $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
                                  });
@@ -768,7 +768,7 @@ class RecruitmentProcessController extends Controller
                                  ->where('recruitment_processes.is_active', 1)
 
                                  ->when(isset($request->is_active), function ($query) use ($request) {
-                                     if(intval($request->is_active)) {
+                                     if(request()->boolean("is_active")) {
                                          return $query->whereDoesntHave("disabled", function($q) {
                                              $q->whereIn("disabled_recruitment_processes.business_id",[auth()->user()->business_id]);
                                          });
@@ -783,7 +783,7 @@ class RecruitmentProcessController extends Controller
                              $query->where('recruitment_processes.business_id', auth()->user()->business_id)
                                  ->where('recruitment_processes.is_default', 0)
                                  ->when(isset($request->is_active), function ($query) use ($request) {
-                                     return $query->where('recruitment_processes.is_active', intval($request->is_active));
+                                     return $query->where('recruitment_processes.is_active', request()->boolean("is_active"));
                                  });
                          });
 
@@ -1003,7 +1003,7 @@ class RecruitmentProcessController extends Controller
                             $query->where('recruitment_processes.business_id', $business->id)
                                 ->where('recruitment_processes.is_default', 0)
 
-                                ->where('recruitment_processes.is_active', intval($request->is_active));
+                                ->where('recruitment_processes.is_active', request()->boolean("is_active"));
 
                         });
                     })

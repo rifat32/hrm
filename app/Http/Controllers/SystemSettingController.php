@@ -28,9 +28,11 @@ class SystemSettingController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *
-     *             @OA\Property(property="self_registration_enabled", type="string", format="number",example="1"),
-     * *           @OA\Property(property="STRIPE_KEY", type="string", format="string",example="STRIPE_KEY"),
-     * *           @OA\Property(property="STRIPE_SECRET", type="string", format="string",example="STRIPE_SECRET"),
+     *           @OA\Property(property="self_registration_enabled", type="string", format="number",example="1"),
+     * *         @OA\Property(property="STRIPE_KEY", type="string", format="string",example="STRIPE_KEY"),
+     *           @OA\Property(property="STRIPE_SECRET", type="string", format="string",example="STRIPE_SECRET"),
+     *           @OA\Property(property="is_frontend_setup", type="string", format="string",example="is_frontend_setup"),
+     *
      *
      *         ),
      *      ),
@@ -93,7 +95,8 @@ class SystemSettingController extends Controller
                 $systemSetting->fill(collect($request_data)->only([
                     'self_registration_enabled',
                     'STRIPE_KEY',
-                    "STRIPE_SECRET"
+                    "STRIPE_SECRET",
+                    "is_frontend_setup"
                 ])->toArray());
                 $systemSetting->save();
 

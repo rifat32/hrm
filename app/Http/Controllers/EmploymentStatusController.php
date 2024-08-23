@@ -535,7 +535,7 @@ class EmploymentStatusController extends Controller
                     return $query->where('employment_statuses.business_id', NULL)
                         ->where('employment_statuses.is_default', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('employment_statuses.is_active', intval($request->is_active));
+                            return $query->where('employment_statuses.is_active', request()->boolean("is_active"));
                         });
                 } else {
                     return $query
@@ -545,7 +545,7 @@ class EmploymentStatusController extends Controller
                                 ->where('employment_statuses.is_default', 1)
                                 ->where('employment_statuses.is_active', 1)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if (intval($request->is_active)) {
+                                    if (request()->boolean("is_active")) {
                                         return $query->whereDoesntHave("disabled", function ($q) {
                                             $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
                                         });
@@ -556,7 +556,7 @@ class EmploymentStatusController extends Controller
                                         ->where('employment_statuses.is_default', 0)
                                         ->where('employment_statuses.created_by', auth()->user()->id)
                                         ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('employment_statuses.is_active', intval($request->is_active));
+                                            return $query->where('employment_statuses.is_active', request()->boolean("is_active"));
                                         });
                                 });
                         });
@@ -574,7 +574,7 @@ class EmploymentStatusController extends Controller
                                     $q->whereIn("disabled_employment_statuses.created_by", [$created_by]);
                                 })
                                 ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
-                                    if (intval($request->is_active)) {
+                                    if (request()->boolean("is_active")) {
                                         return $query->whereDoesntHave("disabled", function ($q) use ($created_by) {
                                             $q->whereIn("disabled_employment_statuses.business_id", [auth()->user()->business_id]);
                                         });
@@ -589,7 +589,7 @@ class EmploymentStatusController extends Controller
                                         ->where('employment_statuses.is_active', 1)
 
                                         ->when(isset($request->is_active), function ($query) use ($request) {
-                                            if (intval($request->is_active)) {
+                                            if (request()->boolean("is_active")) {
                                                 return $query->whereDoesntHave("disabled", function ($q) {
                                                     $q->whereIn("disabled_employment_statuses.business_id", [auth()->user()->business_id]);
                                                 });
@@ -600,7 +600,7 @@ class EmploymentStatusController extends Controller
                                     $query->where('employment_statuses.business_id', auth()->user()->business_id)
                                         ->where('employment_statuses.is_default', 0)
                                         ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('employment_statuses.is_active', intval($request->is_active));
+                                            return $query->where('employment_statuses.is_active', request()->boolean("is_active"));
                                         });;
                                 });
                         });

@@ -237,7 +237,7 @@ class SettingPayrollController extends Controller
                         return $query->where('setting_payruns.business_id', NULL)
                             ->where('setting_payruns.is_default', 1)
                             ->when(isset($request->is_active), function ($query) use ($request) {
-                                return $query->where('setting_payruns.is_active', intval($request->is_active));
+                                return $query->where('setting_payruns.is_active', request()->boolean("is_active"));
                             });
                     } else {
                         return   $query->where('setting_payruns.business_id', NULL)

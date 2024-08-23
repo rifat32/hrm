@@ -546,7 +546,7 @@ class JobPlatformController extends Controller
                     return $query->where('job_platforms.business_id', NULL)
                         ->where('job_platforms.is_default', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('job_platforms.is_active', intval($request->is_active));
+                            return $query->where('job_platforms.is_active', request()->boolean("is_active"));
                         });
                 } else {
                     return $query
@@ -556,7 +556,7 @@ class JobPlatformController extends Controller
                         ->where('job_platforms.is_default', 1)
                         ->where('job_platforms.is_active', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(intval($request->is_active)) {
+                            if(request()->boolean("is_active")) {
                                 return $query->whereDoesntHave("disabled", function($q) {
                                     $q->whereIn("disabled_job_platforms.created_by", [auth()->user()->id]);
                                 });
@@ -568,7 +568,7 @@ class JobPlatformController extends Controller
                                 ->where('job_platforms.is_default', 0)
                                 ->where('job_platforms.created_by', auth()->user()->id)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('job_platforms.is_active', intval($request->is_active));
+                                    return $query->where('job_platforms.is_active', request()->boolean("is_active"));
                                 });
                         });
 
@@ -587,7 +587,7 @@ class JobPlatformController extends Controller
                             $q->whereIn("disabled_job_platforms.created_by", [$created_by]);
                         })
                         ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                            if(intval($request->is_active)) {
+                            if(request()->boolean("is_active")) {
                                 return $query->whereDoesntHave("disabled", function($q) use($created_by) {
                                     $q->whereIn("disabled_job_platforms.business_id",[auth()->user()->business_id]);
                                 });
@@ -603,7 +603,7 @@ class JobPlatformController extends Controller
                                 ->where('job_platforms.is_active', 1)
 
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if(intval($request->is_active)) {
+                                    if(request()->boolean("is_active")) {
                                         return $query->whereDoesntHave("disabled", function($q) {
                                             $q->whereIn("disabled_job_platforms.business_id",[auth()->user()->business_id]);
                                         });
@@ -618,7 +618,7 @@ class JobPlatformController extends Controller
                             $query->where('job_platforms.business_id', auth()->user()->business_id)
                                 ->where('job_platforms.is_default', 0)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('job_platforms.is_active', intval($request->is_active));
+                                    return $query->where('job_platforms.is_active', request()->boolean("is_active"));
                                 });;
                         });
                     });
@@ -826,7 +826,7 @@ class JobPlatformController extends Controller
                         ->orWhere(function ($query) use($request, $business_id) {
                             $query->where('job_platforms.business_id', $business_id)
                                 ->where('job_platforms.is_default', 0)
-                                ->where('job_platforms.is_active', intval($request->is_active));
+                                ->where('job_platforms.is_active', request()->boolean("is_active"));
                         });
                     })
 

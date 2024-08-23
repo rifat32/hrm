@@ -509,7 +509,7 @@ class JobTypeController extends Controller
                     return $query->where('job_types.business_id', NULL)
                         ->where('job_types.is_default', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('job_types.is_active', intval($request->is_active));
+                            return $query->where('job_types.is_active', request()->boolean("is_active"));
                         });
                 } else {
                     return $query
@@ -519,7 +519,7 @@ class JobTypeController extends Controller
                         ->where('job_types.is_default', 1)
                         ->where('job_types.is_active', 1)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(intval($request->is_active)) {
+                            if(request()->boolean("is_active")) {
                                 return $query->whereDoesntHave("disabled", function($q) {
                                     $q->whereIn("disabled_job_types.created_by", [auth()->user()->id]);
                                 });
@@ -531,7 +531,7 @@ class JobTypeController extends Controller
                                 ->where('job_types.is_default', 0)
                                 ->where('job_types.created_by', auth()->user()->id)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('job_types.is_active', intval($request->is_active));
+                                    return $query->where('job_types.is_active', request()->boolean("is_active"));
                                 });
                         });
 
@@ -550,7 +550,7 @@ class JobTypeController extends Controller
                             $q->whereIn("disabled_job_types.created_by", [$created_by]);
                         })
                         ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                            if(intval($request->is_active)) {
+                            if(request()->boolean("is_active")) {
                                 return $query->whereDoesntHave("disabled", function($q) use($created_by) {
                                     $q->whereIn("disabled_job_types.business_id",[auth()->user()->business_id]);
                                 });
@@ -566,7 +566,7 @@ class JobTypeController extends Controller
                                 ->where('job_types.is_active', 1)
 
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if(intval($request->is_active)) {
+                                    if(request()->boolean("is_active")) {
                                         return $query->whereDoesntHave("disabled", function($q) {
                                             $q->whereIn("disabled_job_types.business_id",[auth()->user()->business_id]);
                                         });
@@ -581,7 +581,7 @@ class JobTypeController extends Controller
                             $query->where('job_types.business_id', auth()->user()->business_id)
                                 ->where('job_types.is_default', 0)
                                 ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('job_types.is_active', intval($request->is_active));
+                                    return $query->where('job_types.is_active', request()->boolean("is_active"));
                                 });;
                         });
                     });

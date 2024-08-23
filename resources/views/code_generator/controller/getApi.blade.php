@@ -163,7 +163,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
             return $query->where('{{ $names["table_name"] }}.business_id', NULL)
                 ->where('{{ $names["table_name"] }}.is_default', 1)
                 ->when(isset($request->is_active), function ($query) use ($request) {
-                    return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
+                    return $query->where('{{ $names["table_name"] }}.is_active', request()->boolean("is_active"));
                 });
         } else {
             return $query
@@ -173,7 +173,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
                 ->where('{{ $names["table_name"] }}.is_default', 1)
                 ->where('{{ $names["table_name"] }}.is_active', 1)
                 ->when(isset($request->is_active), function ($query) use ($request) {
-                    if(intval($request->is_active)) {
+                    if(request()->boolean("is_active")) {
                         return $query->whereDoesntHave("disabled", function($q) {
                             $q->whereIn("disabled_{{ $names["table_name"] }}.created_by", [auth()->user()->id]);
                         });
@@ -185,7 +185,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
                         ->where('{{ $names["table_name"] }}.is_default', 0)
                         ->where('{{ $names["table_name"] }}.created_by', auth()->user()->id)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
+                            return $query->where('{{ $names["table_name"] }}.is_active', request()->boolean("is_active"));
                         });
                 });
 
@@ -204,7 +204,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
                     $q->whereIn("disabled_{{ $names["table_name"] }}.created_by", [$created_by]);
                 })
                 ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                    if(intval($request->is_active)) {
+                    if(request()->boolean("is_active")) {
                         return $query->whereDoesntHave("disabled", function($q) use($created_by) {
                             $q->whereIn("disabled_{{ $names["table_name"] }}.business_id",[auth()->user()->business_id]);
                         });
@@ -220,7 +220,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
                         ->where('{{ $names["table_name"] }}.is_active', 1)
 
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(intval($request->is_active)) {
+                            if(request()->boolean("is_active")) {
                                 return $query->whereDoesntHave("disabled", function($q) {
                                     $q->whereIn("disabled_{{ $names["table_name"] }}.business_id",[auth()->user()->business_id]);
                                 });
@@ -235,7 +235,7 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
                     $query->where('{{ $names["table_name"] }}.business_id', auth()->user()->business_id)
                         ->where('{{ $names["table_name"] }}.is_default', 0)
                         ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('{{ $names["table_name"] }}.is_active', intval($request->is_active));
+                            return $query->where('{{ $names["table_name"] }}.is_active', request()->boolean("is_active"));
                         });
                 });
             });

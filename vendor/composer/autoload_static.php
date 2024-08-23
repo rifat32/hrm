@@ -939,6 +939,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Http\\Requests\\ProjectCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProjectCreateRequest.php',
         'App\\Http\\Requests\\ProjectUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProjectUpdateRequest.php',
         'App\\Http\\Requests\\RecruitmentProcessCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/RecruitmentProcessCreateRequest.php',
+        'App\\Http\\Requests\\RecruitmentProcessPositionUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/RecruitmentProcessPositionUpdateRequest.php',
         'App\\Http\\Requests\\RecruitmentProcessUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/RecruitmentProcessUpdateRequest.php',
         'App\\Http\\Requests\\ReminderCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ReminderCreateRequest.php',
         'App\\Http\\Requests\\ReminderUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ReminderUpdateRequest.php',

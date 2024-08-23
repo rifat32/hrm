@@ -227,6 +227,7 @@ return array(
     'App\\Http\\Requests\\ProjectCreateRequest' => $baseDir . '/app/Http/Requests/ProjectCreateRequest.php',
     'App\\Http\\Requests\\ProjectUpdateRequest' => $baseDir . '/app/Http/Requests/ProjectUpdateRequest.php',
     'App\\Http\\Requests\\RecruitmentProcessCreateRequest' => $baseDir . '/app/Http/Requests/RecruitmentProcessCreateRequest.php',
+    'App\\Http\\Requests\\RecruitmentProcessPositionUpdateRequest' => $baseDir . '/app/Http/Requests/RecruitmentProcessPositionUpdateRequest.php',
     'App\\Http\\Requests\\RecruitmentProcessUpdateRequest' => $baseDir . '/app/Http/Requests/RecruitmentProcessUpdateRequest.php',
     'App\\Http\\Requests\\ReminderCreateRequest' => $baseDir . '/app/Http/Requests/ReminderCreateRequest.php',
     'App\\Http\\Requests\\ReminderUpdateRequest' => $baseDir . '/app/Http/Requests/ReminderUpdateRequest.php',
