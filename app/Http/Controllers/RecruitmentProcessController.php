@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\GetIdRequest;
 use App\Http\Requests\RecruitmentProcessCreateRequest;
+use App\Http\Requests\RecruitmentProcessPositionMultipleUpdateRequest;
 use App\Http\Requests\RecruitmentProcessPositionUpdateRequest;
 use App\Http\Requests\RecruitmentProcessUpdateRequest;
 use App\Http\Utils\BusinessUtil;
@@ -257,13 +258,9 @@ class RecruitmentProcessController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-     * @OA\Property(property="name", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="description", type="string", format="string", example="erg ear ga&nbsp;"),
-     * @OA\Property(property="use_in_employee", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="use_in_on_boarding", type="string", format="string", example="tttttt"),
      * @OA\Property(property="employee_order_no", type="string", format="string", example="tttttt"),
      * @OA\Property(property="candidate_order_no", type="string", format="string", example="tttttt"),
-     *   * @OA\Property(property="is_required", type="string", format="string", example=""),
+
      *
      *         ),
      *      ),
@@ -391,6 +388,110 @@ class RecruitmentProcessController extends Controller
                      ->whereNotIn('id', [$recruitment_process_order->id])
                      ->increment('candidate_order_no');
                  }
+
+
+
+                 return response(["ok" => true], 201);
+             });
+         } catch (Exception $e) {
+             error_log($e->getMessage());
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+        /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/recruitment-processes/position/multiple",
+     *      operationId="updateRecruitmentProcessPositionMultiple",
+     *      tags={"recruitment_processes"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to update recruitment process  ",
+     *      description="This method is to update recruitment process ",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
+     * @OA\Property(property="employee_order_no", type="string", format="string", example="tttttt"),
+     * @OA\Property(property="candidate_order_no", type="string", format="string", example="tttttt"),
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function updateRecruitmentProcessPositionMultiple(RecruitmentProcessPositionMultipleUpdateRequest $request)
+     {
+
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             return DB::transaction(function () use ($request) {
+                 if (!$request->user()->hasPermissionTo('recruitment_process_update')) {
+                     return response()->json([
+                         "message" => "You can not perform this action"
+                     ], 401);
+                 }
+                 $request_data = $request->validated();
+
+                 $request_data["business_id"] = auth()->user()->business_id?auth()->user()->business_id:NULL;
+
+
+
+
+
+foreach($request_data["recruitment_processes"] as $recruitment_processes) {
+  // Handle sorting logic for employee order number
+  $order_query = [
+    'recruitment_process_id' => $recruitment_processes["id"],
+    'business_id' => $request_data["business_id"],
+];
+
+$recruitment_process_order = RecruitmentProcessOrder::updateOrCreate(
+    $order_query,
+    [
+        'employee_order_no' => $recruitment_processes["employee_order_no"],
+        'candidate_order_no' => $recruitment_processes["candidate_order_no"],
+    ]
+);
+
+}
+
+
 
 
 

@@ -32343,6 +32343,11 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "STRIPE_SECRET"
+                                    },
+                                    "is_frontend_setup": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "is_frontend_setup"
                                     }
                                 },
                                 "type": "object"

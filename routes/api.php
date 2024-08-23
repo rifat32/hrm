@@ -1140,6 +1140,8 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::put('/v1.0/recruitment-processes', [RecruitmentProcessController::class, "updateRecruitmentProcess"]);
 
     Route::put('/v1.0/recruitment-processes/position', [RecruitmentProcessController::class, "updateRecruitmentProcessPosition"]);
+    Route::put('/v1.0/recruitment-processes/position/multiple', [RecruitmentProcessController::class, "updateRecruitmentProcessPositionMultiple"]);
+
 
     Route::put('/v1.0/recruitment-processes/toggle-active', [RecruitmentProcessController::class, "toggleActiveRecruitmentProcess"]);
     Route::get('/v1.0/recruitment-processes', [RecruitmentProcessController::class, "getRecruitmentProcesses"]);
