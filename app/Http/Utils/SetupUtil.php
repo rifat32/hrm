@@ -80,22 +80,33 @@ trait SetupUtil
     }
 
     public function setupAssetTypes() {
-        
+
         $asset_types = [
             ['name' => 'Mobile Phone'],
             ['name' => 'Laptop']
         ];
 
-
-        // Iterate through the array and create records
+        // Iterate through the array and create records only if they do not already exist
         foreach ($asset_types as $data) {
-            AssetType::create([
+            // Check if a record with all the specified attributes exists
+            $exists = AssetType::where([
                 'name' => $data['name'],
-                "is_active" => 1,
-                "is_default" => 1,
-                "business_id" => NULL,
-                "created_by" => 1
-            ]);
+                'is_active' => 1,
+                'is_default' => 1,
+                'business_id' => NULL,
+                'created_by' => 1
+            ])->exists();
+
+            // Create the record if it does not exist
+            if (!$exists) {
+                AssetType::create([
+                    'name' => $data['name'],
+                    'is_active' => 1,
+                    'is_default' => 1,
+                    'business_id' => NULL,
+                    'created_by' => 1
+                ]);
+            }
         }
 
     }

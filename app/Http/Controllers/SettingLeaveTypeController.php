@@ -1006,15 +1006,15 @@ class SettingLeaveTypeController extends Controller
 
             }
 
-            $leave_type_employment_statuses_exists =  LeaveTypeEmploymentStatus::whereIn("setting_leave_type_id",$existingIds)->exists();
-            if($leave_type_employment_statuses_exists) {
-                // $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
-                return response()->json([
-                    "message" => "Some users are using some of the specified leave types",
-                    // "conflicting_leaves" => $conflictingLeaves
-                ], 409);
+            // $leave_type_employment_statuses_exists =  LeaveTypeEmploymentStatus::whereIn("setting_leave_type_id",$existingIds)->exists();
+            // if($leave_type_employment_statuses_exists) {
+            //     // $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
+            //     return response()->json([
+            //         "message" => "Some users are using some of the specified leave types",
+            //         // "conflicting_leaves" => $conflictingLeaves
+            //     ], 409);
 
-            }
+            // }
 
 
             SettingLeaveType::destroy($existingIds);

@@ -382,7 +382,7 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project->id,
-                    "entity_name" => "Project",
+                    "entity_name" => "project",
                     'notification_title' => "Project Assignment Notification",
                     'notification_description' => $notification_description,
                     'notification_link' => $notification_link,
@@ -551,7 +551,7 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project->id,
-                    "entity_name" => "Project",
+                    "entity_name" => "project",
                     'notification_title' => "Project Deassignment Notification",
                     'notification_description' => $notification_description,
                     'notification_link' => $notification_link,
@@ -738,7 +738,7 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project_id,
-                    "entity_name" => "Project",
+                    "entity_name" => "project",
                     'notification_title' => "Project Deassignment Notification",
                     'notification_description' => $notification_description,
                     'notification_link' => $notification_link,
@@ -891,7 +891,7 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project_id,
-                    "entity_name" => "Project",
+                    "entity_name" => "project",
                     'notification_title' => "Project Deassignment Notification",
                     'notification_description' => $notification_description,
                     'notification_link' => $notification_link,

@@ -822,7 +822,7 @@ BusinessModule::insert($business_modules);
 
             $conflictingBusinesses = Business::
 
-           whereIn("service_plan_id",$nonExistingIds)
+           whereIn("service_plan_id",$existingIds)
 
 
             ->get([

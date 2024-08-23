@@ -133,7 +133,7 @@ $notification_data = $mentioned_users->map(function ($mentioned_user) use ($user
     $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
     return [
         "entity_id" => $user_note->id,
-        "entity_name" => "Note",
+        "entity_name" => "note",
         'notification_title' => "Note Mention Notification",
         'notification_description' => $notification_description,
         'notification_link' => $notification_link,
@@ -321,7 +321,7 @@ $user_note->mentions()->createMany($mentions_data);
       $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
       return [
           "entity_id" => $user_note->id,
-          "entity_name" => "Note",
+          "entity_name" => "note",
           'notification_title' => "New Mention in Updated Note",
           'notification_description' => $notification_description,
           'notification_link' => $notification_link,
@@ -341,7 +341,7 @@ $user_note->mentions()->createMany($mentions_data);
       $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
       return [
           "entity_id" => $user_note->id,
-          "entity_name" => "Note",
+          "entity_name" => "note",
           'notification_title' => "Re-mention in Updated Note",
           'notification_description' => $notification_description,
           'notification_link' => $notification_link,
@@ -522,7 +522,7 @@ $user_note->mentions()->createMany($mentions_data);
       $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
       return [
           "entity_id" => $user_note->id,
-          "entity_name" => "Note",
+          "entity_name" => "note",
           'notification_title' => "New Mention in Updated Note",
           'notification_description' => $notification_description,
           'notification_link' => $notification_link,
@@ -542,7 +542,7 @@ $user_note->mentions()->createMany($mentions_data);
       $notification_link = "http://example.com/notes/{$user_note->id}"; // Dynamic link based on comment ID
       return [
           "entity_id" => $user_note->id,
-          "entity_name" => "Note",
+          "entity_name" => "note",
           'notification_title' => "Re-mention in Updated Note",
           'notification_description' => $notification_description,
           'notification_link' => $notification_link,

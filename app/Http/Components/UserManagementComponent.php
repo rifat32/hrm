@@ -186,14 +186,31 @@ class UserManagementComponent
             })
 
             ->when(!empty(request()->search_key), function ($query) {
-                $term = request()->search_key;
-                return $query->where(function ($subquery) use ($term) {
-                    $subquery->where("first_Name", "like", "%" . $term . "%")
-                        ->orWhere("last_Name", "like", "%" . $term . "%")
-                        ->orWhere("email", "like", "%" . $term . "%")
-                        ->orWhere("phone", "like", "%" . $term . "%");
+                $searchKey = request()->search_key;
+                $searchTerms = explode(',', str_replace(' ', ',', $searchKey));
+
+                return $query->where(function ($subquery) use ($searchKey, $searchTerms) {
+                    // Search by email and phone
+                    $subquery->where(function ($query) use ($searchKey) {
+                        $query->where("email", "like", "%" . $searchKey . "%")
+                            ->orWhere("phone", "like", "%" . $searchKey . "%");
+                    })
+                    ->orWhere(function ($query) use ($searchTerms) {
+                        foreach ($searchTerms as $term) {
+                            $term = trim($term); // Trim whitespace around each term
+                            if (!empty($term)) { // Avoid empty terms
+                                $query->orWhere(function ($subquery) use ($term) {
+                                    $subquery->where("first_Name", "like", "%" . $term . "%")
+                                        ->orWhere("last_Name", "like", "%" . $term . "%")
+                                        ->orWhere("middle_Name", "like", "%" . $term . "%");
+                                });
+                            }
+                        }
+                    });
                 });
             })
+
+
 
 
             // ->when(isset(request()->is_in_employee), function ($query)  {

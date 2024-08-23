@@ -414,9 +414,16 @@ class RecruitmentProcessController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *      @OA\Property(property="id", type="number", format="number", example="Updated Christmas"),
-     * @OA\Property(property="employee_order_no", type="string", format="string", example="tttttt"),
-     * @OA\Property(property="candidate_order_no", type="string", format="string", example="tttttt"),
+ * @OA\Property(
+ *     property="recruitment_processes",
+ *     type="array",
+ *     @OA\Items(
+ *         type="object",
+ *         @OA\Property(property="id", type="number", format="number", example=1),
+ *         @OA\Property(property="employee_order_no", type="string", format="string", example="12345"),
+ *         @OA\Property(property="candidate_order_no", type="string", format="string", example="67890")
+ *     )
+ * )
 
      *
      *         ),

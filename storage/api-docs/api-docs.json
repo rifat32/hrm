@@ -27808,26 +27808,6 @@
                                         "format": "number",
                                         "example": "Updated Christmas"
                                     },
-                                    "name": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "tttttt"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "erg ear ga&nbsp;"
-                                    },
-                                    "use_in_employee": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "tttttt"
-                                    },
-                                    "use_in_on_boarding": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "tttttt"
-                                    },
                                     "employee_order_no": {
                                         "type": "string",
                                         "format": "string",
@@ -27837,15 +27817,83 @@
                                         "type": "string",
                                         "format": "string",
                                         "example": "tttttt"
-                                    },
-                                    "is_required": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": ""
                                     }
                                 },
                                 "type": "object"
                             }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/recruitment-processes/position/multiple": {
+            "put": {
+                "tags": [
+                    "recruitment_processes"
+                ],
+                "summary": "This method is to update recruitment process  ",
+                "description": "This method is to update recruitment process ",
+                "operationId": "updateRecruitmentProcessPositionMultiple",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
                         }
                     }
                 },
