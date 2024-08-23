@@ -16,90 +16,17 @@ public function getWorkLocations () {
     if(auth()->user()->business) {
         $created_by = auth()->user()->business->created_by;
     }
-    $work_locations = WorkLocation::when(empty(request()->user()->business_id), function ($query) use ($created_by) {
-        if (auth()->user()->hasRole('superadmin')) {
-            return $query->where('work_locations.business_id', NULL)
-                ->where('work_locations.is_default', 1)
-                ->when(isset(request()->is_active), function ($query)  {
-                    return $query->where('work_locations.is_active', intval(request()->is_active));
-                });
-        } else {
-            return $query
-
-            ->where(function($query) {
-                $query->where('work_locations.business_id', NULL)
-                ->where('work_locations.is_default', 1)
-                ->where('work_locations.is_active', 1)
-                ->when(isset(request()->is_active), function ($query)  {
-                    if(intval(request()->is_active)) {
-                        return $query->whereDoesntHave("disabled", function($q) {
-                            $q->whereIn("disabled_work_locations.created_by", [auth()->user()->id]);
-                        });
-                    }
-
-                })
-                ->orWhere(function ($query)  {
-                    $query->where('work_locations.business_id', NULL)
-                        ->where('work_locations.is_default', 0)
-                        ->where('work_locations.created_by', auth()->user()->id)
-                        ->when(isset(request()->is_active), function ($query)  {
-                            return $query->where('work_locations.is_active', intval(request()->is_active));
-                        });
-                });
-
-            });
-        }
+    $work_locations = WorkLocation::when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+        $query->when(auth()->user()->hasRole('superadmin'), function ($query)  {
+            $query->forSuperAdmin('work_locations');
+        }, function ($query) use ( $created_by) {
+            $query->forNonSuperAdmin('work_locations', 'disabled_work_locations', $created_by);
+        });
     })
-        ->when(!empty(request()->user()->business_id), function ($query) use ($created_by) {
-            return $query
-            ->where(function($query) use( $created_by) {
+    ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+        $query->forBusiness('work_locations', "disabled_work_locations", $created_by);
+    })
 
-
-                $query->where('work_locations.business_id', NULL)
-                ->where('work_locations.is_default', 1)
-                ->where('work_locations.is_active', 1)
-                ->whereDoesntHave("disabled", function($q) use($created_by) {
-                    $q->whereIn("disabled_work_locations.created_by", [$created_by]);
-                })
-                ->when(isset(request()->is_active), function ($query) use ($created_by)  {
-                    if(intval(request()->is_active)) {
-                        return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
-                        });
-                    }
-
-                })
-
-
-                ->orWhere(function ($query) use ( $created_by){
-                    $query->where('work_locations.business_id', NULL)
-                        ->where('work_locations.is_default', 0)
-                        ->where('work_locations.created_by', $created_by)
-                        ->where('work_locations.is_active', 1)
-
-                        ->when(isset(request()->is_active), function ($query)  {
-                            if(intval(request()->is_active)) {
-                                return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
-                                });
-                            }
-
-                        })
-
-
-                        ;
-                })
-                ->orWhere(function ($query) {
-                    $query->where('work_locations.business_id', auth()->user()->business_id)
-                        // ->where('work_locations.is_default', 0)
-                        ->when(isset(request()->is_active), function ($query)  {
-                            return $query->where('work_locations.is_active', intval(request()->is_active));
-                        });;
-                });
-            });
-
-
-        })
         ->when(!empty(request()->search_key), function ($query)  {
             return $query->where(function ($query)  {
                 $term = request()->search_key;

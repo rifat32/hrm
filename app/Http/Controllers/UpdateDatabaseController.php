@@ -190,8 +190,10 @@ if (Schema::hasColumn('candidates', 'feedback')) {
 
   if ($i == 11) {
       $foreignKeys = [
-        
-          'disabled_asset_types' => 'disabled_asset_types_business_id_foreign',,
+
+          'disabled_task_categories' => 'disabled_task_categories_business_id_foreign',
+          'disabled_letter_templates' => 'disabled_letter_templates_business_id_foreign',
+          'disabled_asset_types' => 'disabled_asset_types_business_id_foreign',
           'disabled_designations' => 'disabled_designations_business_id_foreign',
           'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
           'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',

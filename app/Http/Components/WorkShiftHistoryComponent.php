@@ -170,7 +170,7 @@ class WorkShiftHistoryComponent
             return $query->where(function ($query) {
                 $term = request()->search_key;
                 $query->where("work_shifts.name", "like", "%" . $term . "%")
-                    ->orWhere("work_shifts.description", "like", "%" . $term . "%");.
+                    ->orWhere("work_shifts.description", "like", "%" . $term . "%");
             });
         })
 

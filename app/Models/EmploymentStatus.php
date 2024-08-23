@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Utils\DefaultQueryScopesTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class EmploymentStatus extends Model
 {
-    use HasFactory;
+    use HasFactory, DefaultQueryScopesTrait;
     protected $fillable = [
         'name',
         'color',

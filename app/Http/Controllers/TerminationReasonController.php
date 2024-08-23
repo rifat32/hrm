@@ -497,80 +497,25 @@ class TerminationReasonController extends Controller
 
 
             $termination_reasons = TerminationReason::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('termination_reasons.business_id', NULL)
-                        ->where('termination_reasons.is_default', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('termination_reasons.is_active', request()->boolean("is_active"));
-                        });
-                } else {
-                    return $query
-
-                        ->where(function ($query) use ($request) {
-                            $query->where('termination_reasons.business_id', NULL)
-                                ->where('termination_reasons.is_default', 1)
-                                ->where('termination_reasons.is_active', 1)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if (request()->boolean("is_active")) {
-                                        return $query->whereDoesntHave("disabled", function ($q) {
-                                            $q->whereIn("disabled_termination_reasons.created_by", [auth()->user()->id]);
-                                        });
-                                    }
-                                })
-                                ->orWhere(function ($query) use ($request) {
-                                    $query->where('termination_reasons.business_id', NULL)
-                                        ->where('termination_reasons.is_default', 0)
-                                        ->where('termination_reasons.created_by', auth()->user()->id)
-                                        ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('termination_reasons.is_active', request()->boolean("is_active"));
-                                        });
-                                });
-                        });
-                }
+                $query->when(auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    $query->forSuperAdmin('termination_reasons');
+                }, function ($query) use ($request, $created_by) {
+                    $query->forNonSuperAdmin('termination_reasons', 'disabled_termination_reasons', $created_by);
+                });
             })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                    return $query
-                        ->where(function ($query) use ($request, $created_by) {
+            ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+                $query->forBusiness('termination_reasons', "disabled_termination_reasons", $created_by);
+            })
 
 
-                            $query->where('termination_reasons.business_id', NULL)
-                                ->where('termination_reasons.is_default', 1)
-                                ->where('termination_reasons.is_active', 1)
-                                ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                    $q->whereIn("disabled_termination_reasons.created_by", [$created_by]);
-                                })
-                                ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
-                                    if (request()->boolean("is_active")) {
-                                        return $query->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                            $q->whereIn("disabled_termination_reasons.business_id", [auth()->user()->business_id]);
-                                        });
-                                    }
-                                })
 
 
-                                ->orWhere(function ($query) use ($request, $created_by) {
-                                    $query->where('termination_reasons.business_id', NULL)
-                                        ->where('termination_reasons.is_default', 0)
-                                        ->where('termination_reasons.created_by', $created_by)
-                                        ->where('termination_reasons.is_active', 1)
 
-                                        ->when(isset($request->is_active), function ($query) use ($request) {
-                                            if (request()->boolean("is_active")) {
-                                                return $query->whereDoesntHave("disabled", function ($q) {
-                                                    $q->whereIn("disabled_termination_reasons.business_id", [auth()->user()->business_id]);
-                                                });
-                                            }
-                                        });
-                                })
-                                ->orWhere(function ($query) use ($request) {
-                                    $query->where('termination_reasons.business_id', auth()->user()->business_id)
-                                        ->where('termination_reasons.is_default', 0)
-                                        ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('termination_reasons.is_active', request()->boolean("is_active"));
-                                        });;
-                                });
-                        });
-                })
+
+
+
+
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;

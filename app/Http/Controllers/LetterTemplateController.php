@@ -552,88 +552,16 @@ $letter_template->save();
 
 
             $letter_templates = LetterTemplate::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('letter_templates.business_id', NULL)
-                        ->where('letter_templates.is_default', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('letter_templates.is_active', request()->boolean("is_active"));
-                        });
-                } else {
-                    return $query
-
-                    ->where(function($query) use($request) {
-                        $query->where('letter_templates.business_id', NULL)
-                        ->where('letter_templates.is_default', 1)
-                        ->where('letter_templates.is_active', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(request()->boolean("is_active")) {
-                                return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_letter_templates.created_by", [auth()->user()->id]);
-                                });
-                            }
-
-                        })
-                        ->orWhere(function ($query) use ($request) {
-                            $query->where('letter_templates.business_id', NULL)
-                                ->where('letter_templates.is_default', 0)
-                                ->where('letter_templates.created_by', auth()->user()->id)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('letter_templates.is_active', request()->boolean("is_active"));
-                                });
-                        });
-
-                    });
-                }
+                $query->when(auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    $query->forSuperAdmin('letter_templates');
+                }, function ($query) use ($request, $created_by) {
+                    $query->forNonSuperAdmin('letter_templates', 'disabled_letter_templates', $created_by);
+                });
             })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                    return $query
-                    ->where(function($query) use($request, $created_by) {
+            ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+                $query->forBusiness('letter_templates', "disabled_letter_templates", $created_by);
+            })
 
-
-                        $query->where('letter_templates.business_id', NULL)
-                        ->where('letter_templates.is_default', 1)
-                        ->where('letter_templates.is_active', 1)
-                        ->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_letter_templates.created_by", [$created_by]);
-                        })
-                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                            if(request()->boolean("is_active")) {
-                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_letter_templates.business_id",[auth()->user()->business_id]);
-                                });
-                            }
-
-                        })
-
-
-                        ->orWhere(function ($query) use($request, $created_by){
-                            $query->where('letter_templates.business_id', NULL)
-                                ->where('letter_templates.is_default', 0)
-                                ->where('letter_templates.created_by', $created_by)
-                                ->where('letter_templates.is_active', 1)
-
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if(request()->boolean("is_active")) {
-                                        return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_letter_templates.business_id",[auth()->user()->business_id]);
-                                        });
-                                    }
-
-                                })
-
-
-                                ;
-                        })
-                        ->orWhere(function ($query) use($request) {
-                            $query->where('letter_templates.business_id', auth()->user()->business_id)
-                                ->where('letter_templates.is_default', 0)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('letter_templates.is_active', request()->boolean("is_active"));
-                                });
-                        });
-                    });
-
-                })
                 ->when(!empty($request->id), function ($query) use ($request) {
                   return $query->where('letter_templates.id', $request->id);
               })

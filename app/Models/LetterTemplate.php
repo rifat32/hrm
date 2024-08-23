@@ -4,14 +4,14 @@
 
 namespace App\Models;
 
-
+use App\Http\Utils\DefaultQueryScopesTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LetterTemplate extends Model
 {
-    use HasFactory;
+    use HasFactory, DefaultQueryScopesTrait;
     protected $fillable = [
         'name',
         'description',
@@ -92,6 +92,6 @@ class LetterTemplate extends Model
         return $is_default;
     }
 
-    
+
 }
 

@@ -542,89 +542,15 @@ class JobPlatformController extends Controller
             }
 
             $job_platforms = JobPlatform::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('job_platforms.business_id', NULL)
-                        ->where('job_platforms.is_default', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('job_platforms.is_active', request()->boolean("is_active"));
-                        });
-                } else {
-                    return $query
-
-                    ->where(function($query) use($request) {
-                        $query->where('job_platforms.business_id', NULL)
-                        ->where('job_platforms.is_default', 1)
-                        ->where('job_platforms.is_active', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            if(request()->boolean("is_active")) {
-                                return $query->whereDoesntHave("disabled", function($q) {
-                                    $q->whereIn("disabled_job_platforms.created_by", [auth()->user()->id]);
-                                });
-                            }
-
-                        })
-                        ->orWhere(function ($query) use ($request) {
-                            $query->where('job_platforms.business_id', NULL)
-                                ->where('job_platforms.is_default', 0)
-                                ->where('job_platforms.created_by', auth()->user()->id)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('job_platforms.is_active', request()->boolean("is_active"));
-                                });
-                        });
-
-                    });
-                }
+                $query->when(auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    $query->forSuperAdmin('job_platforms');
+                }, function ($query) use ($request, $created_by) {
+                    $query->forNonSuperAdmin('job_platforms', 'disabled_job_platforms', $created_by);
+                });
             })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                    return $query
-                    ->where(function($query) use($request, $created_by) {
-
-
-                        $query->where('job_platforms.business_id', NULL)
-                        ->where('job_platforms.is_default', 1)
-                        ->where('job_platforms.is_active', 1)
-                        ->whereDoesntHave("disabled", function($q) use($created_by) {
-                            $q->whereIn("disabled_job_platforms.created_by", [$created_by]);
-                        })
-                        ->when(isset($request->is_active), function ($query) use ($request, $created_by)  {
-                            if(request()->boolean("is_active")) {
-                                return $query->whereDoesntHave("disabled", function($q) use($created_by) {
-                                    $q->whereIn("disabled_job_platforms.business_id",[auth()->user()->business_id]);
-                                });
-                            }
-
-                        })
-
-
-                        ->orWhere(function ($query) use($request, $created_by){
-                            $query->where('job_platforms.business_id', NULL)
-                                ->where('job_platforms.is_default', 0)
-                                ->where('job_platforms.created_by', $created_by)
-                                ->where('job_platforms.is_active', 1)
-
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if(request()->boolean("is_active")) {
-                                        return $query->whereDoesntHave("disabled", function($q) {
-                                            $q->whereIn("disabled_job_platforms.business_id",[auth()->user()->business_id]);
-                                        });
-                                    }
-
-                                })
-
-
-                                ;
-                        })
-                        ->orWhere(function ($query) use($request) {
-                            $query->where('job_platforms.business_id', auth()->user()->business_id)
-                                ->where('job_platforms.is_default', 0)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    return $query->where('job_platforms.is_active', request()->boolean("is_active"));
-                                });;
-                        });
-                    });
-
-
-                })
+            ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+                $query->forBusiness('job_platforms', "disabled_job_platforms", $created_by);
+            })
 
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {

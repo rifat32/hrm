@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Http\Utils\DefaultQueryScopesTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TaskCategory extends Model
 {
-    use HasFactory;
+    use HasFactory, DefaultQueryScopesTrait;
     protected $fillable = [
         'name',
         'color',

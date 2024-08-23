@@ -531,80 +531,15 @@ class EmploymentStatusController extends Controller
 
 
             $employment_statuses = EmploymentStatus::when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('employment_statuses.business_id', NULL)
-                        ->where('employment_statuses.is_default', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
-                            return $query->where('employment_statuses.is_active', request()->boolean("is_active"));
-                        });
-                } else {
-                    return $query
-
-                        ->where(function ($query) use ($request) {
-                            $query->where('employment_statuses.business_id', NULL)
-                                ->where('employment_statuses.is_default', 1)
-                                ->where('employment_statuses.is_active', 1)
-                                ->when(isset($request->is_active), function ($query) use ($request) {
-                                    if (request()->boolean("is_active")) {
-                                        return $query->whereDoesntHave("disabled", function ($q) {
-                                            $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
-                                        });
-                                    }
-                                })
-                                ->orWhere(function ($query) use ($request) {
-                                    $query->where('employment_statuses.business_id', NULL)
-                                        ->where('employment_statuses.is_default', 0)
-                                        ->where('employment_statuses.created_by', auth()->user()->id)
-                                        ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('employment_statuses.is_active', request()->boolean("is_active"));
-                                        });
-                                });
-                        });
-                }
+                $query->when(auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
+                    $query->forSuperAdmin('employment_statuses');
+                }, function ($query) use ($request, $created_by) {
+                    $query->forNonSuperAdmin('employment_statuses', 'disabled_employment_statuses', $created_by);
+                });
             })
-                ->when(!empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
-                    return $query
-                        ->where(function ($query) use ($request, $created_by) {
-
-
-                            $query->where('employment_statuses.business_id', NULL)
-                                ->where('employment_statuses.is_default', 1)
-                                ->where('employment_statuses.is_active', 1)
-                                ->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                    $q->whereIn("disabled_employment_statuses.created_by", [$created_by]);
-                                })
-                                ->when(isset($request->is_active), function ($query) use ($request, $created_by) {
-                                    if (request()->boolean("is_active")) {
-                                        return $query->whereDoesntHave("disabled", function ($q) use ($created_by) {
-                                            $q->whereIn("disabled_employment_statuses.business_id", [auth()->user()->business_id]);
-                                        });
-                                    }
-                                })
-
-
-                                ->orWhere(function ($query) use ($request, $created_by) {
-                                    $query->where('employment_statuses.business_id', NULL)
-                                        ->where('employment_statuses.is_default', 0)
-                                        ->where('employment_statuses.created_by', $created_by)
-                                        ->where('employment_statuses.is_active', 1)
-
-                                        ->when(isset($request->is_active), function ($query) use ($request) {
-                                            if (request()->boolean("is_active")) {
-                                                return $query->whereDoesntHave("disabled", function ($q) {
-                                                    $q->whereIn("disabled_employment_statuses.business_id", [auth()->user()->business_id]);
-                                                });
-                                            }
-                                        });
-                                })
-                                ->orWhere(function ($query) use ($request) {
-                                    $query->where('employment_statuses.business_id', auth()->user()->business_id)
-                                        ->where('employment_statuses.is_default', 0)
-                                        ->when(isset($request->is_active), function ($query) use ($request) {
-                                            return $query->where('employment_statuses.is_active', request()->boolean("is_active"));
-                                        });;
-                                });
-                        });
-                })
+            ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+                $query->forBusiness('employment_statuses', "disabled_employment_statuses", $created_by);
+            })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;

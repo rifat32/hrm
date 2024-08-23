@@ -84,9 +84,9 @@ class RecruitmentProcessUpdateRequest extends BaseFormRequest
             ],
             "use_in_employee" => "required|boolean",
             "use_in_on_boarding" => "required|boolean",
-            "is_required" => "required|boolean",
+       
 
-         
+
         ];
 
 
