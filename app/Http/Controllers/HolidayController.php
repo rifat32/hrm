@@ -358,6 +358,7 @@ class HolidayController extends Controller
 
 
 
+
             return response()->json($holiday, 201);
              });
          } catch (Exception $e) {
@@ -478,6 +479,15 @@ class HolidayController extends Controller
                 }
                 $holiday->departments()->sync($request_data['departments']);
                 $holiday->users()->sync($request_data['users']);
+
+                foreach($holiday->departments() as $department) {
+                    $this->send_notification($holiday, $department->manager, "Holiday Status Updated", $request_data["status"], "holiday",1,$department->name);
+                }
+
+                foreach($holiday->users() as $user) {
+                    $this->send_notification($holiday, $user, "Holiday Request Updated", $request_data["status"], "holiday");
+                }
+
                 return response($holiday, 201);
             });
         } catch (Exception $e) {
@@ -989,13 +999,28 @@ class HolidayController extends Controller
                 ->toArray();
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
+
             if (!empty($nonExistingIds)) {
 
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
+            $holidays = Holiday::whereIn("id", $existingIds)->get();
+            foreach($holidays as $holiday) {
+                foreach($holiday->departments() as $department) {
+                    $this->send_notification($holiday, $department->manager, "Holiday Request Deleted", "delete", "holiday", 1,$department->name );
+
+                }
+
+                foreach($holiday->users() as $user) {
+                    $this->send_notification($holiday, $user, "Holiday Request Deleted", "delete", "holiday");
+                }
+            }
+
+
             Holiday::destroy($existingIds);
+
 
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);

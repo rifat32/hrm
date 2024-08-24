@@ -2522,15 +2522,15 @@ class LeaveController extends Controller
 
             $leaves =  Leave::whereIn("id", $existingIds)->get();
 
-            foreach ($leaves as $leave) {
-                $leave_history_data = $leave->toArray();
-                $leave_history_data['leave_id'] = $leave->id;
-                $leave_history_data['actor_id'] = auth()->user()->id;
-                $leave_history_data['action'] = "delete";
-                $leave_history_data['is_approved'] = NULL;
-                $leave_history_data['leave_created_at'] = $leave->created_at;
-                $leave_history_data['leave_updated_at'] = $leave->updated_at;
-            }
+            // foreach ($leaves as $leave) {
+            //     $leave_history_data = $leave->toArray();
+            //     $leave_history_data['leave_id'] = $leave->id;
+            //     $leave_history_data['actor_id'] = auth()->user()->id;
+            //     $leave_history_data['action'] = "delete";
+            //     $leave_history_data['is_approved'] = NULL;
+            //     $leave_history_data['leave_created_at'] = $leave->created_at;
+            //     $leave_history_data['leave_updated_at'] = $leave->updated_at;
+            // }
 
 
 
