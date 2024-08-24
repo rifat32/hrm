@@ -139,35 +139,35 @@ class BusinessTimesController extends Controller
                     ]);
 
 
-                    $default_work_shift_data = [
-                        'name' => 'Default work shift',
-                        'type' => 'regular',
-                        'description' => '',
-                        'is_personal' => false,
-                        'break_type' => 'unpaid',
-                        'break_hours' => 1,
+                    // $default_work_shift_data = [
+                    //     'name' => 'Default work shift',
+                    //     'type' => 'regular',
+                    //     'description' => '',
+                    //     'is_personal' => false,
+                    //     'break_type' => 'unpaid',
+                    //     'break_hours' => 1,
 
-                        'details' => $business->times->toArray(),
-                        "is_business_default" => 1,
-                        "is_active",
-                        "is_default" => 1,
-                        "business_id" => $business->id,
-                    ];
+                    //     'details' => $business->times->toArray(),
+                    //     "is_business_default" => 1,
+                    //     "is_active",
+                    //     "is_default" => 1,
+                    //     "business_id" => $business->id,
+                    // ];
 
-                    $default_department =   Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first();
+                    // $default_department =   Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first();
 
-                    $default_work_shift = WorkShift::create($default_work_shift_data);
-                    $default_work_shift->details()->createMany($default_work_shift_data['details']);
-                    $default_work_shift->departments()->sync([$default_department->id]);
+                    // $default_work_shift = WorkShift::create($default_work_shift_data);
+                    // $default_work_shift->details()->createMany($default_work_shift_data['details']);
+                    // $default_work_shift->departments()->sync([$default_department->id]);
 
 
-                    $employee_work_shift_history_data = $default_work_shift->toArray();
-                    $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
-                    $employee_work_shift_history_data["from_date"] = $business->start_date;
-                    $employee_work_shift_history_data["to_date"] = NULL;
-                     $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-                     $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
-                     $employee_work_shift_history->departments()->sync([$default_department->id]);
+                    // $employee_work_shift_history_data = $default_work_shift->toArray();
+                    // $employee_work_shift_history_data["work_shift_id"] = $default_work_shift->id;
+                    // $employee_work_shift_history_data["from_date"] = $business->start_date;
+                    // $employee_work_shift_history_data["to_date"] = NULL;
+                    //  $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+                    //  $employee_work_shift_history->details()->createMany($default_work_shift_data['details']);
+                    //  $employee_work_shift_history->departments()->sync([$default_department->id]);
                 }
 
 

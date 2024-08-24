@@ -8,6 +8,7 @@ use App\Http\Requests\HolidayCreateRequest;
 use App\Http\Requests\HolidaySelfCreateRequest;
 use App\Http\Requests\HolidayUpdateRequest;
 use App\Http\Requests\HolidayUpdateStatusRequest;
+use App\Http\Utils\BasicNotificationUtil;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
@@ -26,7 +27,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class HolidayController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, BasicUtil, ModuleUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, BasicUtil, ModuleUtil, BasicNotificationUtil;
 
 
     protected $departmentComponent;
@@ -123,6 +124,7 @@ class HolidayController extends Controller
                  $holiday->users()->sync([auth()->user()->id]);
 
 
+                 $this->send_notification($holiday, auth()->user(), "Holiday Request Taken", "create", "holiday");
 
 
 
@@ -222,6 +224,19 @@ class HolidayController extends Controller
 
                 $holiday->departments()->sync($request_data['departments']);
                 $holiday->users()->sync($request_data['users']);
+
+
+                foreach($holiday->departments() as $department) {
+                    $this->send_notification($holiday, $department->manager, "Holiday Request Taken", "create", "holiday",1,$department->name );
+
+                }
+
+                foreach($holiday->users() as $user) {
+                    $this->send_notification($holiday, $user, "Holiday Request Taken", "create", "holiday");
+                }
+
+
+
 
 
 
@@ -329,6 +344,17 @@ class HolidayController extends Controller
                      "message" => "Something went wrong."
                  ], 500);
              }
+
+             foreach($holiday->departments() as $department) {
+                $this->send_notification($holiday, $department->manager, "Holiday Request Status Updated", $request_data["status"], "holiday",1,$department->name);
+            }
+
+            foreach($holiday->users() as $user) {
+                $this->send_notification($holiday, $user, "Holiday Request Status Updated", $request_data["status"], "holiday");
+            }
+
+
+
 
 
 
@@ -978,4 +1004,5 @@ class HolidayController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
 }

@@ -7,6 +7,7 @@ use App\Http\Utils\SetupUtil;
 use App\Models\Business;
 use App\Models\EmailTemplate;
 use App\Models\Module;
+use App\Models\RecruitmentProcess;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
 use Illuminate\Http\Request;
@@ -257,6 +258,17 @@ if (Schema::hasColumn('candidates', 'feedback')) {
       }
   }
 
+//   if ($i == 12) {
+
+// $recuitment_processes = RecruitmentProcess::get();
+// foreach($recuitment_processes as $recuitment_process){
+
+//     $recuitment_process->employee_order_no = $recuitment_process->id;
+//     $recuitment_process->candidate_order_no = $recuitment_process->id;
+//     $recuitment_process->save();
+// }
+
+// }
         }
 
         return "ok";

@@ -14,7 +14,7 @@ trait BasicNotificationUtil
 {
     use BasicUtil;
     // this function do all the task and returns transaction id or -1
-    public function send_notification($data, $user, $title, $type, $entity_name,$all_parent_department_ids=[])
+    public function send_notification($data, $user, $title, $type, $entity_name,$all_parent_department_ids=[],$for_department=0,$department_name="")
     {
 
             if ($data instanceof \Illuminate\Support\Collection) {
@@ -48,25 +48,55 @@ trait BasicNotificationUtil
             $notification_description = '';
 
 
-            if ($type == "create") {
-                $notification_description = (explode('_', $entity_name)[0]) . " taken for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
 
-            }
-            if ($type == "update") {
-                $notification_description = (explode('_', $entity_name)[0]) . " updated for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+            if(!$for_department) {
+                if ($type == "create") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " taken for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
 
-            }
-            if ($type == "approve") {
-                $notification_description = (explode('_', $entity_name)[0]) . " approved for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+                }
+                if ($type == "update") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " updated for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
 
-            }
-            if ($type == "reject") {
-                $notification_description = (explode('_', $entity_name)[0]) . " rejected for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+                }
+                if ($type == "approve") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " approved for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
 
-            }
-            if ($type == "delete") {
-                $notification_description = (explode('_', $entity_name)[0]) . " deleted for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+                }
+                if ($type == "reject") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " rejected for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
 
+                }
+                if ($type == "delete") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " deleted for the user " . ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name);
+
+                }
+                else {
+                    $notification_description = (explode('_', $entity_name)[0]) . " status for the user " . ($department_name);
+                }
+
+            } else {
+                if ($type == "create") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " taken for the department " . ($department_name);
+
+                }
+                if ($type == "update") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " updated for the department " . ($department_name);
+
+                }
+                if ($type == "approve") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " approved for the department " . ($department_name);
+
+                }
+                if ($type == "reject") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " rejected for the department " . ($department_name);
+
+                }
+                if ($type == "delete") {
+                    $notification_description = (explode('_', $entity_name)[0]) . " deleted for the department " . ($department_name);
+
+                } else {
+                    $notification_description = (explode('_', $entity_name)[0]) . " status for the department " . ($department_name);
+                }
             }
 
 

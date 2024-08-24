@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateEmailSettingRequest;
 use App\Http\Requests\UpdateSystemSettingRequest;
+use App\Http\Utils\BasicEmailUtil;
+use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\TestEmail;
@@ -15,7 +17,7 @@ use Illuminate\Support\Facades\Mail;
 
 class BusinessEmailSettingController extends Controller
 {
-    use ErrorUtil,UserActivityUtil;
+    use ErrorUtil,UserActivityUtil, EmailLogUtil;
  /**
      *
      * @OA\Put(
@@ -120,8 +122,11 @@ class BusinessEmailSettingController extends Controller
 
                 return response()->json(['message' => 'Email settings saved successfully, and test email sent!'], 200);
 
-            } catch (\Exception $e) {
-                return response()->json(['error' => 'Failed to send test email. Please check your settings and try again.'], 400);
+            } catch (Exception $e) {
+                return response()->json(['message' => 'Failed to send test email. Please check your settings and try again.',
+
+                "info" => $e->getMessage()
+            ], 400);
             }
 
 

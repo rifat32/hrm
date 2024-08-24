@@ -115,13 +115,10 @@ class RecruitmentProcessController extends Controller
 
                 $recruitment_process =  RecruitmentProcess::create($request_data);
 
-                $order_no = RecruitmentProcess::where(collect($request_data)->only(
-                    "business_id",
-                    )->toArray()
-                    )->count();
+                $order_no_count = RecruitmentProcess::count();
 
-                    $recruitment_process->employee_order_no = $order_no;
-                    $recruitment_process->candidate_order_no = $order_no;
+                    $recruitment_process->employee_order_no = $order_no_count;
+                    $recruitment_process->candidate_order_no = $order_no_count;
 
                 $recruitment_process->save();
 

@@ -11,6 +11,7 @@ use App\Http\Utils\UserActivityUtil;
 use Exception;
 use Illuminate\Http\Request;
 use App\Models\Role;
+use App\Models\User;
 use Carbon\Carbon;
 
 class RolesController extends Controller
@@ -520,6 +521,17 @@ class RolesController extends Controller
                 ], 404);
             }
 
+
+// Check if any users have these roles
+$rolesWithUsers = User::whereHas('roles', function ($query) use ($existingIds) {
+    $query->whereIn('id', $existingIds);
+})->exists();
+
+if ($rolesWithUsers) {
+    return response()->json([
+        "message" => "One or more roles cannot be deleted because they are assigned to users."
+    ], 400);
+}
 
 
 
