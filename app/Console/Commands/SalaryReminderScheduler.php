@@ -115,6 +115,7 @@ class SalaryReminderScheduler extends Command
 
     public function handle()
     {
+        Log::info('Reminder process started.');
      $settingPaymentDates =   SettingPaymentDate::get();
 
      foreach($settingPaymentDates as $settingPaymentDate){
@@ -150,6 +151,7 @@ class SalaryReminderScheduler extends Command
 
 
      }
+     Log::info('Reminder process finished.');
         return 0;
     }
 
@@ -170,8 +172,7 @@ class SalaryReminderScheduler extends Command
 
 
 
-        Log::info(($notification_description));
-        Log::info(($notification_link));
+
 
 
 
@@ -179,7 +180,7 @@ class SalaryReminderScheduler extends Command
         $all_parent_departments_manager_ids = $this->all_parent_departments_manager_of_user($user->id, $user->business_id);
 
 
-        Log::warning((json_encode($all_parent_departments_manager_ids)));
+
 
 
         foreach ($all_parent_departments_manager_ids as $manager_id) {
@@ -196,6 +197,8 @@ class SalaryReminderScheduler extends Command
                 "status" => "unread",
             ]);
         }
+
+
     }
 
 

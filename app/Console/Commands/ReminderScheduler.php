@@ -52,6 +52,7 @@ class ReminderScheduler extends Command
     public function sendNotification($reminder, $data, $business)
     {
 
+
         $user = User::where([
             "id" => $data->user_id
         ])
@@ -81,11 +82,9 @@ class ReminderScheduler extends Command
 
 
 
-        Log::warning((json_encode($data)));
 
 
-        Log::info(($notification_description));
-        Log::info(($notification_link));
+
 
 
 
@@ -93,7 +92,7 @@ class ReminderScheduler extends Command
         $all_parent_departments_manager_ids = $this->all_parent_departments_manager_of_user($user->id, $user->business_id);
 
 
-        Log::warning((json_encode($all_parent_departments_manager_ids)));
+
 
 
         foreach ($all_parent_departments_manager_ids as $manager_id) {
@@ -116,9 +115,9 @@ class ReminderScheduler extends Command
 
     public function handle()
     {
-
+        Log::info('Reminder process started.');
         // Log that the reminder process has started
-        Log::info('reminder is sending...');
+
 
         // Retrieve distinct business IDs for reminders
         $businesses =  Reminder::groupBy("business_id")->select("business_id")->get();
@@ -126,7 +125,7 @@ class ReminderScheduler extends Command
 
         // Iterate over each business
         foreach ($businesses as $business) {
-            Log::info(('reminder is sending for business id: ' . $business->id));
+
             $business = Business::where([
                 "id" => $business->business_id,
                 "is_active" => 1
@@ -136,7 +135,7 @@ class ReminderScheduler extends Command
             // Skip iteration if business not found or inactive
             if (empty($business)) {
                 // Log that the business is not found or inactive
-                Log::warning('Business not found or inactive, skipping...');
+
                 continue;
             }
 
@@ -150,7 +149,7 @@ class ReminderScheduler extends Command
             // Iterate over each reminder
             foreach ($reminders as $reminder) {
 
-                Log::info(('reminder is sending for reminder id: ' . $reminder->id));
+
                 // Adjust reminder duration if necessary
                 if ($reminder->duration_unit == "weeks") {
                     $reminder->duration =  $reminder->duration * 7;
@@ -171,7 +170,7 @@ class ReminderScheduler extends Command
 
                 // Handle different model types differently
                 if ($model_name == "EmployeePensionHistory") {
-                    Log::info(('pension reminder.. '));
+
                     // Handle reminders for EmployeePensionHistory model
                     $all_current_data_ids = $this->resolveClassName($model_name)::select('id','user_id')
                         ->where([
@@ -200,7 +199,7 @@ class ReminderScheduler extends Command
 
                             return $current_data->id;
                         })->filter()->values();
-                        Log::info(json_encode($all_current_data_ids));
+
 
 
                     $all_reminder_data = $this->resolveClassName($model_name)::whereIn("id", $all_current_data_ids)
@@ -283,7 +282,7 @@ class ReminderScheduler extends Command
                 foreach ($all_reminder_data as $data) {
 
 
-    Log::info(('reminder data....            ' . json_encode($data)));
+
 
 
 
@@ -325,12 +324,12 @@ class ReminderScheduler extends Command
                         }
                     } else if ($reminder->send_time == "before_expiry") {
 
-                        Log::info(('before expiry reminder....            ' ));
+
 
                             // Calculate the reminder date based on the duration set
                             // $reminder_date =   $now->copy()->addDays($reminder->duration);
                             $reminder_date =   Carbon::parse($data->$expiry_date_column)->subDays($reminder->duration);
-                            Log::info(('before expiry reminder date....            ' . $reminder_date ));
+
 
                             // Check if the reminder date matches the expiry date
                             if ($reminder_date->eq($now)) {

@@ -371,11 +371,15 @@ trait SetupUtil
         foreach ($defaultData as $data) {
             $existingData = $modelClass::where([
                 "business_id" => $business->id,
-                "parent_id" => $data->id
-            ])->first();
+            ])
+            ->where(function($query) use($data) {
+                      $query->where( "parent_id", $data->id)
+                      ->orWhere("name", $data->name);
+            })
+            ->first();
 
-            if (!empty($existingData)) {
-                $modelClass::create($existingData->toArray());
+            if (empty($existingData)) {
+                $modelClass::create($data->toArray());
             }
         }
     }
