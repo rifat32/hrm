@@ -9,6 +9,65 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait DefaultQueryScopesTrait
 {
+    public function getIsActiveAttribute($value)
+    {
+        $is_active = $value;
+        $user = auth()->user();
+
+        if(!empty($user)) {
+            if (empty($user->business_id)) {
+                if (empty($this->business_id) && $this->is_default == 1) {
+                    if (!$user->hasRole("superadmin")) {
+                        $disabled = $this->disabled()->where([
+                            "created_by" => $user->id
+                        ])
+                            ->first();
+                        if ($disabled) {
+                            $is_active = 0;
+                        }
+                    }
+                }
+            } else {
+                if (empty($this->business_id)) {
+                    $disabled = $this->disabled()->where([
+                        "business_id" => $user->business_id
+                    ])
+                        ->first();
+                    if ($disabled) {
+                        $is_active = 0;
+                    }
+                }
+            }
+        }
+
+
+
+
+
+        return $is_active;
+    }
+
+
+
+    public function getIsDefaultAttribute($value)
+    {
+
+        $is_default = $value;
+        $user = auth()->user();
+
+        if (!empty($user)) {
+
+            if (!empty($user->business_id)) {
+                if (empty($this->business_id) || $user->business_id !=  $this->business_id) {
+                    $is_default = 1;
+                }
+            } else if ($user->hasRole("superadmin")) {
+                $is_default = 0;
+            }
+        }
+
+        return $is_default;
+    }
 
     public function scopeForSuperAdmin(Builder $query, $table)
     {
@@ -48,7 +107,7 @@ trait DefaultQueryScopesTrait
     public function scopeForBusiness(Builder $query, $table,$disabled_table, $created_by)
     {
         return $query->where(function ($query) use ($table, $created_by, $disabled_table) {
-            $query->when(!request()->boolean('exclude_defaults'), function ($query) use ($table, $created_by, $disabled_table) {
+            $query->when(request()->boolean('include_defaults'), function ($query) use ($table, $created_by, $disabled_table) {
                 return $query->where(function ($query) use ($table, $created_by, $disabled_table) {
                     $query->where($table . '.business_id', NULL)
                           ->where($table . '.is_default', 1)

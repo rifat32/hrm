@@ -90,7 +90,8 @@ trait SetupUtil
         }
     }
 
-    public function setupAssetTypes() {
+    public function setupAssetTypes()
+    {
 
         $asset_types = [
             ['name' => 'Mobile Phone'],
@@ -119,10 +120,10 @@ trait SetupUtil
                 ]);
             }
         }
-
     }
 
-    public function setUpSocialMedia() {
+    public function setUpSocialMedia()
+    {
         $social_media_platforms = [
             ['id' => 1, 'name' => 'Linkedin', 'icon' => 'FaLinkedin', 'link' => 'https://www.linkedin.com/'],
             ['id' => 2, 'name' => 'Github', 'icon' => 'FaGithub', 'link' => 'https://github.com/'],
@@ -152,8 +153,6 @@ trait SetupUtil
                 "created_by" => 1
             ]);
         }
-
-
     }
     public function roleRefreshFunc()
     {
@@ -283,7 +282,8 @@ trait SetupUtil
 
 
 
-    public function setupServicePlan() {
+    public function setupServicePlan()
+    {
         $modules = Module::where('is_enabled', 1)->pluck('id');
 
         $service_plan = ServicePlan::create([
@@ -307,10 +307,10 @@ trait SetupUtil
         })->toArray();
 
         ServicePlanModule::insert($service_plan_modules);
-
     }
 
-    public function storeWorkLocation() {
+    public function storeWorkLocation()
+    {
         $default_work_location = [
             [
                 'name' => "Office-Based",
@@ -367,24 +367,41 @@ trait SetupUtil
 
 
 
-    public function loadDefaultData($business, $defaultData, $modelClass) {
+    public function loadDefaultData($business, $defaultData, $modelClass)
+    {
         foreach ($defaultData as $data) {
             $existingData = $modelClass::where([
                 "business_id" => $business->id,
             ])
-            ->where(function($query) use($data) {
-                      $query->where( "parent_id", $data->id)
-                      ->orWhere("name", $data->name);
-            })
-            ->first();
+                ->where(function ($query) use ($data) {
+                    $query->where("parent_id", $data->id)
+                        ->orWhere("name", $data->name);
+                })
+                ->first();
 
             if (empty($existingData)) {
-                $modelClass::create($data->toArray());
+                $data = $data->toArray();
+                $data['is_active'] = 1;
+                $data['is_default'] = 0; // Example modification
+                $data['business_id'] = $business->id;
+                $data['created_by'] = $business->owner_id;
+                $data['parent_id'] = $data["id"];
+
+
+
+
+
+                // Another example modification
+
+                // Create the model with modified data
+                $modelClass::create($data);
+
             }
         }
     }
 
-    public function getDefaultData($modelClass) {
+    public function getDefaultData($modelClass)
+    {
         return $modelClass::where([
             "is_active" => 1,
             "is_default" => 1,
@@ -409,7 +426,8 @@ trait SetupUtil
         SettingLeaveType::class,
     ];
 
-    public function defaultDataSetupForBusiness($businesses) {
+    public function defaultDataSetupForBusiness($businesses)
+    {
 
         foreach ($this->defaultModels as $model) {
             $defaultData = $this->getDefaultData($model);
@@ -418,9 +436,5 @@ trait SetupUtil
                 $this->loadDefaultData($business, $defaultData, $model);
             }
         }
-
     }
-
-
-
 }

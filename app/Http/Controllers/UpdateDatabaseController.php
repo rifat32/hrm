@@ -190,13 +190,11 @@ class UpdateDatabaseController extends Controller
             if ($i == 11) {
                 $foreignKeys = [
                     'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
-
                     'disabled_task_categories' => 'disabled_task_categories_business_id_foreign',
                     'disabled_letter_templates' => 'disabled_letter_templates_business_id_foreign',
                     'disabled_asset_types' => 'disabled_asset_types_business_id_foreign',
                     'disabled_designations' => 'disabled_designations_business_id_foreign',
                     'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
-                    'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
                     'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
                     'disabled_job_types' => 'disabled_job_types_business_id_foreign',
                     'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
@@ -235,9 +233,9 @@ class UpdateDatabaseController extends Controller
 
                         if (!empty($foreignKeyExists)) {
                             DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
-                            echo "Foreign key '{$foreignKey}' dropped successfully on table '{$table}'.\n";
+
                         } else {
-                            echo "Foreign key '{$foreignKey}' does not exist on table '{$table}'. Skipping...\n";
+
                         }
                     } catch (\Exception $e) {
                         // Log the error or handle it as needed
@@ -249,22 +247,25 @@ class UpdateDatabaseController extends Controller
                 foreach ($foreignKeys as $table => $foreignKey) {
                     try {
                         DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
-                        echo "Foreign key '{$foreignKey}' added successfully on table '{$table}'.\n";
+
                     } catch (\Exception $e) {
                         // Log the error or handle it as needed
                         echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
                     }
                 }
             }
+            if ($i == 12) {
+
+                $businesses = Business::get(["id","owner_id"]);
+
+
+
+                $this->defaultDataSetupForBusiness($businesses);
+            }
         }
 
 
-        if ($i == 12) {
 
-            $businesses = Business::get(["id"]);
-
-            $this->defaultDataSetupForBusiness($businesses);
-        }
 
         return "ok";
     }
