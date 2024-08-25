@@ -21,7 +21,8 @@ class RecruitmentProcess extends Model
 
         "employee_order_no",
         "candidate_order_no",
-        "created_by"
+        "created_by",
+        "parent_id",
     ];
     public function getEmployeeOrderNoAttribute($value)
     {

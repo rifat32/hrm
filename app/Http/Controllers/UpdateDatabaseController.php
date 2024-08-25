@@ -189,6 +189,7 @@ class UpdateDatabaseController extends Controller
 
             if ($i == 11) {
                 $foreignKeys = [
+                    'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
 
                     'disabled_task_categories' => 'disabled_task_categories_business_id_foreign',
                     'disabled_letter_templates' => 'disabled_letter_templates_business_id_foreign',
@@ -255,17 +256,14 @@ class UpdateDatabaseController extends Controller
                     }
                 }
             }
-
-
         }
 
 
         if ($i == 12) {
 
-$businesses = Business::get(["id"]);
+            $businesses = Business::get(["id"]);
 
-    $this->defaultDataSetupForBusiness($businesses);
-
+            $this->defaultDataSetupForBusiness($businesses);
         }
 
         return "ok";

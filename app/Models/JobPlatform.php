@@ -16,7 +16,8 @@ class JobPlatform extends Model
         "is_active",
         "is_default",
         "business_id",
-        "created_by"
+        "created_by",
+        "parent_id",
     ];
 
     public function disabled()

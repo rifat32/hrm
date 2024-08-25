@@ -3,12 +3,23 @@
 namespace App\Http\Utils;
 
 use App\Models\AssetType;
+use App\Models\Bank;
+use App\Models\Designation;
 use App\Models\EmailTemplate;
+use App\Models\EmploymentStatus;
+use App\Models\JobPlatform;
+use App\Models\JobType;
+use App\Models\LetterTemplate;
 use App\Models\Module;
+use App\Models\RecruitmentProcess;
 use App\Models\Role;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
+use App\Models\SettingLeaveType;
 use App\Models\SocialSite;
+use App\Models\TaskCategory;
+use App\Models\TerminationReason;
+use App\Models\TerminationType;
 use App\Models\WorkLocation;
 use Exception;
 use Spatie\Permission\Models\Permission;
@@ -355,28 +366,57 @@ trait SetupUtil
 
 
 
-    public function loadDefaultAssetTypes() {
 
-    }
-    public function getDefaultAssetTypes() {
+    public function loadDefaultData($business, $defaultData, $modelClass) {
+        foreach ($defaultData as $data) {
+            $existingData = $modelClass::where([
+                "business_id" => $business->id,
+                "parent_id" => $data->id
+            ])->first();
 
-        $default_data = AssetType::where([
-           "is_active" => 1,
-           "is_default" => 1,
-           "business_id" => NULL,
-           "parent_id" => NULL
-        ])
-
-        ->get();
-
+            if (!empty($existingData)) {
+                $modelClass::create($existingData->toArray());
+            }
+        }
     }
 
+    public function getDefaultData($modelClass) {
+        return $modelClass::where([
+            "is_active" => 1,
+            "is_default" => 1,
+            "business_id" => NULL,
+            "parent_id" => NULL
+        ])->get();
+    }
+
+    public $defaultModels = [
+        AssetType::class,
+        Bank::class,
+        Designation::class,
+        EmploymentStatus::class,
+        JobPlatform::class,
+        JobType::class,
+        LetterTemplate::class,
+        RecruitmentProcess::class,
+        TaskCategory::class,
+        TerminationReason::class,
+        TerminationType::class,
+        WorkLocation::class,
+        SettingLeaveType::class,
+    ];
 
     public function defaultDataSetupForBusiness($businesses) {
 
+        foreach ($this->defaultModels as $model) {
+            $defaultData = $this->getDefaultData($model);
 
-
+            foreach ($businesses as $business) {
+                $this->loadDefaultData($business, $defaultData, $model);
+            }
+        }
 
     }
+
+
 
 }

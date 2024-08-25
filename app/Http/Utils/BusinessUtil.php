@@ -37,7 +37,7 @@ use PharIo\Manifest\Email;
 
 trait BusinessUtil
 {
-    use BasicUtil, DiscountUtil;
+    use BasicUtil, DiscountUtil, SetupUtil;
     // this function do all the task and returns transaction id or -1
 
 
@@ -563,7 +563,7 @@ trait BusinessUtil
         $this->loadDefaultEmailTemplates($business->id);
 
 
-        $this->loadDefaultSettingLeaveType($business);
+        // $this->loadDefaultSettingLeaveType($business);
 
         // $this->loadDefaultRecruitmentProcesses($business);
 
@@ -575,6 +575,8 @@ trait BusinessUtil
         $this->loadDefaultPayrunSetting($business);
 
         $this->loadDefaultPaymentDateSetting($business);
+
+        $this->defaultDataSetupForBusiness([$business]);
 
         // $this->loadDefaultEmailTemplate($business);
     }

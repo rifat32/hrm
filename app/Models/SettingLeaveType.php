@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Utils\DefaultQueryScopesTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SettingLeaveType extends Model
 {
-    use HasFactory;
+    use HasFactory, DefaultQueryScopesTrait;
     protected $fillable = [
         'name',
         'type',
@@ -17,7 +18,8 @@ class SettingLeaveType extends Model
         "is_active",
         "is_default",
         "business_id",
-        "created_by"
+        "created_by",
+        "parent_id"
     ];
 
     public function disabled()

@@ -18,7 +18,8 @@ class TaskCategory extends Model
         "business_id",
         "project_id",
         "order_no",
-        "created_by"
+        "created_by",
+        "parent_id",
     ];
     public function getOrderNoAttribute($value)
     {
