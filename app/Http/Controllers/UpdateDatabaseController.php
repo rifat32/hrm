@@ -54,9 +54,7 @@ class UpdateDatabaseController extends Controller
     public function updateDatabase()
     {
 
-
         $i = 6;
-
 
 
         for ($i; $i <= 20; $i++) {
@@ -153,122 +151,121 @@ class UpdateDatabaseController extends Controller
                 }
             }
 
-               // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-               if ($i == 7) {
-              // Check if the 'feedback' column exists
-if (Schema::hasColumn('candidates', 'feedback')) {
-    // Make the 'feedback' column nullable
-    DB::statement('ALTER TABLE candidates MODIFY feedback VARCHAR(255) NULL');
-}
+            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+            if ($i == 7) {
+                // Check if the 'feedback' column exists
+                if (Schema::hasColumn('candidates', 'feedback')) {
+                    // Make the 'feedback' column nullable
+                    DB::statement('ALTER TABLE candidates MODIFY feedback VARCHAR(255) NULL');
+                }
             }
-                // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-                if ($i == 8) {
-                    // // Check if the 'is_default' column exists
-                    // if (!Schema::hasColumn('asset_types', 'is_default')) {
-                    //     // Add the 'is_default' column as a boolean with a default value of 1
-                    //     DB::statement("ALTER TABLE asset_types ADD COLUMN is_default TINYINT(1) NOT NULL DEFAULT 1");
-                    // }
+            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+            if ($i == 8) {
+                // // Check if the 'is_default' column exists
+                // if (!Schema::hasColumn('asset_types', 'is_default')) {
+                //     // Add the 'is_default' column as a boolean with a default value of 1
+                //     DB::statement("ALTER TABLE asset_types ADD COLUMN is_default TINYINT(1) NOT NULL DEFAULT 1");
+                // }
 
-                        // Make the 'feedback' column nullable
-                        DB::statement('ALTER TABLE asset_types MODIFY business_id BIGINT(20) UNSIGNED NULL');
+                // Make the 'feedback' column nullable
+                DB::statement('ALTER TABLE asset_types MODIFY business_id BIGINT(20) UNSIGNED NULL');
 
 
-                    $this->setupAssetTypes();
+                $this->setupAssetTypes();
+            }
+            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
+            if ($i == 9) {
+                if (Schema::hasColumn('comments', 'description')) {
+                    DB::statement('ALTER TABLE comments MODIFY description LONGTEXT NULL');
                 }
-                   // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-                   if ($i == 9) {
-                    if (Schema::hasColumn('comments', 'description')) {
-                        DB::statement('ALTER TABLE comments MODIFY description LONGTEXT NULL');
-                    }
-                }
+            }
 
-                if ($i == 10) {
-                   EmailTemplate::where("type", "send_password_mail")->delete();
-                }
+            if ($i == 10) {
+                EmailTemplate::where("type", "send_password_mail")->delete();
+            }
 
-  // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
+            // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
 
 
-  if ($i == 11) {
-      $foreignKeys = [
+            if ($i == 11) {
+                $foreignKeys = [
 
-          'disabled_task_categories' => 'disabled_task_categories_business_id_foreign',
-          'disabled_letter_templates' => 'disabled_letter_templates_business_id_foreign',
-          'disabled_asset_types' => 'disabled_asset_types_business_id_foreign',
-          'disabled_designations' => 'disabled_designations_business_id_foreign',
-          'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
-          'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
-          'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
-          'disabled_job_types' => 'disabled_job_types_business_id_foreign',
-          'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
-          'disabled_recruitment_processes' => 'disabled_recruitment_processes_business_id_foreign',
-          'disabled_banks' => 'disabled_banks_business_id_foreign',
-          'disabled_termination_types' => 'disabled_termination_types_business_id_foreign',
-          'disabled_termination_reasons' => 'disabled_termination_reasons_business_id_foreign',
-      ];
+                    'disabled_task_categories' => 'disabled_task_categories_business_id_foreign',
+                    'disabled_letter_templates' => 'disabled_letter_templates_business_id_foreign',
+                    'disabled_asset_types' => 'disabled_asset_types_business_id_foreign',
+                    'disabled_designations' => 'disabled_designations_business_id_foreign',
+                    'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
+                    'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
+                    'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
+                    'disabled_job_types' => 'disabled_job_types_business_id_foreign',
+                    'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
+                    'disabled_recruitment_processes' => 'disabled_recruitment_processes_business_id_foreign',
+                    'disabled_banks' => 'disabled_banks_business_id_foreign',
+                    'disabled_termination_types' => 'disabled_termination_types_business_id_foreign',
+                    'disabled_termination_reasons' => 'disabled_termination_reasons_business_id_foreign',
+                ];
 
-      // Disable foreign key checks to avoid errors during deletion
-      DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                // Disable foreign key checks to avoid errors during deletion
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-      // Delete invalid records from tables
-      foreach ($foreignKeys as $table => $foreignKey) {
-          // Delete records with invalid business_id
-          DB::statement("
+                // Delete invalid records from tables
+                foreach ($foreignKeys as $table => $foreignKey) {
+                    // Delete records with invalid business_id
+                    DB::statement("
               DELETE FROM {$table}
               WHERE business_id IS NOT NULL
               AND business_id NOT IN (SELECT id FROM businesses);
           ");
-      }
+                }
 
-      // Enable foreign key checks
-      DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+                // Enable foreign key checks
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-      // Drop foreign key constraints if they exist
-      foreach ($foreignKeys as $table => $foreignKey) {
-          try {
-              // Check if the foreign key exists before attempting to drop it
-              $foreignKeyExists = DB::select(DB::raw("
+                // Drop foreign key constraints if they exist
+                foreach ($foreignKeys as $table => $foreignKey) {
+                    try {
+                        // Check if the foreign key exists before attempting to drop it
+                        $foreignKeyExists = DB::select(DB::raw("
                   SELECT CONSTRAINT_NAME
                   FROM information_schema.KEY_COLUMN_USAGE
                   WHERE TABLE_NAME = '{$table}'
                   AND CONSTRAINT_NAME = '{$foreignKey}'
               "));
 
-              if (!empty($foreignKeyExists)) {
-                  DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
-                  echo "Foreign key '{$foreignKey}' dropped successfully on table '{$table}'.\n";
-              } else {
-                  echo "Foreign key '{$foreignKey}' does not exist on table '{$table}'. Skipping...\n";
-              }
-          } catch (\Exception $e) {
-              // Log the error or handle it as needed
-              echo "Failed to drop foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
-          }
-      }
+                        if (!empty($foreignKeyExists)) {
+                            DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
+                            echo "Foreign key '{$foreignKey}' dropped successfully on table '{$table}'.\n";
+                        } else {
+                            echo "Foreign key '{$foreignKey}' does not exist on table '{$table}'. Skipping...\n";
+                        }
+                    } catch (\Exception $e) {
+                        // Log the error or handle it as needed
+                        echo "Failed to drop foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
+                    }
+                }
 
-      // Re-add foreign key constraints
-      foreach ($foreignKeys as $table => $foreignKey) {
-          try {
-              DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
-              echo "Foreign key '{$foreignKey}' added successfully on table '{$table}'.\n";
-          } catch (\Exception $e) {
-              // Log the error or handle it as needed
-              echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
-          }
-      }
-  }
+                // Re-add foreign key constraints
+                foreach ($foreignKeys as $table => $foreignKey) {
+                    try {
+                        DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
+                        echo "Foreign key '{$foreignKey}' added successfully on table '{$table}'.\n";
+                    } catch (\Exception $e) {
+                        // Log the error or handle it as needed
+                        echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
+                    }
+                }
+            }
 
-//   if ($i == 12) {
 
-// $recuitment_processes = RecruitmentProcess::get();
-// foreach($recuitment_processes as $recuitment_process){
+        }
 
-//     $recuitment_process->employee_order_no = $recuitment_process->id;
-//     $recuitment_process->candidate_order_no = $recuitment_process->id;
-//     $recuitment_process->save();
-// }
 
-// }
+        if ($i == 12) {
+
+$businesses = Business::get(["id"]);
+
+    $this->defaultDataSetupForBusiness($businesses);
+
         }
 
         return "ok";

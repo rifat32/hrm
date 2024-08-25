@@ -352,4 +352,31 @@ trait SetupUtil
             ]);
         }
     }
+
+
+
+    public function loadDefaultAssetTypes() {
+
+    }
+    public function getDefaultAssetTypes() {
+
+        $default_data = AssetType::where([
+           "is_active" => 1,
+           "is_default" => 1,
+           "business_id" => NULL,
+           "parent_id" => NULL
+        ])
+
+        ->get();
+
+    }
+
+
+    public function defaultDataSetupForBusiness($businesses) {
+
+
+
+
+    }
+
 }

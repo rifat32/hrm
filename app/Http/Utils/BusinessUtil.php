@@ -85,8 +85,9 @@ trait BusinessUtil
 
 
 
-    public function storeDefaultEmailTemplates($business_id)
+    public function loadDefaultEmailTemplates($business_id)
     {
+
         // Fetch active, default email templates without a business_id
         $email_templates = EmailTemplate::where([
             "is_active" => 1,
@@ -559,7 +560,7 @@ trait BusinessUtil
         }
 
 
-        $this->storeDefaultEmailTemplates($business->id);
+        $this->loadDefaultEmailTemplates($business->id);
 
 
         $this->loadDefaultSettingLeaveType($business);

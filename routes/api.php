@@ -437,9 +437,6 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
 
 
 
-
-
-
     Route::delete('/v1.0/users/{ids}', [UserManagementController::class, "deleteUsersByIds"]);
     Route::get('/v1.0/users/get/user-activity', [UserManagementController::class, "getUserActivity"]);
 
