@@ -23,11 +23,16 @@ class TaskCategory extends Model
     ];
     public function getOrderNoAttribute($value)
     {
+        $user = auth()->user();
+
+        if (empty($user)) {
+            return $value;
+        }
 
       $task_category_order = TaskCategoryOrder::where([
         "task_category_id" => $this->id,
         'project_id'  => request()->project_id,
-        "business_id"  => auth()->user()->business_id
+        "business_id"  => $user->business_id
 
         ])->first();
 
@@ -50,7 +55,7 @@ class TaskCategory extends Model
     }
 
 
- 
+
 
 
 

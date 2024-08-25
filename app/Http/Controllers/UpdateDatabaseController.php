@@ -256,7 +256,8 @@ class UpdateDatabaseController extends Controller
             }
             if ($i == 12) {
 
-                $businesses = Business::get(["id","owner_id"]);
+                $businesses = Business::whereHas("owner")
+                ->get(["id","owner_id"]);
 
 
 

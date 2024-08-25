@@ -26,9 +26,15 @@ class RecruitmentProcess extends Model
     ];
     public function getEmployeeOrderNoAttribute($value)
     {
+        $user = auth()->user();
+        if (empty($user)) {
+            return $value;
+        }
+
+
         $recruitment_process_order = RecruitmentProcessOrder::where([
             "recruitment_process_id" => $this->id,
-            "business_id" => auth()->user()->business_id
+            "business_id" => $user->business_id
         ])->first();
 
         if (!empty($recruitment_process_order)) {
@@ -40,9 +46,13 @@ class RecruitmentProcess extends Model
 
     public function getCandidateOrderNoAttribute($value)
     {
+        $user = auth()->user();
+        if (empty($user)) {
+            return $value;
+        }
         $recruitment_process_order = RecruitmentProcessOrder::where([
             "recruitment_process_id" => $this->id,
-            "business_id" => auth()->user()->business_id
+            "business_id" => $user->business_id
         ])->first();
 
         if (!empty($recruitment_process_order)) {
@@ -58,7 +68,7 @@ class RecruitmentProcess extends Model
     }
 
 
-  
+
 
     // public function users() {
     //     return $this->belongsToMany(User::class, 'user_recruitment_processes', 'recruitment_process_id', 'user_id');
