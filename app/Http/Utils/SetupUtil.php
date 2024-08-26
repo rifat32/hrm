@@ -387,8 +387,6 @@ trait SetupUtil
                 $data['created_by'] = $business->owner_id;
                 $data['parent_id'] = $data["id"];
 
-
-
                 // Another example modification
 
                 // Create the model with modified data

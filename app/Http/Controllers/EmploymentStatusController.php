@@ -810,52 +810,36 @@ class EmploymentStatusController extends Controller
             }
 
 
-            $conflictingUsers = User::whereIn("employment_status_id", $existingIds)->get([
-                'id', 'first_Name',
-                'last_Name',
-            ]);
+            $conflictingUsersExists = User::whereIn("employment_status_id", $existingIds)->exists();
 
-            if ($conflictingUsers->isNotEmpty()) {
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified employment statuses",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
 
 
-            $conflictingPaidEmploymentStatuses =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get([
-                'id'
-            ]);
-            if ($conflictingPaidEmploymentStatuses->isNotEmpty()) {
-
+            $conflictingPaidEmploymentStatusesExists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($conflictingPaidEmploymentStatusesExists) {
                 return response()->json([
-                    "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_paid_employment_status" => $conflictingPaidEmploymentStatuses
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
-            $conflictingUnpaidEmploymentStatuses =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->get([
-                'id'
-            ]);
-            if ($conflictingUnpaidEmploymentStatuses->isNotEmpty()) {
 
-
+            $conflictingUnpaidEmploymentStatusesExit =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($conflictingUnpaidEmploymentStatusesExit) {
                 return response()->json([
-                    "message" => "Some leave settings are associated with the specified employment statuses",
-                    "conflicting_unpaid_employment_status" => $conflictingUnpaidEmploymentStatuses
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
-            $conflictingLeaveTypeEmploymentStatuses =  LeaveTypeEmploymentStatus::whereIn("employment_status_id", $existingIds)->get([
-                'id'
-            ]);
-            if ($conflictingLeaveTypeEmploymentStatuses->isNotEmpty()) {
 
-
+            $conflictingLeaveTypeEmploymentStatusesExists =  LeaveTypeEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($conflictingLeaveTypeEmploymentStatusesExists) {
                 return response()->json([
-                    "message" => "Some leave types are associated with the specified employment statuses",
-                    "conflicting_unpaid_employment_status" => $conflictingLeaveTypeEmploymentStatuses
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

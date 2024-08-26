@@ -7,6 +7,7 @@ use App\Http\Requests\JobListingUpdateeRequest;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\Candidate;
 use App\Models\JobListing;
 use Carbon\Carbon;
 use Exception;
@@ -954,6 +955,14 @@ class JobListingController extends Controller
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
+
+            $candidate_exists =  Candidate::whereIn("job_listing_id", $existingIds)->exists();
+            if ($candidate_exists) {
+                return response()->json([
+                    "message" => config('messages.delete_restricted'),
+                ], 409);
+            }
+
             JobListing::destroy($existingIds);
 
 

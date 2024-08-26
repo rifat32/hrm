@@ -719,7 +719,7 @@ class TaskCategoryController extends Controller
 
 
 
-            
+
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -1477,10 +1477,8 @@ class TaskCategoryController extends Controller
 
             $task_exists =  Task::whereIn("task_category_id", $existingIds)->exists();
             if ($task_exists) {
-
                 return response()->json([
-                    "message" => "Some user's are using some of these task categories.",
-                    // "conflicting_users" => $conflictingSocialSites
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

@@ -769,20 +769,16 @@ class TerminationTypeController extends Controller
             }
 
 
-            $conflictingUsers = User::
+            $conflictingUsersExists = User::
             whereHas("terminations",function($query) use($existingIds) {
                 $query->whereIn("terminations.termination_reason_id", $existingIds);
             })
 
-            ->get([
-                'users.id', 'users.first_Name',
-                'users.last_Name',
-            ]);
+            ->exists();
 
-            if ($conflictingUsers->isNotEmpty()) {
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified termination types",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

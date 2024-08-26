@@ -1316,15 +1316,10 @@ $recruitment_process_order = RecruitmentProcessOrder::updateOrCreate(
 
 
 
-            $conflictingUsers = User::whereIn("recruitment_process_id", $existingIds)->get([
-                'id', 'first_Name',
-                'last_Name',
-            ]);
-
-            if ($conflictingUsers->isNotEmpty()) {
+            $conflictingUsersExists = User::whereIn("recruitment_process_id", $existingIds)->exists();
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified recruitment processes",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
@@ -1332,8 +1327,7 @@ $recruitment_process_order = RecruitmentProcessOrder::updateOrCreate(
 
             if ($conflictingUserRecruitmentProcessesExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified recruitment processes",
-                    // "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
@@ -1341,8 +1335,7 @@ $recruitment_process_order = RecruitmentProcessOrder::updateOrCreate(
 
             if ($conflictingCandidateRecruitmentProcessesExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified recruitment processes",
-                    // "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

@@ -1426,10 +1426,10 @@ class ProjectController extends Controller
 
             $attendanceExists = AttendanceProject::whereIn("project_id", $idsArray)->exists();
 
-            if (!empty($nonExistingIds)) {
+            if ($attendanceExists) {
                 return response()->json([
-                    "message" => "Attendance exists for this project."
-                ], 404);
+                    "message" => config('messages.delete_restricted'),
+                ], 409);
             }
 
 

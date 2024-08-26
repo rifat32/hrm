@@ -891,28 +891,18 @@ class SettingLeaveTypeController extends Controller
             }
 
           $leave_exists =  Leave::whereIn("leave_type_id",$existingIds)->exists();
-            if($leave_exists) {
-                // $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
-
-
-                return response()->json([
-                    "message" => "Some leaves are associated with the specified setting_leave_types",
-                    // "conflicting_leaves" => $conflictingLeaves
-                ], 409);
-
-            }
+          if ($leave_exists) {
+            return response()->json([
+                "message" => config('messages.delete_restricted'),
+            ], 409);
+        }
 
 
             $leave_history_exists =  LeaveHistory::whereIn("leave_type_id",$existingIds)->exists();
-            if($leave_history_exists) {
-                // $conflictingLeaves = Leave::whereIn("leave_type_id", $existingIds)->get(['id']);
-
-
+            if ($leave_history_exists) {
                 return response()->json([
-                    "message" => "Some leave histories are associated with the specified setting_leave_types",
-                    // "conflicting_leaves" => $conflictingLeaves
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
-
             }
 
             // $leave_type_employment_statuses_exists =  LeaveTypeEmploymentStatus::whereIn("setting_leave_type_id",$existingIds)->exists();

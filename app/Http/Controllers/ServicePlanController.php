@@ -820,19 +820,15 @@ BusinessModule::insert($business_modules);
                 ], 404);
             }
 
-            $conflictingBusinesses = Business::
+            $conflictingBusinessesExists = Business::
 
            whereIn("service_plan_id",$existingIds)
 
+            ->exists();
 
-            ->get([
-                "id"
-            ]);
-
-            if ($conflictingBusinesses->isNotEmpty()) {
+            if ($conflictingBusinessesExists) {
                 return response()->json([
-                    "message" => "Some businesses are associated with the specified service plans",
-                    "conflicting_users" => $conflictingBusinesses
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

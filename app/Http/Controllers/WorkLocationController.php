@@ -778,14 +778,13 @@ class WorkLocationController extends Controller
             }
 
 
-            $conflictingUsers = User::whereHas("work_locations", function($query) use($existingIds) {
+            $conflictingUsersExists = User::whereHas("work_locations", function($query) use($existingIds) {
                 $query->whereIn("work_location_id", $existingIds);
-            })->get(['id', 'first_name', 'last_name']);
+            })->exists();
 
-            if ($conflictingUsers->isNotEmpty()) {
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "work locations are in use",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
@@ -795,8 +794,7 @@ class WorkLocationController extends Controller
 
             if ($conflictingDepartmentExists) {
                 return response()->json([
-                    "message" => "work locations are in use",
-                    // "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
@@ -804,17 +802,16 @@ class WorkLocationController extends Controller
 
             if ($conflictingAttendanceExists) {
                 return response()->json([
-                    "message" => "work locations are in use",
-                    // "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
+
 
             $conflictingAttendanceHistoryExists = AttendanceHistory::whereIn("work_location_id",$existingIds)->exists();
 
             if ($conflictingAttendanceHistoryExists) {
                 return response()->json([
-                    "message" => "work locations are in use",
-                    // "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
@@ -822,8 +819,7 @@ class WorkLocationController extends Controller
 
             if ($conflictingJobListingExists) {
                 return response()->json([
-                    "message" => "work locations are in use",
-                    // "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
@@ -831,8 +827,7 @@ class WorkLocationController extends Controller
 
             if ($conflictingWorkShiftExists) {
                 return response()->json([
-                    "message" => "work locations are in use",
-                    // "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

@@ -31,7 +31,7 @@ trait BasicEmailUtil
                 Config::set('mail.from.address', $emailSettings->mail_from_address);
                 Config::set('mail.from.name', $emailSettings->mail_from_name);
 
-                Log::info('Mail setting touched');
+                // Log::info('Mail setting touched');
             }
         }
 

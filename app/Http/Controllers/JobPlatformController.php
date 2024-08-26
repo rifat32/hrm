@@ -1019,6 +1019,7 @@ class JobPlatformController extends Controller
                 ->get()
                 ->pluck('id')
                 ->toArray();
+
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
@@ -1030,19 +1031,15 @@ class JobPlatformController extends Controller
 
             $job_post_exists =  JobListingJobPlatforms::whereIn("job_platform_id", $existingIds)->exists();
             if ($job_post_exists) {
-
                 return response()->json([
-                    "message" => "Some user's are using some of these job platforms.",
-                    // "conflicting_users" => $conflictingSocialSites
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
             $job_candidate_exists =  CandidateJobPlatform::whereIn("job_platform_id", $existingIds)->exists();
             if ($job_candidate_exists) {
-
                 return response()->json([
-                    "message" => "Some user's are using some of these job platforms.",
-                    // "conflicting_users" => $conflictingSocialSites
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

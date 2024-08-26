@@ -529,8 +529,8 @@ $rolesWithUsers = User::whereHas('roles', function ($query) use ($existingIds) {
 
 if ($rolesWithUsers) {
     return response()->json([
-        "message" => "One or more roles cannot be deleted because they are assigned to users."
-    ], 400);
+        "message" => config('messages.delete_restricted'),
+    ], 409);
 }
 
 

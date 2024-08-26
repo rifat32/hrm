@@ -1075,14 +1075,15 @@ class DepartmentController extends Controller
 
 
 
-            $conflictingUsers = User::whereHas("departments", function($query) use($existingIds) {
+            $conflictingUsersExists = User::whereHas("departments", function($query) use($existingIds) {
                 $query->whereIn("department_id", $existingIds);
-            })->get(['id', 'first_name', 'last_name']);
+            })->exists();
 
-            if ($conflictingUsers->isNotEmpty()) {
+
+
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified departments",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

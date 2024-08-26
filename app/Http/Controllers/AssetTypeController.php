@@ -550,7 +550,7 @@ class AssetTypeController extends Controller
                 $query->forBusiness('asset_types', "disabled_asset_types", $created_by);
             })
 
-            
+
 
                 ->when(!empty($request->id), function ($query) use ($request) {
                     return $query->where('asset_types.id', $request->id);
@@ -703,16 +703,11 @@ class AssetTypeController extends Controller
             }
 
 
-    $conflictingUsers = User::whereIn("designation_id", $existingIds)->get([
-                'id',
-                'first_Name',
-                'last_Name',
-            ]);
+    $conflictingUsersExists = User::whereIn("designation_id", $existingIds)->exists();
 
-            if ($conflictingUsers->isNotEmpty()) {
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified designations",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

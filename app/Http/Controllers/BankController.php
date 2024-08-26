@@ -770,33 +770,27 @@ class BankController extends Controller
             $nonExistingIds = array_diff($idsArray, $existingIds);
 
             if (!empty($nonExistingIds)) {
-
                 return response()->json([
                     "message" => "Some or all of the specified data do not exist."
                 ], 404);
             }
 
-            $conflictingUsers = User::whereIn("bank_id", $existingIds)->get([
-                'id', 'first_Name',
-                'last_Name',
-            ]);
+            $conflictingUsersExists = User::whereIn("bank_id", $existingIds)->exists();
 
-            if ($conflictingUsers->isNotEmpty()) {
+
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified banks",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 
 
-            $conflictingPayslip = Payslip::whereIn("bank_id", $existingIds)->get([
-                'id'
-            ]);
+            $conflictingPayslip = Payslip::whereIn("bank_id", $existingIds)->exists();
 
-            if ($conflictingPayslip->isNotEmpty()) {
+
+            if ($conflictingPayslip) {
                 return response()->json([
-                    "message" => "Some payslips are associated with the specified banks",
-                    "conflicting_users" => $conflictingPayslip
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
 

@@ -781,19 +781,13 @@ class DesignationController extends Controller
             }
 
 
-            $conflictingUsers = User::whereIn("designation_id", $existingIds)->get([
-                'id',
-                'first_Name',
-                'last_Name',
-            ]);
+            $conflictingUsersExists = User::whereIn("designation_id", $existingIds)->exists();
 
-            if ($conflictingUsers->isNotEmpty()) {
+            if ($conflictingUsersExists) {
                 return response()->json([
-                    "message" => "Some users are associated with the specified designations",
-                    "conflicting_users" => $conflictingUsers
+                    "message" => config('messages.delete_restricted'),
                 ], 409);
             }
-
 
 
             Designation::destroy($existingIds);
