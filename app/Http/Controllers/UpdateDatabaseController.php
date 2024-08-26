@@ -263,6 +263,14 @@ class UpdateDatabaseController extends Controller
 
                 $this->defaultDataSetupForBusiness($businesses);
             }
+            if ($i == 13) {
+                if (Schema::hasColumn('notifications', 'entity_name')) {
+                    // Modify the column type to VARCHAR in MySQL
+                    DB::statement('ALTER TABLE notifications MODIFY entity_name VARCHAR(255) NULL');
+                }
+            }
+
+
         }
 
 

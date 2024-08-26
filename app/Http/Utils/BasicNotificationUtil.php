@@ -26,7 +26,12 @@ trait BasicNotificationUtil
                 $entity_ids = $data->pluck('id')->toArray();
 
                 $entity = $data->first();
-                $notification_link = ($entity_name) . "/" . implode('_', $entity_ids);
+
+                if($entity_name == "attendance") {
+                    $notification_link = ($entity_name) . "/" . implode('_', $entity_ids);
+                } else {
+                    $notification_link = ($entity_name) . "/" . implode('_', $entity_ids);
+                }
             } else {
                 // Handle the case where the collection is empty
                 return; // or do something else, depending on your requirements
@@ -35,6 +40,9 @@ trait BasicNotificationUtil
             // If it's not a collection, it's assumed to be a single entity
             $entity_ids = [];
             $entity = $data;
+            if($entity_name == "attendance") {
+                $notification_link = ($entity_name) . "/" . ($entity->id);
+            }
             $notification_link = ($entity_name) . "/" . ($entity->id);
         }
 
@@ -101,13 +109,14 @@ trait BasicNotificationUtil
                     'notification_title' => $title,
                     'notification_description' => $notification_description,
                     'notification_link' => $notification_link,
-                    "sender_id" => 1,
+                    "sender_id" => auth()->user()->id,
                     "receiver_id" => $manager_id,
                     "business_id" => auth()->user()->business_id,
                     "is_system_generated" => 1,
                     "status" => "unread",
                     "created_at" => now(),
                     "updated_at" => now(),
+                    "type" => $type
                 ];
 
                 // Log each notification data
@@ -148,7 +157,7 @@ trait BasicNotificationUtil
             // If it's not a collection, it's assumed to be a single entity
             $entity_ids = [];
             $entity = $data;
-            $notification_link = ($entity_name) . "/" . ($entity->id);
+            $notification_link = "/holiday/holiday-request/?enc_id=" . base64_encode($entity->id);
         }
 
 
@@ -221,13 +230,14 @@ trait BasicNotificationUtil
                     'notification_title' => $title,
                     'notification_description' => $notification_description,
                     'notification_link' => $notification_link,
-                    "sender_id" => 1,
+                    "sender_id" => auth()->user()->id,
                     "receiver_id" => $receiver_id,
                     "business_id" => auth()->user()->business_id,
                     "is_system_generated" => 1,
                     "status" => "unread",
                     "created_at" => now(),
                     "updated_at" => now(),
+                    "type" => $type,
                 ];
 
                 // Log each notification data

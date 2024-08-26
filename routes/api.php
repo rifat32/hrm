@@ -183,6 +183,8 @@ Route::middleware(['auth:api', "mail.setting",])->group(function () {
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     Route::get('/v1.0/notifications', [NotificationController::class, "getNotifications"]);
 
+    Route::get('/v1.0/notifications-holiday-page-number/{id}', [NotificationController::class, "getHolidayPageNumber"]);
+
     Route::get('/v1.0/notifications/{business_id}/{perPage}', [NotificationController::class, "getNotificationsByBusinessId"]);
 
     Route::put('/v1.0/notifications/change-status', [NotificationController::class, "updateNotificationStatus"]);

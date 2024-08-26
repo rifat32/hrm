@@ -21,7 +21,7 @@ class CreateNotificationsTable extends Migration
 
 
 
-            $table->unsignedBigInteger("entity_name");
+            $table->string("entity_name");
 
             $table->text("notification_title");
             $table->text("notification_description");
