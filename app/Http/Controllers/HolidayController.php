@@ -124,7 +124,7 @@ class HolidayController extends Controller
                  $holiday->users()->sync([auth()->user()->id]);
 
 
-                 $this->send_notification_for_department($holiday, auth()->user(), "Holiday Request Taken", "create", "holiday");
+                 $this->send_notification_for_department_self($holiday, "Holiday Request Taken", "create", "holiday");
 
 
 
@@ -230,7 +230,7 @@ class HolidayController extends Controller
                 foreach($holiday->departments as $department) {
 
 
-                    $this->send_notification_for_department($holiday, $department->manager, "Holiday Request Taken", "create", "holiday",[],1,$department->name );
+                    $this->send_notification_for_department($holiday, $department->manager, "Holiday Request Taken", "create", "holiday",[],1,$department );
                 }
 
                 foreach($holiday->users as $user) {
@@ -348,7 +348,7 @@ class HolidayController extends Controller
              }
 
              foreach($holiday->departments as $department) {
-                $this->send_notification_for_department($holiday, $department->manager, "Holiday Request Status Updated", $request_data["status"], "holiday", [], 1,$department->name);
+                $this->send_notification_for_department($holiday, $department->manager, "Holiday Request Status Updated", $request_data["status"], "holiday", [], 1,$department);
             }
 
             foreach($holiday->users as $user) {
@@ -483,11 +483,11 @@ class HolidayController extends Controller
                 $holiday->users()->sync($request_data['users']);
 
                 foreach($holiday->departments as $department) {
-                    $this->send_notification_for_department($holiday, $department->manager, "Holiday Status Updated", $request_data["status"], "holiday", [],1,$department->name);
+                    $this->send_notification_for_department($holiday, $department->manager, "Holiday Status Updated", "update", "holiday", [],1,$department);
                 }
 
                 foreach($holiday->users as $user) {
-                    $this->send_notification_for_department($holiday, $user, "Holiday Request Updated", $request_data["status"], "holiday");
+                    $this->send_notification_for_department($holiday, $user, "Holiday Request Updated", "update", "holiday");
                 }
 
                 return response($holiday, 201);
@@ -1011,7 +1011,7 @@ class HolidayController extends Controller
             $holidays = Holiday::whereIn("id", $existingIds)->get();
             foreach($holidays as $holiday) {
                 foreach($holiday->departments as $department) {
-                    $this->send_notification_for_department($holiday, $department->manager, "Holiday Request Deleted", "delete", "holiday", [],1,$department->name );
+                    $this->send_notification_for_department($holiday, $department->manager, "Holiday Request Deleted", "delete", "holiday", [],1,$department );
 
                 }
 

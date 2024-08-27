@@ -225,6 +225,7 @@ class AuthController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
             $loginData = $request->validate([
                 'email' => 'email|required',
                 'password' => 'required'
@@ -268,7 +269,7 @@ class AuthController extends Controller
                     }
                 }
 
-                return response(['message' => 'Invalid Credentials'], 401);
+                return response(['message' => 'Invalid Credentials'], 403);
             }
 
 
@@ -492,7 +493,7 @@ class AuthController extends Controller
                     }
                 }
 
-                return response(['message' => 'Invalid Credentials'], 401);
+                return response(['message' => 'Invalid Credentials'], 403);
             }
 
 
