@@ -893,21 +893,56 @@ class HolidayController extends Controller
                 "id" => $id,
                 "business_id" => auth()->user()->business_id
             ])
-            ->where(function ($query) use ($all_parent_department_ids, $all_manager_department_ids,$all_user_of_manager) {
-                $query->whereHas("departments", function ($query) use ($all_parent_department_ids,$all_manager_department_ids) {
-                    $query->whereIn("departments.id", array_merge($all_parent_department_ids,$all_manager_department_ids));
-                })
-                    ->orWhereHas("users", function ($query) use($all_user_of_manager) {
-                        $query->whereIn(
-                            "users.id",
-                            array_merge([auth()->user()->id],$all_user_of_manager)
-                        );
+            ->where(function ($query) use ($all_parent_department_ids, $all_manager_department_ids, $all_user_of_manager) {
+                     $query->where(function($query) use ($all_parent_department_ids) {
+                        $query->where(function ($query) use ($all_parent_department_ids) {
+                            $query->whereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                $query->whereIn("departments.id", $all_parent_department_ids);
+                            })
+                                ->orWhereHas("users", function ($query) {
+                                    $query->whereIn(
+                                        "users.id",
+                                        [auth()->user()->id]
+                                    );
+                                })
+                                ->orWhere(function ($query) {
+                                    $query->whereDoesntHave("users")
+                                        ->whereDoesntHave("departments");
+                                });
+                        });
                     })
-                    ->orWhere(function ($query) {
-                        $query->whereDoesntHave("users")
-                            ->whereDoesntHave("departments");
+                    ->orWhere(function ($query) use ( $all_manager_department_ids, $all_user_of_manager) {
+
+                            $query->where(function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
+                                $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                    $query->whereIn("departments.id", $all_manager_department_ids);
+                                })
+                                    ->orWhereHas("users", function ($query) use ($all_user_of_manager) {
+                                        $query->whereIn(
+                                            "users.id",
+                                            $all_user_of_manager
+                                        );
+                                    });
+
+                                    if (auth()->user()->hasRole('business_owner')) {
+                                        $query ->orWhere(function ($query) {
+                                            $query->whereDoesntHave("users")
+                                                ->whereDoesntHave("departments");
+                                        });
+                                    }
+
+
+
+                            });
+
+
                     });
-            })
+
+                },
+
+
+            )
+
                 ->first();
             if (!$holiday) {
 
