@@ -33,21 +33,21 @@ class JobListingController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 
-*     @OA\Property(property="title", type="string", format="string", example="Software Engineer"),
- *     @OA\Property(property="description", type="string", format="string", example="Exciting opportunity for a skilled developer..."),
- *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
- *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
- *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
- *     @OA\Property(property="job_platforms", type="string", format="{}", example={1,2}),
- *     @OA\Property(property="department_id", type="number", format="number", example="1"),
- * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
- *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
- *     @OA\Property(property="experience_level", type="string", format="string", example="Mid-level"),
- *     @OA\Property(property="job_type_id", type="number", format="number", example="123"),
- *     @OA\Property(property="work_location_id", type="integer", format="int", example="1")
+     *     @OA\Property(property="title", type="string", format="string", example="Software Engineer"),
+     *     @OA\Property(property="description", type="string", format="string", example="Exciting opportunity for a skilled developer..."),
+     *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
+     *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
+     *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
+     *     @OA\Property(property="job_platforms", type="string", format="{}", example={1,2}),
+     *     @OA\Property(property="department_id", type="number", format="number", example="1"),
+     * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
+     *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
+     *     @OA\Property(property="experience_level", type="string", format="string", example="Mid-level"),
+     *     @OA\Property(property="job_type_id", type="number", format="number", example="123"),
+     *     @OA\Property(property="work_location_id", type="integer", format="int", example="1")
 
- *
- *
+     *
+     *
      *
      *         ),
      *      ),
@@ -88,7 +88,7 @@ class JobListingController extends Controller
     public function createJobListing(JobListingCreateRequest $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('job_listing_create')) {
                     return response()->json([
@@ -132,19 +132,19 @@ class JobListingController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *    @OA\Property(property="id", type="number", format="number",example="1"),
- *     @OA\Property(property="title", type="string", format="string", example="Software Engineer"),
- *     @OA\Property(property="description", type="string", format="string", example="Exciting opportunity for a skilled developer..."),
- *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
- *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
- *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
- *     @OA\Property(property="job_platforms", type="string", format="array", example={1,2,3}),
- *     @OA\Property(property="department_id", type="number", format="number", example="1"),
- *  * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
- *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
- *     @OA\Property(property="experience_level", type="string", format="string", example="Mid-level"),
- *     @OA\Property(property="job_type_id", type="number", format="number", example="123"),
- *     @OA\Property(property="work_location_id", type="integer", format="int", example="456")
- *
+     *     @OA\Property(property="title", type="string", format="string", example="Software Engineer"),
+     *     @OA\Property(property="description", type="string", format="string", example="Exciting opportunity for a skilled developer..."),
+     *     @OA\Property(property="required_skills", type="string", format="string", example="Java, Python, SQL"),
+     *     @OA\Property(property="application_deadline", type="string", format="date", example="2023-12-01"),
+     *     @OA\Property(property="posted_on", type="string", format="date", example="2023-11-20"),
+     *     @OA\Property(property="job_platforms", type="string", format="array", example={1,2,3}),
+     *     @OA\Property(property="department_id", type="number", format="number", example="1"),
+     *  * *     @OA\Property(property="minimum_salary", type="number", format="number", example="80000"),
+     *     @OA\Property(property="maximum_salary", type="number", format="number", example="100000"),
+     *     @OA\Property(property="experience_level", type="string", format="string", example="Mid-level"),
+     *     @OA\Property(property="job_type_id", type="number", format="number", example="123"),
+     *     @OA\Property(property="work_location_id", type="integer", format="int", example="456")
+     *
 
      *
      *         ),
@@ -187,7 +187,7 @@ class JobListingController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('job_listing_update')) {
                     return response()->json([
@@ -215,17 +215,17 @@ class JobListingController extends Controller
 
                 $job_listing  =  tap(JobListing::where($job_listing_query_params))->update(
                     collect($request_data)->only([
-        'title',
-        'description',
-        'required_skills',
-        'application_deadline',
-        'posted_on',
-        'department_id',
-        'minimum_salary',
-        'maximum_salary',
-        'experience_level',
-        'job_type_id',
-        'work_location_id',
+                        'title',
+                        'description',
+                        'required_skills',
+                        'application_deadline',
+                        'posted_on',
+                        'department_id',
+                        'minimum_salary',
+                        'maximum_salary',
+                        'experience_level',
+                        'job_type_id',
+                        'work_location_id',
                         // "is_active",
                         // "business_id",
                         // "created_by"
@@ -423,27 +423,25 @@ class JobListingController extends Controller
     public function getJobListings(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('job_listing_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  auth()->user()->business_id;
-            $job_listings = JobListing::with("job_platforms","job_type","work_location","department")
-            ->where(
-                [
-                    "business_id" => $business_id
-                ]
-            )
+            $job_listings = JobListing::with("job_platforms", "job_type", "work_location", "department")
+                ->where(
+                    [
+                        "business_id" => $business_id
+                    ]
+                )
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
                         $query->where("title", "like", "%" . $term . "%")
                             ->orWhere("description", "like", "%" . $term . "%");
-
-
                     });
                 })
 
@@ -478,19 +476,47 @@ class JobListingController extends Controller
 
                 ->when(!empty($request->salary), function ($query) use ($request) {
                     return $query->where('minimum_salary', "<=", $request->salary)
-                    ->where('maximum_salary', ">=", $request->salary);
+                        ->where('maximum_salary', ">=", $request->salary);
                 })
 
-                ->when(!empty($request->post_on), function ($query) use ($request) {
-                    return $query->where('posted_on', $request->post_on);
+                ->when(request()->filled("post_on"), function ($query)  {
+
+                    // Split the date range string into start and end dates
+                    $dates = explode(',', request()->input("post_on"));
+                    $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                    $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                    // Apply conditions based on which dates are available
+                    if ($startDate) {
+                        $query->where('posted_on', '>=', $startDate);
+                    }
+
+                    if ($endDate) {
+                        $query->where('posted_on', '<=', $endDate);
+                    }
+                    return $query;
                 })
-                ->when(!empty($request->deadline), function ($query) use ($request) {
-                    return $query->where('application_deadline', $request->deadline);
+                ->when(request()->filled("application_deadline"), function ($query) {
+                    // Split the date range string into start and end dates
+                    $dates = explode(',', request()->input("application_deadline"));
+                    $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                    $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                    // Apply conditions based on which dates are available
+                    if ($startDate) {
+                        $query->where('application_deadline', '>=', $startDate);
+                    }
+
+                    if ($endDate) {
+                        $query->where('application_deadline', '<=', $endDate);
+                    }
+                    return $query;
                 })
+
 
                 ->when(!empty($request->job_platform_id), function ($query) use ($request) {
                     $job_platform_ids = explode(',', $request->job_platform_id);
-                    $query->whereHas("job_platforms",function($query) use($job_platform_ids){
+                    $query->whereHas("job_platforms", function ($query) use ($job_platform_ids) {
                         $query->whereIn("job_platforms.id", $job_platform_ids);
                     });
                 })
@@ -500,9 +526,8 @@ class JobListingController extends Controller
                     $number_query = explode(',', str_replace(' ', ',', $request->number_of_candidates));
 
                     $query->whereHas("candidates", function ($query) use ($request, $number_query) {
-                        $query->havingRaw('COUNT(*) ' . $number_query[0] .' ?', [$number_query[1]]);
+                        $query->havingRaw('COUNT(*) ' . $number_query[0] . ' ?', [$number_query[1]]);
                     });
-
                 })
 
 
@@ -519,21 +544,21 @@ class JobListingController extends Controller
                     return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
                 })
                 ->when(isset($request->is_open_roles), function ($query) use ($request) {
-                    if( intval($request->is_open_roles) == 1) {
-                        $query->where("application_deadline",">=", today());
+                    if (intval($request->is_open_roles) == 1) {
+                        $query->where("application_deadline", ">=", today());
                     } else {
-                        $query->where("application_deadline","<", today());
+                        $query->where("application_deadline", "<", today());
                     }
-
                 })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("job_listings.id", $request->order_by);
                 }, function ($query) {
                     return $query->orderBy("job_listings.id", "DESC");
                 })
-                ->select('job_listings.*',
+                ->select(
+                    'job_listings.*',
 
-                 )
+                )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -549,7 +574,7 @@ class JobListingController extends Controller
         }
     }
 
-        /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/client/job-listings",
@@ -643,66 +668,66 @@ class JobListingController extends Controller
      *     )
      */
 
-     public function getJobListingsClient(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function getJobListingsClient(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-             $business_id =  $request->business_id;
-             if(!$business_id) {
-                $error = [ "message" => "The given data was invalid.",
-                "errors" => ["business_id"=>["The business id field is required."]]
+            $business_id =  $request->business_id;
+            if (!$business_id) {
+                $error = [
+                    "message" => "The given data was invalid.",
+                    "errors" => ["business_id" => ["The business id field is required."]]
                 ];
-                    throw new Exception(json_encode($error),422);
-             }
+                throw new Exception(json_encode($error), 422);
+            }
 
-             $job_listings = JobListing::with("job_platforms","job_type","work_location","department")
-             ->where(
-                 [
-                     "business_id" => $business_id
-                 ]
-             )
-                 ->when(!empty($request->search_key), function ($query) use ($request) {
-                     return $query->where(function ($query) use ($request) {
-                         $term = $request->search_key;
-                         $query->where("title", "like", "%" . $term . "%")
-                             ->orWhere("description", "like", "%" . $term . "%");
+            $job_listings = JobListing::with("job_platforms", "job_type", "work_location", "department")
+                ->where(
+                    [
+                        "business_id" => $business_id
+                    ]
+                )
+                ->when(!empty($request->search_key), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->search_key;
+                        $query->where("title", "like", "%" . $term . "%")
+                            ->orWhere("description", "like", "%" . $term . "%");
+                    });
+                })
+                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                //        return $query->where('product_category_id', $request->product_category_id);
+                //    })
+                ->when(!empty($request->start_date), function ($query) use ($request) {
+                    return $query->where('created_at', ">=", $request->start_date);
+                })
+                ->when(!empty($request->end_date), function ($query) use ($request) {
+                    return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
+                })
+                ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                    return $query->orderBy("job_listings.id", $request->order_by);
+                }, function ($query) {
+                    return $query->orderBy("job_listings.id", "DESC");
+                })
+                ->select(
+                    'job_listings.*',
 
-
-                     });
-                 })
-                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                 //        return $query->where('product_category_id', $request->product_category_id);
-                 //    })
-                 ->when(!empty($request->start_date), function ($query) use ($request) {
-                     return $query->where('created_at', ">=", $request->start_date);
-                 })
-                 ->when(!empty($request->end_date), function ($query) use ($request) {
-                     return $query->where('created_at', "<=", ($request->end_date . ' 23:59:59'));
-                 })
-                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
-                     return $query->orderBy("job_listings.id", $request->order_by);
-                 }, function ($query) {
-                     return $query->orderBy("job_listings.id", "DESC");
-                 })
-                 ->select('job_listings.*',
-
-                  )
-                 ->when(!empty($request->per_page), function ($query) use ($request) {
-                     return $query->paginate($request->per_page);
-                 }, function ($query) {
-                     return $query->get();
-                 });
-
+                )
+                ->when(!empty($request->per_page), function ($query) use ($request) {
+                    return $query->paginate($request->per_page);
+                }, function ($query) {
+                    return $query->get();
+                });
 
 
-             return response()->json($job_listings, 200);
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response()->json($job_listings, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -762,20 +787,21 @@ class JobListingController extends Controller
     public function getJobListingById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('job_listing_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
             $business_id =  auth()->user()->business_id;
-            $job_listing =  JobListing::with("job_platforms","job_type","work_location","department")
-            ->where([
-                "id" => $id,
-                "business_id" => $business_id
-            ])
-            ->select('job_listings.*'
-             )
+            $job_listing =  JobListing::with("job_platforms", "job_type", "work_location", "department")
+                ->where([
+                    "id" => $id,
+                    "business_id" => $business_id
+                ])
+                ->select(
+                    'job_listings.*'
+                )
                 ->first();
             if (!$job_listing) {
 
@@ -792,7 +818,7 @@ class JobListingController extends Controller
     }
 
 
- /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/client/job-listings/{id}",
@@ -847,31 +873,31 @@ class JobListingController extends Controller
      */
 
 
-     public function getJobListingByIdClient($id, Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+    public function getJobListingByIdClient($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-             $job_listing =  JobListing::with("job_platforms","job_type","work_location","department")
-             ->where([
-                 "id" => $id,
-             ])
-             ->select('job_listings.*')
-             ->first();
-             if (!$job_listing) {
+            $job_listing =  JobListing::with("job_platforms", "job_type", "work_location", "department")
+                ->where([
+                    "id" => $id,
+                ])
+                ->select('job_listings.*')
+                ->first();
+            if (!$job_listing) {
 
-                 return response()->json([
-                     "message" => "no job listing found"
-                 ], 404);
-             }
+                return response()->json([
+                    "message" => "no job listing found"
+                ], 404);
+            }
 
-             return response()->json($job_listing, 200);
-         } catch (Exception $e) {
+            return response()->json($job_listing, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -931,7 +957,7 @@ class JobListingController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('job_listing_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -966,7 +992,7 @@ class JobListingController extends Controller
             JobListing::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

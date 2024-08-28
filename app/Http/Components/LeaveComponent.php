@@ -429,10 +429,10 @@ class LeaveComponent
         $query = $query
             ->when(!empty(request()->ids), function ($query) {
                 $idsArray = explode(',', request()->ids);
-                return $query->whereIn('leaves.id', $idsArray);
+                 $query->whereIn('leaves.id', $idsArray);
             })
             ->when(!empty(request()->search_key), function ($query) {
-                return $query->where(function ($query) {
+                 $query->where(function ($query) {
                     $term = request()->search_key;
                     // $query->where("leaves.name", "like", "%" . $term . "%")
                     //     ->orWhere("leaves.description", "like", "%" . $term . "%");
@@ -442,24 +442,28 @@ class LeaveComponent
             //        return $query->where('product_category_id', request()->product_category_id);
             //    })
             ->when(!empty(request()->user_id), function ($query) {
-                return $query->where('leaves.user_id', request()->user_id);
+                 $query->where('leaves.user_id', request()->user_id);
             })
 
 
             ->when(
-                request()->has('show_all_data'),
+                request()->boolean('show_all_data'),
                 function ($query) use ($all_manager_department_ids) {
-                    $query->where('leaves.user_id', auth()->user()->id)
+                    $query->where(function($query) use($all_manager_department_ids) {
+
+                        $query ->where('leaves.user_id', auth()->user()->id)
                         ->orWhere(function ($query) use ($all_manager_department_ids) {
                             $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                                 $query->whereIn("departments.id", $all_manager_department_ids);
                             })
                                 ->whereNotIn('leaves.user_id', [auth()->user()->id]);
                         });
+                    });
+
                 },
                 function ($query) use ($all_manager_department_ids) {
                     $query->when(
-                        (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
+                        (request()->boolean('show_my_data')),
                         function ($query) {
                             $query->where('leaves.user_id', auth()->user()->id);
                         },
@@ -483,13 +487,13 @@ class LeaveComponent
             //     });
             // })
             ->when(!empty(request()->leave_type_id), function ($query) {
-                return $query->where('leaves.leave_type_id', request()->leave_type_id);
+                 $query->where('leaves.leave_type_id', request()->leave_type_id);
             })
             ->when(!empty(request()->status), function ($query) {
-                return $query->where('leaves.status', request()->status);
+                 $query->where('leaves.status', request()->status);
             })
             ->when(!empty(request()->department_id), function ($query) {
-                return $query->whereHas("employee.department_user.department", function ($query) {
+                 $query->whereHas("employee.department_user.department", function ($query) {
                     $query->where("departments.id", request()->department_id);
                 });
             })
