@@ -246,7 +246,7 @@ trait BasicNotificationUtil
     public function send_notification_for_department_self($data, $title, $type, $entity_name, $all_parent_department_ids = [])
     {
 
-$user = auth()->user()->id;
+$user = auth()->user();
 
         if ($data instanceof \Illuminate\Support\Collection) {
             // If it's a collection, check if it's empty

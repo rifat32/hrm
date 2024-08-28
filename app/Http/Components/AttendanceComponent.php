@@ -50,6 +50,13 @@ use BasicUtil;
                 "attendances.business_id" => auth()->user()->business_id
             ]
         )
+
+        ->when(!empty(request()->ids), function ($query) {
+            $idsArray = explode(',', request()->ids);
+            return $query->whereIn('attendances.id', $idsArray);
+        })
+
+
         ->when(!empty(request()->search_key), function ($query)  {
             return $query->where(function ($query)  {
                 $term = request()->search_key;
@@ -112,21 +119,36 @@ use BasicUtil;
 
 
 
+         ->when(request()->boolean('show_all_data'), function($query) use($all_manager_department_ids) {
+            return $query->where(function($query) use($all_manager_department_ids) {
+                $query->where('attendances.user_id', auth()->user()->id)
+                ->orWhere(function($query) use($all_manager_department_ids) {
+                    $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    })
+                    ->whereNotIn('attendances.user_id', [auth()->user()->id]);
+                });
+            });
+         },
+         function($query) use($all_manager_department_ids) {
+            return $query->when(
+                (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
+                function ($query)  {
+                    $query->where('attendances.user_id', auth()->user()->id);
+                },
+                function ($query) use ($all_manager_department_ids) {
 
-        ->when(
-            (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
-            function ($query)  {
-                $query->where('attendances.user_id', auth()->user()->id);
-            },
-            function ($query) use ($all_manager_department_ids,) {
+                    $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    })
+                    ->whereNotIn('attendances.user_id', [auth()->user()->id]);
 
-                $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                })
-                ->whereNotIn('attendances.user_id', [auth()->user()->id]);
+                }
+            );
+         } )
 
-            }
-        )
+
+
 
 
 
