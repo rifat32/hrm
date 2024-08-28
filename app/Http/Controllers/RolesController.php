@@ -83,9 +83,13 @@ class RolesController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $insertableData = $request->validated();
+
+
+
+
+            $request_data = $request->validated();
             $insertableRole = [
-                "name" => $insertableData["name"],
+                "name" => $request_data["name"],
                 "guard_name" => "api",
             ];
 
@@ -97,8 +101,31 @@ class RolesController extends Controller
                 $insertableRole["is_default"] = 0;
                 $insertableRole["is_default_for_business"] = 0;
             }
+
+            if(!empty($insertableRole["business_id"])) {
+              $custom_roles_count =   Role::where([
+                    "business_id" => $insertableRole["business_id"],
+                    "is_default_for_business"=> 0
+                 ])
+
+                 ->count();
+
+                 if($custom_roles_count >= 5) {
+                    return response()->json([
+                        "message" => "You can not create more than 5"
+                    ], 403);
+                 }
+
+                 throw new Exception($custom_roles_count,409);
+
+            }
+
+
+
+
+
             $role = Role::create($insertableRole);
-            $role->syncPermissions($insertableData["permissions"]);
+            $role->syncPermissions($request_data["permissions"]);
 
 
 

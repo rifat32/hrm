@@ -38,8 +38,8 @@ trait BasicNotificationUtil
             }
         } else {
             // If it's not a collection, it's assumed to be a single entity
-            $entity_ids = [];
             $entity = $data;
+            $entity_ids = [$entity->id];
             if($entity_name == "attendance") {
                 $notification_link = ($entity_name) . "/" . ($entity->id);
             }
@@ -154,8 +154,8 @@ trait BasicNotificationUtil
             }
         } else {
             // If it's not a collection, it's assumed to be a single entity
-            $entity_ids = [];
             $entity = $data;
+            $entity_ids = [$entity->id];
             $notification_link = "/holiday/holiday-request/?enc_id=" . base64_encode($entity->id);
         }
 
@@ -262,8 +262,8 @@ $user = auth()->user();
             }
         } else {
             // If it's not a collection, it's assumed to be a single entity
-            $entity_ids = [];
             $entity = $data;
+            $entity_ids = [$entity->id];
             $notification_link = "/holiday/holiday-request/?enc_id=" . base64_encode($entity->id);
         }
 

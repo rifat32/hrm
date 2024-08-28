@@ -415,7 +415,10 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
 {
 
     $query = $query
-
+    ->when(!empty(request()->ids), function ($query) {
+        $idsArray = explode(',', request()->ids);
+        return $query->whereIn('leaves.id', $idsArray);
+    })
     ->when(!empty(request()->search_key), function ($query)  {
         return $query->where(function ($query)  {
             $term = request()->search_key;
@@ -431,22 +434,38 @@ public function updateLeavesQuery( $all_manager_department_ids,$query)
     })
 
 
-    ->when(
-        (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
-        function ($query)  {
-            $query->where('leaves.user_id', auth()->user()->id);
-        },
-        function ($query) use ($all_manager_department_ids,) {
-
+    ->when(request()->has('show_all_data'), function ($query) use ($all_manager_department_ids) {
+        $query->where('leaves.user_id', auth()->user()->id)
+        ->orWhere(function($query) use($all_manager_department_ids){
             $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
 
             })
             ->whereNotIn('leaves.user_id', [auth()->user()->id]);
-            ;
+        });
 
-        }
-    )
+    },
+    function ($query) use ($all_manager_department_ids) {
+        $query->when(
+            (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
+            function ($query)  {
+                $query->where('leaves.user_id', auth()->user()->id);
+            },
+            function ($query) use ($all_manager_department_ids,) {
+
+                $query->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+
+                })
+                ->whereNotIn('leaves.user_id', [auth()->user()->id]);
+                ;
+
+            }
+        );
+
+    })
+
+
 
 
     // ->when(empty(request()->user_id), function ($query)  {
