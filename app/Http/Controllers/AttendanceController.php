@@ -150,6 +150,8 @@ class AttendanceController extends Controller
 
             $request_data = $request->validated();
 
+
+
             // Ensure the authenticated user exists and has a business_id
             $user = auth()->user();
             if (!$user || !$user->business_id) {
@@ -171,6 +173,10 @@ class AttendanceController extends Controller
                 throw new Exception("Attendance record not found.");
             }
 
+            if(!count($request_data["attendance_records"])) {
+                throw new Exception("Attendance records is empty", 401);
+             }
+
             // Convert the attendance record to an array
             $attendance_data = $attendance->toArray();
 
@@ -178,6 +184,7 @@ class AttendanceController extends Controller
             // Merge request data into the attendance data, overriding existing keys with request data
 
             $request_data_update = array_replace($attendance_data, $request_data);
+
 
             $work_location = WorkLocation::find($request_data_update["work_location_id"]);
 
@@ -189,18 +196,49 @@ class AttendanceController extends Controller
 
 
 
-$request_data_update["attendance_records"] = collect($request_data_update["attendance_records"])
+
+  $request_data_update["attendance_records"] = collect($request_data_update["attendance_records"])
     ->map(function ($item) use($work_location) {
 
-        $item["in_ip_address"] = request()->ip();
+        // $item["in_ip_address"] = request()->ip();
         $item["out_ip_address"] = request()->ip();
+
+        if(empty($item["out_latitude"]) ){
+            $item["out_latitude"] = "";
+        }
+        if(empty($item["out_longitude"])){
+            $item["out_longitude"] = "";
+        }
+        if(empty($item["out_time"]) ){
+            $item["out_time"] = $item["in_time"];
+        }
+
         $this->validateWorkLocation($work_location,$item["out_latitude"],$item["out_longitude"]);
         return $item;
     })
     ->toArray();
 
-  // Merge existing attendance records with the updated ones
-$request_data_update["attendance_records"] = array_merge($attendance->attendance_records, $request_data_update["attendance_records"]);
+    $previous_attendance_records = $attendance->attendance_records;
+
+
+
+    if ($request_data_update["attendance_records"][0]["out_time"] == $request_data_update["attendance_records"][0]["in_time"]) {
+        // Merge existing attendance records with the updated ones
+        $request_data_update["attendance_records"] = array_merge(
+            $previous_attendance_records,
+            $request_data_update["attendance_records"]
+        );
+    } else {
+        // Update the last existing record with the first of the updated records
+        $lastIndex = array_key_last($previous_attendance_records);
+        if ($lastIndex !== null) {
+            $previous_attendance_records[$lastIndex] = $request_data_update["attendance_records"][count($request_data_update["attendance_records"]) -1 ];
+        }
+        // Set the modified attendance records back into the update data
+        $request_data_update["attendance_records"] = $previous_attendance_records;
+    }
+
+
 
 
 

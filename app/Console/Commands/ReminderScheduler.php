@@ -98,6 +98,7 @@ class ReminderScheduler extends Command
         foreach ($all_parent_departments_manager_ids as $manager_id) {
             Notification::create([
                 "entity_id" => $data->id,
+                "entity_ids" => [$data->id],
                 "entity_name" => $reminder->entity_name,
                 'notification_title' => $reminder->title,
                 'notification_description' => $notification_description,

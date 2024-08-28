@@ -143,13 +143,35 @@ class UserManagementComponent
             })
 
 
-            ->when(!empty(request()->salary_per_annum), function ($query) {
-                return   $query->where(
-                    "salary_per_annum",
-                    request()->salary_per_annum
-                );
-            })
 
+
+            ->when(request()->filled('salary_per_annum'), function ($query) {
+                // Split the input into an array of numbers, replacing spaces with commas
+                $numbers = explode(',', request()->input('salary_per_annum'));
+
+                // Define start and end values
+                $startValue = isset($numbers[0]) && trim($numbers[0]) !== '' ? trim($numbers[0]) : null;
+                $endValue = isset($numbers[1]) && trim($numbers[1]) !== '' ? trim($numbers[1]) : null;
+
+                // Apply conditions based on which values are available
+                if ($startValue) {
+                    $query->where(
+                        "salary_per_annum",
+                        ">=",
+                        $startValue
+                    );
+                }
+
+                if ($endValue) {
+                    $query->where(
+                        "salary_per_annum",
+                        "<=",
+                        $endValue
+                    );
+                }
+
+                return $query;
+            })
 
 
 
@@ -172,11 +194,33 @@ class UserManagementComponent
                     request()->end_weekly_contractual_hours
                 );
             })
-            ->when(!empty(request()->weekly_contractual_hours), function ($query) {
-                return   $query->where(
-                    "weekly_contractual_hours",
-                    request()->weekly_contractual_hours
-                );
+
+            ->when(request()->filled('weekly_contractual_hours'), function ($query) {
+                // Split the input into an array of numbers, replacing spaces with commas
+                $numbers = explode(',', request()->input('weekly_contractual_hours'));
+
+                // Define start and end values
+                $startValue = isset($numbers[0]) && trim($numbers[0]) !== '' ? trim($numbers[0]) : null;
+                $endValue = isset($numbers[1]) && trim($numbers[1]) !== '' ? trim($numbers[1]) : null;
+
+                // Apply conditions based on which values are available
+                if ($startValue) {
+                    $query->where(
+                        "weekly_contractual_hours",
+                        ">=",
+                        $startValue
+                    );
+                }
+
+                if ($endValue) {
+                    $query->where(
+                        "weekly_contractual_hours",
+                        "<=",
+                        $endValue
+                    );
+                }
+
+                return $query;
             })
 
 
@@ -341,7 +385,7 @@ class UserManagementComponent
             })
 
             ->when(!empty(request()->recruitment_process_ids), function ($query) {
-                return $query->whereHas("recruitment_processes", function ($query) {
+                return $query->whereHas("employee_recruitment_processes", function ($query) {
                     $idsArray = explode(',', request()->recruitment_process_ids);
                     $query->whereIn("recruitment_processes.id", $idsArray);
                 });
@@ -389,18 +433,23 @@ class UserManagementComponent
                 return $query->where('joining_date', "<=", (request()->end_joining_date .  ' 23:59:59'));
             })
 
-            ->when(!empty(request()->joining_date), function ($query) {
-                $data_pairs = explode(',', request()->joining_date);
 
-                $start_joining_date = !empty($data_pairs[0]) ? $data_pairs[0] : "";
-                $end_joining_date = !empty($data_pairs[1]) ? $data_pairs[1] : "";
+            ->when(request()->filled("joining_date"), function ($query)  {
 
-                return $query->when(!empty($start_joining_date), function ($query) use ($start_joining_date) {
-                    return $query->where('joining_date', ">=", $start_joining_date);
-                })
-                    ->when(!empty($end_joining_date), function ($query) use ($end_joining_date) {
-                        return $query->where('joining_date', "<=", ($end_joining_date .  ' 23:59:59'));
-                    });
+                // Split the date range string into start and end dates
+                $dates = explode(',', request()->input("joining_date"));
+                $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                // Apply conditions based on which dates are available
+                if ($startDate) {
+                    $query->where('joining_date', '>=', $startDate);
+                }
+
+                if ($endDate) {
+                    $query->where('joining_date', '<=', $endDate);
+                }
+                return $query;
             })
 
 

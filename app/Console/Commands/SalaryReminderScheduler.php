@@ -186,6 +186,7 @@ class SalaryReminderScheduler extends Command
         foreach ($all_parent_departments_manager_ids as $manager_id) {
             Notification::create([
                 "entity_id" => $user->id,
+                "entity_ids" => [$user->id],
                 "entity_name" => "pending_salary",
                 'notification_title' => "Salary Pending Notification",
                 'notification_description' => $notification_description,

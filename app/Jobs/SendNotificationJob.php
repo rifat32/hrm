@@ -122,5 +122,6 @@ class SendNotificationJob implements ShouldQueue
 
             Notification::create($notification);
         }
+        
     }
 }

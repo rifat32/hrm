@@ -382,6 +382,7 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project->id,
+                    "entity_ids" => [$project->id],
                     "entity_name" => "project",
                     'notification_title' => "Project Assignment Notification",
                     'notification_description' => $notification_description,
@@ -551,6 +552,8 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project->id,
+                    "entity_ids" => [$project->id],
+
                     "entity_name" => "project",
                     'notification_title' => "Project Deassignment Notification",
                     'notification_description' => $notification_description,
@@ -738,6 +741,7 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project_id,
+                    "entity_ids" => [$project_id],
                     "entity_name" => "project",
                     'notification_title' => "Project Deassignment Notification",
                     'notification_description' => $notification_description,
@@ -891,6 +895,7 @@ class ProjectController extends Controller
                 $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
                 return [
                     "entity_id" => $project_id,
+                    "entity_ids" => [$project_id],
                     "entity_name" => "project",
                     'notification_title' => "Project Deassignment Notification",
                     'notification_description' => $notification_description,

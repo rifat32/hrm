@@ -523,7 +523,7 @@ class JobListingController extends Controller
 
                 ->when(request()->filled('number_of_candidates'), function ($query) {
                     // Split the input into an array of numbers, replacing spaces with commas
-                    $numbers = explode(',', str_replace(' ', ',', request()->input('number_of_candidates')));
+                    $numbers = explode(',', request()->input('number_of_candidates'));
 
                     // Define start and end values
                     $startValue = isset($numbers[0]) && trim($numbers[0]) !== '' ? trim($numbers[0]) : null;

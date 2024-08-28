@@ -152,6 +152,7 @@ $notification_description = "A task is pending for your action.";
 $notification_link = "http://example.com/tasks/1"; // Example link
 Notification::create([
     "entity_id" => $task->id, // Assuming $task is your task object
+    "entity_ids" => [$task->id],
     "entity_name" => "task",
     'notification_title' => "Task Pending Notification",
     'notification_description' => $notification_description,
@@ -320,6 +321,7 @@ Notification::create([
 
                 Notification::create([
                     "entity_id" => $task->id,
+                    "entity_ids" => [$task->id],
                     "entity_name" => "task",
                     'notification_title' => "Task Update Notification",
                     'notification_description' => $notification_description,

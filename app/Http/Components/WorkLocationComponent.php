@@ -27,6 +27,7 @@ public function getWorkLocations () {
         $query->forBusiness('work_locations', "disabled_work_locations", $created_by);
     })
     ->when(request()->filled("user_id"), function ($query) use ( $created_by) {
+
         $query->whereHas("users" , function($query) {
            $query->whereIn("users.id",[request()->input("user_id")]) ;
         });

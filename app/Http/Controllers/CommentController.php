@@ -161,6 +161,7 @@ class CommentController extends Controller
                 $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
                 return [
                     "entity_id" => $comment->id,
+                    "entity_ids" => [$comment->id],
                     "entity_name" => "comment",
                     'notification_title' => "Comment Mention Notification",
                     'notification_description' => $notification_description,
@@ -359,6 +360,7 @@ class CommentController extends Controller
                 $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
                 return [
                     "entity_id" => $comment->id,
+                    "entity_ids" => [$comment->id],
                     "entity_name" => "comment",
                     'notification_title' => "New Mention in Updated Comment",
                     'notification_description' => $notification_description,
@@ -379,6 +381,7 @@ class CommentController extends Controller
                 $notification_link = "http://example.com/comments/{$comment->id}"; // Dynamic link based on comment ID
                 return [
                     "entity_id" => $comment->id,
+                    "entity_ids" => [$comment->id],
                     "entity_name" => "comment",
                     'notification_title' => "Re-mention in Updated Comment",
                     'notification_description' => $notification_description,

@@ -113,10 +113,25 @@ class UserNoteController extends Controller
                     ->whereIn('user_name', $mentioned_users)
                     ->get();
 
-
                 $request_data["created_by"] = $request->user()->id;
 
+
+
+
                 $user_note =  UserNote::create($request_data);
+
+                // Notification::create([
+                //     "entity_id" => $user_note->id,
+                //     "entity_name" => "note",
+                //     'notification_title' => "Note Creation Notification",
+                //     'notification_description' => "You have a note",
+                //     'notification_link' => "http://example.com/notes/{$user_note->id}",
+                //     "sender_id" => auth()->user()->id, // Assuming you have a variable for the mentioner's ID
+                //     "receiver_id" => $user_note->user_id,
+                //     "business_id" => auth()->user()->business_id,
+                //     "is_system_generated" => 1,
+                //     "status" => "unread",
+                // ]);
 
 // Store mentions in user_note_mentions table using createMany
 $mentions_data = $mentioned_users->map(function ($mentioned_user) {
@@ -147,7 +162,7 @@ $notification_data = $mentioned_users->map(function ($mentioned_user) use ($user
     ];
 })->toArray();
 
-Notification::insert($notification_data);
+// Notification::insert($notification_data);
 
 
 
@@ -288,6 +303,20 @@ if (isset($request_data['updated_at'])) {
 
     // Save the updated UserNote object
     $user_note->save();
+
+    // Notification::create([
+    //     "entity_id" => $user_note->id,
+    //     "entity_name" => "note",
+    //     'notification_title' => "Note Updated",
+    //     'notification_description' => "Your note has been updated. View it here.",
+    //     'notification_link' => "http://example.com/notes/{$user_note->id}",
+    //     "sender_id" => auth()->user()->id,
+    //     "receiver_id" => $user_note->user_id,
+    //     "business_id" => auth()->user()->business_id,
+    //     "is_system_generated" => 1,
+    //     "status" => "unread",
+    // ]);
+
 }
 
                 if (!$user_note) {
@@ -356,7 +385,7 @@ $user_note->mentions()->createMany($mentions_data);
   })->toArray();
 
   // Insert notifications into the database
-  Notification::insert(array_merge($new_notification_data, $old_notification_data));
+//   Notification::insert(array_merge($new_notification_data, $old_notification_data));
 
                 return response($user_note, 201);
             });
@@ -485,6 +514,19 @@ $user_note->mentions()->createMany($mentions_data);
                      ])->toArray()
                  );
 
+                //  Notification::create([
+                //     "entity_id" => $request_data["id"],
+                //     "entity_name" => "note",
+                //     'notification_title' => "Note Updated",
+                //     'notification_description' => "Your note has been updated. View it here.",
+                //     'notification_link' => "http://example.com/notes/{$request_data['id']}",
+                //     "sender_id" => auth()->user()->id,
+                //     "receiver_id" => $request_data["user_id"],
+                //     "business_id" => auth()->user()->business_id,
+                //     "is_system_generated" => 1,
+                //     "status" => "unread",
+                // ]);
+
                  // Enable timestamp updates
                  UserNote::enableTimestamps();
 
@@ -557,7 +599,8 @@ $user_note->mentions()->createMany($mentions_data);
   })->toArray();
 
   // Insert notifications into the database
-  Notification::insert(array_merge($new_notification_data, $old_notification_data));
+//   Notification::insert(array_merge($new_notification_data, $old_notification_data));
+
                  return response($user_note, 201);
              });
          } catch (Exception $e) {

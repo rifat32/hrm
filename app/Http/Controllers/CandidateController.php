@@ -720,13 +720,13 @@ class CandidateController extends Controller
                     return $query->whereIn('candidates.job_listing_id',$idsArray);
                 })
 
-
                 ->when(!empty($request->job_platform_id), function ($query) use ($request) {
                     $job_platform_ids = explode(',', $request->job_platform_id);
                     $query->whereHas("job_platforms",function($query) use($job_platform_ids){
                         $query->whereIn("job_platforms.id", $job_platform_ids);
                     });
                 })
+
                 ->when(request()->filled("application_date"), function ($query) {
                     // Split the date range string into start and end dates
                     $dates = explode(',', request()->input("application_date"));

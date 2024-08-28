@@ -6063,6 +6063,7 @@ class UserManagementController extends Controller
 
             return $this->sendError($e, 500, $request);
         }
+
     }
 
 
