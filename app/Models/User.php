@@ -199,6 +199,8 @@ class User extends Authenticatable
 
 
 
+
+
     public function holidays()
     {
         return $this->belongsToMany(Holiday::class, 'user_holidays', 'user_id', 'holiday_id');

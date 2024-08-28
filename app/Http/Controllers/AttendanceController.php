@@ -199,6 +199,10 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
     })
     ->toArray();
 
+  // Merge existing attendance records with the updated ones
+$request_data_update["attendance_records"] = array_merge($attendance->attendance_records, $request_data_update["attendance_records"]);
+
+
 
 
 
@@ -256,7 +260,9 @@ $request_data_update["attendance_records"] = collect($request_data_update["atten
                     "regular_hours_salary",
                     "overtime_hours_salary",
                     "attendance_records",
-                    "is_present"
+                    "is_present",
+
+
                 ])->toArray());
                 $attendance->save();
             }

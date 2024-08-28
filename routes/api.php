@@ -1573,6 +1573,8 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::put('/v1.0/tasks/position', [TaskController::class, "updateTaskPosition"]);
     Route::get('/v1.0/tasks', [TaskController::class, "getTasks"]);
     Route::get('/v1.0/tasks/{id}', [TaskController::class, "getTaskById"]);
+    Route::get('/v2.0/tasks/{id}', [TaskController::class, "getTaskByIdV2"]);
+
     Route::delete('/v1.0/tasks/{ids}', [TaskController::class, "deleteTasksByIds"]);
 
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

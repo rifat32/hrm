@@ -269,6 +269,13 @@ class UpdateDatabaseController extends Controller
                     DB::statement('ALTER TABLE notifications MODIFY entity_name VARCHAR(255) NULL');
                 }
             }
+            if ($i == 13) {
+                DB::statement("
+                ALTER tasks {$table}
+                MODIFY COLUMN task_category_id BIGINT UNSIGNED NULL;
+            ");
+            }
+
 
 
         }

@@ -38,8 +38,12 @@ class WorkLocation extends Model
         return $this->hasMany(DisabledWorkLocation::class, 'work_location_id', 'id');
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_work_locations', 'work_location_id', 'user_id');
+    }
 
- 
+
 
 
 

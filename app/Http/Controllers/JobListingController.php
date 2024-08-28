@@ -341,11 +341,11 @@ class JobListingController extends Controller
      *
      *     *
      * @OA\Parameter(
-     * name="deadline",
+     * name="application_deadline",
      * in="query",
-     * description="deadline",
+     * description="application_deadline",
      * required=true,
-     * example="deadline"
+     * example="application_deadline"
      * ),
      *
      * @OA\Parameter(
@@ -521,15 +521,29 @@ class JobListingController extends Controller
                     });
                 })
 
-                ->when(!empty($request->number_of_candidates), function ($query) use ($request) {
+                ->when(request()->filled('number_of_candidates'), function ($query) {
+                    // Split the input into an array of numbers, replacing spaces with commas
+                    $numbers = explode(',', str_replace(' ', ',', request()->input('number_of_candidates')));
 
-                    $number_query = explode(',', str_replace(' ', ',', $request->number_of_candidates));
+                    // Define start and end values
+                    $startValue = isset($numbers[0]) && trim($numbers[0]) !== '' ? trim($numbers[0]) : null;
+                    $endValue = isset($numbers[1]) && trim($numbers[1]) !== '' ? trim($numbers[1]) : null;
 
-                    $query->whereHas("candidates", function ($query) use ($request, $number_query) {
-                        $query->havingRaw('COUNT(*) ' . $number_query[0] . ' ?', [$number_query[1]]);
-                    });
+                    // Apply conditions based on which values are available
+                    if ($startValue) {
+                        $query->whereHas('candidates', function ($query) use ($startValue, $endValue) {
+                            $query->havingRaw('COUNT(*) >= ?', [$startValue]);
+                        });
+                    }
+
+                    if ($endValue) {
+                        $query->whereHas('candidates', function ($query) use ($endValue) {
+                            $query->havingRaw('COUNT(*) <= ?', [$endValue]);
+                        });
+                    }
+
+                    return $query;
                 })
-
 
 
 

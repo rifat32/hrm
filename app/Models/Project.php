@@ -64,6 +64,10 @@ class Project extends Model
     }
 
 
+    public function labels() {
+        return $this->hasMany(Label::class, 'project_id', 'id');
+    }
+
     public function tasks() {
         return $this->hasMany(Task::class, 'project_id', 'id');
     }

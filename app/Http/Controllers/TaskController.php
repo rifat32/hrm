@@ -117,7 +117,7 @@ class TaskController extends Controller
                 $request_data["is_active"] = true;
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["assigned_by"] = auth()->user()->id;
-                $request_data["assigned_to"] = $request_data["assigned_to"];
+
 
 
 
@@ -130,6 +130,7 @@ class TaskController extends Controller
                     "business_id",
                     )->toArray()
                     )->count();
+
                 $task->save();
 
                 $task->assignees()->sync($request_data['assignees']);
@@ -851,6 +852,125 @@ Notification::create([
             return $this->sendError($e, 500, $request);
         }
     }
+     /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/tasks/{id}",
+     *      operationId="getTaskByIdV2",
+     *      tags={"task"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *      summary="This method is to get task listing by id",
+     *      description="This method is to get task listing by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+     public function getTaskByIdV2($id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+                $this->isModuleEnabled("task_management");
+
+
+             if (!$request->user()->hasPermissionTo('task_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id =  auth()->user()->business_id;
+
+             $task =  Task::with(
+             [
+                 "project.labels",
+                 "assigned_by" => function ($query) {
+                     $query->select('users.id', 'users.first_Name','users.middle_Name',
+                     'users.last_Name');
+                 },
+                 "assignees" => function ($query) {
+                     $query->select('users.id', 'users.first_Name','users.middle_Name',
+                     'users.last_Name');
+                 },
+                 "assigned_to" => function ($query) {
+                     $query->select('users.id', 'users.first_Name','users.middle_Name',
+                     'users.last_Name');
+                 },
+                 "labels" => function ($query) {
+                     $query->select(
+                     'labels.id',
+                     'labels.name',
+                     'labels.color',
+                     "labels.unique_identifier",
+                     'labels.project_id',
+                 );
+                 },
+
+             ]
+
+
+             )
+             ->where([
+                 "id" => $id,
+                 "business_id" => $business_id
+             ])
+             ->select('tasks.*'
+              )
+                 ->first();
+             if (!$task) {
+
+                 return response()->json([
+                     "message" => "no task listing found"
+                 ], 404);
+             }
+
+             return response()->json($task, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
 
 
 

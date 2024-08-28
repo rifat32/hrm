@@ -571,7 +571,21 @@ class CandidateController extends Controller
      * required=true,
      * example="name"
      * ),
+     *  *     * *  @OA\Parameter(
+     * name="application_date",
+     * in="query",
+     * description="application_date",
+     * required=true,
+     * example="application_date"
+     * ),
      *
+     *     *  *  @OA\Parameter(
+     * name="interview_date",
+     * in="query",
+     * description="interview_date",
+     * required=true,
+     * example="interview_date"
+     * ),
 
      *
      *  @OA\Parameter(
@@ -582,13 +596,7 @@ class CandidateController extends Controller
      * example="job_platform_id"
      * ),
      *
-     *  *  @OA\Parameter(
-     * name="interview_date",
-     * in="query",
-     * description="interview_date",
-     * required=true,
-     * example="interview_date"
-     * ),
+
      *     *  *  @OA\Parameter(
      * name="status",
      * in="query",
@@ -670,8 +678,12 @@ class CandidateController extends Controller
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
-                        // $query->where("candidates.name", "like", "%" . $term . "%")
-                        //     ->orWhere("candidates.description", "like", "%" . $term . "%");
+                         $query->where("candidates.name", "like", "%" . $term . "%")
+                             ->orWhere("candidates.email", "like", "%" . $term . "%")
+                             ->orWhere("candidates.phone", "like", "%" . $term . "%")
+                             ->orWhere("candidates.cover_letter", "like", "%" . $term . "%")
+                             ->orWhere("candidates.feedback", "like", "%" . $term . "%")
+                             ;
                     });
                 })
                 ->when(!empty($request->name), function ($query) use ($request) {
@@ -681,6 +693,14 @@ class CandidateController extends Controller
                         //     ->orWhere("candidates.description", "like", "%" . $term . "%");
                     });
                 })
+                ->when(!empty($request->status), function ($query) use ($request) {
+                    return $query->where(function ($query) use ($request) {
+                        $term = $request->status;
+                        $query->where("candidates.status", "like", "%" . $term . "%");
+                        //     ->orWhere("candidates.description", "like", "%" . $term . "%");
+                    });
+                })
+
 
 
 
@@ -706,6 +726,38 @@ class CandidateController extends Controller
                     $query->whereHas("job_platforms",function($query) use($job_platform_ids){
                         $query->whereIn("job_platforms.id", $job_platform_ids);
                     });
+                })
+                ->when(request()->filled("application_date"), function ($query) {
+                    // Split the date range string into start and end dates
+                    $dates = explode(',', request()->input("application_date"));
+                    $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                    $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                    // Apply conditions based on which dates are available
+                    if ($startDate) {
+                        $query->where('candidates.application_date', '>=', $startDate);
+                    }
+
+                    if ($endDate) {
+                        $query->where('candidates.application_date', '<=', $endDate);
+                    }
+                    return $query;
+                })
+                ->when(request()->filled("interview_date"), function ($query) {
+                    // Split the date range string into start and end dates
+                    $dates = explode(',', request()->input("interview_date"));
+                    $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                    $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                    // Apply conditions based on which dates are available
+                    if ($startDate) {
+                        $query->where('candidates.interview_date', '>=', $startDate);
+                    }
+
+                    if ($endDate) {
+                        $query->where('candidates.interview_date', '<=', $endDate);
+                    }
+                    return $query;
                 })
 
 
