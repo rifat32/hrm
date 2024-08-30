@@ -305,7 +305,7 @@ class User extends Authenticatable
         return $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
             ->where($issue_date_column, '<', now())
             ->joinSub(
-                EmployeePassportDetailHistory::select('user_id', $expiry_date_column)
+                EmployeeSponsorshipHistory::select('user_id', $expiry_date_column)
                     ->whereColumn('user_id', 'employee_sponsorship_histories.user_id')
                     ->where($issue_date_column, '<', now())
                     ->orderBy($expiry_date_column, 'DESC')
@@ -374,7 +374,7 @@ class User extends Authenticatable
         return $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
             ->where($issue_date_column, '<', now())
             ->joinSub(
-                EmployeePassportDetailHistory::select('user_id', $expiry_date_column)
+                EmployeeSponsorshipHistory::select('user_id', $expiry_date_column)
                     ->whereColumn('user_id', 'employee_sponsorship_histories.user_id')
                     ->where($issue_date_column, '<', now())
                     ->orderBy($expiry_date_column, 'DESC')

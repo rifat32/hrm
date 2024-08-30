@@ -627,34 +627,40 @@ class UserManagementComponent
                     $query->where("employee_visa_detail_histories.visa_issue_date", "<=", request()->end_visa_issue_date . ' 23:59:59');
                 });
             })
-            ->when(!empty(request()->start_visa_expiry_date), function ($query) {
-                return $query->whereHas("visa_details", function ($query) {
-                    $query->where("employee_visa_detail_histories.visa_expiry_date", ">=", request()->start_visa_expiry_date);
-                });
-            })
-            ->when(!empty(request()->end_visa_expiry_date), function ($query) {
-                return $query->whereHas("visa_details", function ($query) {
-                    $query->where("employee_visa_detail_histories.visa_expiry_date", "<=", request()->end_visa_expiry_date . ' 23:59:59');
-                });
-            })
+            // ->when(!empty(request()->start_visa_expiry_date), function ($query) {
+            //     return $query->whereHas("visa_details", function ($query) {
+            //         $query->where("employee_visa_detail_histories.visa_expiry_date", ">=", request()->start_visa_expiry_date);
+            //     });
+            // })
+            // ->when(!empty(request()->end_visa_expiry_date), function ($query) {
+            //     return $query->whereHas("visa_details", function ($query) {
+            //         $query->where("employee_visa_detail_histories.visa_expiry_date", "<=", request()->end_visa_expiry_date . ' 23:59:59');
+            //     });
+            // })
+
+            ->when(request()->filled("visa_expiry_date"), function ($query)  {
+
+                // Split the date range string into start and end dates
+                $dates = explode(',', request()->input("visa_expiry_date"));
+                $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
 
 
-            ->when(!empty(request()->visa_expiry_date), function ($query) {
-                $data_pairs = explode(',', request()->visa_expiry_date);
 
-                $start_date = !empty($data_pairs[0]) ? $data_pairs[0] : "";
-                $end_date = !empty($data_pairs[1]) ? $data_pairs[1] : "";
+               $query->whereHas("visa_details", function ($query)  use ($startDate,$endDate) {
+                        if ($startDate) {
+                            $query->where('employee_visa_detail_histories.visa_expiry_date', '>=', $startDate);
+                        }
 
-                return $query->when(!empty($start_date), function ($query) use ($start_date, $end_date) {
-                    return $query->whereHas("visa_details", function ($query)  use ($start_date) {
-                        $query->where("employee_visa_detail_histories.visa_expiry_date", ">=", ($start_date));
+                        if ($endDate) {
+                            $query->where('employee_visa_detail_histories.visa_expiry_date', '<=', $endDate);
+                        }
+                        return $query;
+
                     });
-                })
-                    ->when(!empty($end_date), function ($query) use ($end_date) {
-                        return $query->whereHas("visa_details", function ($query)  use ($end_date) {
-                            $query->where("employee_visa_detail_histories.visa_expiry_date", "<=", ($end_date . ' 23:59:59'));
-                        });
-                    });
+
+
+                return $query;
             })
 
 

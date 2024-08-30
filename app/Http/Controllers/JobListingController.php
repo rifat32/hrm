@@ -496,6 +496,10 @@ class JobListingController extends Controller
                     }
                     return $query;
                 })
+
+
+
+
                 ->when(request()->filled("application_deadline"), function ($query) {
                     // Split the date range string into start and end dates
                     $dates = explode(',', request()->input("application_deadline"));
