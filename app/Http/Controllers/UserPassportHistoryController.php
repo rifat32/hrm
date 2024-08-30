@@ -11,6 +11,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\EmployeePassportDetail;
 use App\Models\EmployeePassportDetailHistory;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -208,16 +209,17 @@ class UserPassportHistoryController extends Controller
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
 
-              $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-
-                $current_user_id =  $request_data["user_id"];
-                $issue_date_column = 'passport_issue_date';
-                $expiry_date_column = 'passport_expiry_date';
 
 
 
-                $current_passport = $this->getCurrentHistory(EmployeePassportDetailHistory::class, 'current_passport_id', $current_user_id, $issue_date_column, $expiry_date_column);
+                $user = User::where([
+                    "id" => $request_data["user_id"]
+                ])
+                   ->first();
+
+                $current_passport = $user->passport_detail;
+
+
 
 
                 $user_passport_history_query_params = [

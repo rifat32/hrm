@@ -11,6 +11,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 
 use App\Models\EmployeeVisaDetailHistory;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -232,11 +233,15 @@ class UserVisaHistoryController extends Controller
                 $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-                $current_user_id =  $request_data["user_id"];
-                $issue_date_column = 'visa_issue_date';
-                $expiry_date_column = 'visa_expiry_date';
 
-                $current_visa = $this->getCurrentHistory(EmployeeVisaDetailHistory::class, 'current_visa_id', $current_user_id, $issue_date_column, $expiry_date_column);
+
+
+                $user = User::where([
+                    "id" => $request_data["user_id"]
+                ])
+                   ->first();
+
+                $current_visa = $user->visa_detail;
 
 
                 $user_visa_history_query_params = [

@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
-use App\Rules\ValidateTerminationReasonId;
-use App\Rules\ValidateTerminationTypeId;
+use App\Rules\ValidateTerminationReason;
+use App\Rules\ValidateTerminationType;
 use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -40,12 +40,12 @@ class UserExitRequest extends FormRequest
             'termination.termination_type_id' => [
                 'required',
                 'numeric',
-                new ValidateTerminationTypeId()
+                new ValidateTerminationType()
             ],
             'termination.termination_reason_id' => [
                 'required',
                 'numeric',
-                new ValidateTerminationReasonId()
+                new ValidateTerminationReason()
             ],
 
             'termination.date_of_termination' => 'required|date',

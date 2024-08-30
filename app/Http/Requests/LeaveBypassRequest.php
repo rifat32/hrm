@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\Leave;
-use App\Rules\ValidateLeaveId;
+use App\Rules\ValidateLeave;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveBypassRequest extends BaseFormRequest
@@ -33,7 +33,7 @@ class LeaveBypassRequest extends BaseFormRequest
             'leave_id' => [
                 'required',
                 'numeric',
-                new ValidateLeaveId($all_manager_department_ids),
+                new ValidateLeave($all_manager_department_ids),
             ],
 
             "add_in_next_payroll" => "required|boolean"

@@ -7,7 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
-use App\Rules\ValidateDesignationId;
+use App\Rules\ValidateDesignation;
 use App\Rules\ValidateEmploymentStatus;
 use App\Rules\ValidateUser;
 use App\Rules\ValidateUserAllowSelf;

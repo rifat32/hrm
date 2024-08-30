@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 
 use App\Rules\ValidateDepartmentName;
-use App\Rules\ValidateParentDepartmentId;
+use App\Rules\ValidateParentDepartment;
 use App\Rules\ValidateUser;
 use App\Rules\ValidateWorkLocation;
 
@@ -56,7 +56,7 @@ class DepartmentCreateRequest extends BaseFormRequest
             'parent_id' => [
                 'required',
                 'numeric',
-                new ValidateParentDepartmentId($all_manager_department_ids)
+                new ValidateParentDepartment($all_manager_department_ids)
             ],
 
         ];

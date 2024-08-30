@@ -7,7 +7,7 @@ use App\Models\BusinessTime;
 use App\Models\Role;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
-use App\Rules\ValidateDesignationId;
+use App\Rules\ValidateDesignation;
 use App\Rules\ValidateEmploymentStatus;
 use App\Rules\ValidateUser;
 use App\Rules\ValidateWorkLocation;
@@ -169,7 +169,7 @@ class UserRejoinRequest extends FormRequest
             'designation_id' => [
                 "required",
                 'numeric',
-                new ValidateDesignationId()
+                new ValidateDesignation()
             ],
             'employment_status_id' => [
                 "required",

@@ -127,20 +127,20 @@ class UserManagementComponent
                     "gender" => request()->gender
                 ]);
             })
-            ->when(!empty(request()->start_salary_per_annum), function ($query) {
-                return   $query->where(
-                    "salary_per_annum",
-                    ">=",
-                    request()->start_salary_per_annum
-                );
-            })
-            ->when(!empty(request()->end_salary_per_annum), function ($query) {
-                return   $query->where(
-                    "salary_per_annum",
-                    "<=",
-                    request()->end_salary_per_annum
-                );
-            })
+            // ->when(!empty(request()->start_salary_per_annum), function ($query) {
+            //     return   $query->where(
+            //         "salary_per_annum",
+            //         ">=",
+            //         request()->start_salary_per_annum
+            //     );
+            // })
+            // ->when(!empty(request()->end_salary_per_annum), function ($query) {
+            //     return   $query->where(
+            //         "salary_per_annum",
+            //         "<=",
+            //         request()->end_salary_per_annum
+            //     );
+            // })
 
 
 
@@ -180,20 +180,20 @@ class UserManagementComponent
                 return $query->whereIn('designation_id', $idsArray);
             })
 
-            ->when(!empty(request()->start_weekly_contractual_hours), function ($query) {
-                return   $query->where(
-                    "weekly_contractual_hours",
-                    ">=",
-                    request()->start_weekly_contractual_hours
-                );
-            })
-            ->when(!empty(request()->end_weekly_contractual_hours), function ($query) {
-                return   $query->where(
-                    "weekly_contractual_hours",
-                    "<=",
-                    request()->end_weekly_contractual_hours
-                );
-            })
+            // ->when(!empty(request()->start_weekly_contractual_hours), function ($query) {
+            //     return   $query->where(
+            //         "weekly_contractual_hours",
+            //         ">=",
+            //         request()->start_weekly_contractual_hours
+            //     );
+            // })
+            // ->when(!empty(request()->end_weekly_contractual_hours), function ($query) {
+            //     return   $query->where(
+            //         "weekly_contractual_hours",
+            //         "<=",
+            //         request()->end_weekly_contractual_hours
+            //     );
+            // })
 
             ->when(request()->filled('weekly_contractual_hours'), function ($query) {
                 // Split the input into an array of numbers, replacing spaces with commas
@@ -426,12 +426,12 @@ class UserManagementComponent
 
             )
 
-            ->when(!empty(request()->start_joining_date), function ($query) {
-                return $query->where('joining_date', ">=", request()->start_joining_date);
-            })
-            ->when(!empty(request()->end_joining_date), function ($query) {
-                return $query->where('joining_date', "<=", (request()->end_joining_date .  ' 23:59:59'));
-            })
+            // ->when(!empty(request()->start_joining_date), function ($query) {
+            //     return $query->where('joining_date', ">=", request()->start_joining_date);
+            // })
+            // ->when(!empty(request()->end_joining_date), function ($query) {
+            //     return $query->where('joining_date', "<=", (request()->end_joining_date .  ' 23:59:59'));
+            // })
 
 
             ->when(request()->filled("joining_date"), function ($query)  {
@@ -518,16 +518,17 @@ class UserManagementComponent
 
 
 
-            ->when(!empty(request()->start_sponsorship_expiry_date), function ($query) {
-                return $query->whereHas("sponsorship_details", function ($query) {
-                    $query->where("employee_sponsorship_histories.expiry_date", ">=", request()->start_sponsorship_expiry_date);
-                });
-            })
-            ->when(!empty(request()->end_sponsorship_expiry_date), function ($query) {
-                return $query->whereHas("sponsorship_details", function ($query) {
-                    $query->where("employee_sponsorship_histories.expiry_date", "<=", request()->end_sponsorship_expiry_date . ' 23:59:59');
-                });
-            })
+            // ->when(!empty(request()->start_sponsorship_expiry_date), function ($query) {
+            //     return $query->whereHas("sponsorship_details", function ($query) {
+            //         $query->where("employee_sponsorship_histories.expiry_date", ">=", request()->start_sponsorship_expiry_date);
+            //     });
+            // })
+            // ->when(!empty(request()->end_sponsorship_expiry_date), function ($query) {
+            //     return $query->whereHas("sponsorship_details", function ($query) {
+            //         $query->where("employee_sponsorship_histories.expiry_date", "<=", request()->end_sponsorship_expiry_date . ' 23:59:59');
+            //     });
+            // })
+
             ->when(!empty(request()->sponsorship_expires_in_day), function ($query) use ($today) {
                 return $query->whereHas("sponsorship_details", function ($query) use ($today) {
                     $query_day = Carbon::now()->addDays(request()->sponsorship_expires_in_day);
@@ -559,12 +560,16 @@ class UserManagementComponent
                     $query->where("employee_pension_histories.pension_re_enrollment_due_date", "<=", request()->end_pension_pension_re_enrollment_due_date . ' 23:59:59');
                 });
             })
+
             ->when(!empty(request()->pension_pension_re_enrollment_due_date_in_day), function ($query) use ($today) {
                 return $query->whereHas("pension_details", function ($query) use ($today) {
                     $query_day = Carbon::now()->addDays(request()->pension_pension_re_enrollment_due_date_in_day);
                     $query->whereBetween("employee_pension_histories.pension_re_enrollment_due_date", [$today, ($query_day->endOfDay() . ' 23:59:59')]);
                 });
             })
+
+
+            
 
             ->when(!empty(request()->pension_scheme_status), function ($query) {
                 return $query->whereHas("pension_details", function ($query) {

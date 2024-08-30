@@ -7,7 +7,7 @@ use App\Models\Department;
 use App\Models\Leave;
 use App\Models\SettingLeaveType;
 use App\Models\User;
-use App\Rules\ValidateLeaveId;
+use App\Rules\ValidateLeave;
 use App\Rules\ValidateSettingLeaveType;
 use App\Rules\ValidateUser;
 use Illuminate\Foundation\Http\FormRequest;
@@ -37,7 +37,7 @@ class LeaveUpdateRequest extends BaseFormRequest
             'id' => [
                 'required',
                 'numeric',
-                new ValidateLeaveId($all_manager_department_ids),
+                new ValidateLeave($all_manager_department_ids),
             ],
 
             'leave_duration' => 'required|in:single_day,multiple_day,half_day,hours',

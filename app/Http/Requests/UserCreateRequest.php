@@ -7,7 +7,7 @@ use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\Role;
 use App\Models\WorkShift;
-use App\Rules\ValidateDesignationId;
+use App\Rules\ValidateDesignation;
 use App\Rules\ValidateDesignationName;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
@@ -98,7 +98,7 @@ class UserCreateRequest extends BaseFormRequest
         'designation_id' => [
             "nullable",
             'numeric',
-            new ValidateDesignationId()
+            new ValidateDesignation()
 
         ],
 

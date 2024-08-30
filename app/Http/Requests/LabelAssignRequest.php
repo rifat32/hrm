@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\ValidateLabelId;
+use App\Rules\ValidateLabel;
 use App\Rules\ValidateTaskId;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -38,7 +38,7 @@ class LabelAssignRequest extends FormRequest
             'label_ids.*' => [
                 'nullable',
                 'numeric',
-                new ValidateLabelId(),
+                new ValidateLabel(),
             ],
 
 

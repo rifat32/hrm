@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\ValidateLabelId;
+use App\Rules\ValidateLabel;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LabelUpdateRequest extends FormRequest
@@ -28,7 +28,7 @@ class LabelUpdateRequest extends FormRequest
           "id" => [
             'nullable',
             'numeric',
-            new ValidateLabelId(),
+            new ValidateLabel(),
           ],
 
           "name" => "required|string",

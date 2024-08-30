@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\WorkLocation;
 use App\Rules\ValidateDepartment;
 use App\Rules\ValidateDepartmentName;
-use App\Rules\ValidateParentDepartmentId;
+use App\Rules\ValidateParentDepartment;
 use App\Rules\ValidateUser;
 use App\Rules\ValidateUserAllowSelf;
 use App\Rules\ValidateWorkLocation;
@@ -66,7 +66,7 @@ class DepartmentUpdateRequest extends BaseFormRequest
             'parent_id' => [
                 'nullable',
                 'numeric',
-                new ValidateParentDepartmentId($all_manager_department_ids)
+                new ValidateParentDepartment($all_manager_department_ids)
 
             ],
 

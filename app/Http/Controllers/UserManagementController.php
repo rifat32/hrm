@@ -67,9 +67,9 @@ use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Rules\ValidateBank;
 use App\Rules\ValidateDepartment;
-use App\Rules\ValidateDesignationId;
+use App\Rules\ValidateDesignation;
 use App\Rules\ValidateEmploymentStatus;
-use App\Rules\ValidateRecruitmentProcessId;
+use App\Rules\ValidateRecruitmentProcess;
 use App\Rules\ValidateWorkLocation;
 use Carbon\Carbon;
 
@@ -820,7 +820,7 @@ class UserManagementController extends Controller
                 'employeeData.designation_id' => [
                     "required",
                     'numeric',
-                    new ValidateDesignationId()
+                    new ValidateDesignation()
                 ],
                 'employeeData.employment_status_id' => [
                     "required",
@@ -832,7 +832,7 @@ class UserManagementController extends Controller
                 'employeeData.recruitment_processes.*.recruitment_process_id' => [
                     "required",
                     'numeric',
-                    new ValidateRecruitmentProcessId()
+                    new ValidateRecruitmentProcess()
                 ],
                 'employeeData.recruitment_processes.*.description' => "nullable|string",
                 'employeeData.recruitment_processes.*.attachments' => "present|array",
@@ -9132,6 +9132,139 @@ class UserManagementController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+     /**
+     *
+     * @OA\Get(
+     *      path="/v5.0/users/{id}",
+     *      operationId="getUserByIdV4",
+     *      tags={"user_management.employee"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *              @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="id",
+     *         required=true,
+     *  example="6"
+     *      ),
+
+     *      summary="This method is to get user by id",
+     *      description="This method is to get user by id",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getUserByIdV5($id, Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('user_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+             $user = User::with(
+               [
+                       "sponsorship_detail",
+                       "pension_detail",
+                       "passport_detail",
+                       "visa_detail",
+                       "right_to_work"
+
+               ]
+
+             )
+
+                 ->where([
+                     "id" => $id
+                 ])
+                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
+                     return $query->where(function ($query) use ($all_manager_department_ids) {
+                         return $query->where('created_by', auth()->user()->id)
+                             ->orWhere('id', auth()->user()->id)
+                             ->orWhere('business_id', auth()->user()->business_id)
+                             ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
+                                 $query->whereIn("departments.id", $all_manager_department_ids);
+                             });
+                     });
+                 })
+                 ->select(
+                     "users.id",
+                     "users.first_Name",
+                     "users.middle_Name",
+                     "users.last_Name",
+                     "users.email",
+
+                     'users.address_line_1',
+                     'users.address_line_2',
+                     'users.country',
+                     'users.city',
+                     'users.postcode',
+                     'users.gender',
+                     'users.phone',
+                 )
+                 ->first();
+             if (!$user) {
+
+                 return response()->json([
+                     "message" => "no user found"
+                 ], 404);
+             }
+
+
+
+
+
+
+             return response()->json($user, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+
+
+
+
+
 
     /**
      *

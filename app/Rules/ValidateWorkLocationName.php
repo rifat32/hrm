@@ -2,10 +2,10 @@
 
 namespace App\Rules;
 
-use App\Models\JobPlatform;
+use App\Models\WorkLocation;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateJobPlatformName implements Rule
+class ValidateWorkLocationName implements Rule
 {
     /**
      * Create a new rule instance.
@@ -37,20 +37,20 @@ class ValidateJobPlatformName implements Rule
             $created_by = auth()->user()->business->created_by;
         }
 
-        $data = JobPlatform::where("name", $value)
+        $data = WorkLocation::where("name", $value)
         ->when(!empty($this->id), function($query) {
 
             $query->whereNotIn("id", [$this->id]);
         })
         ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
             $query->when(auth()->user()->hasRole('superadmin'), function ($query)  {
-                $query->forSuperAdmin('job_platforms');
+                $query->forSuperAdmin('work_locations');
             }, function ($query) use ($created_by) {
-                $query->forNonSuperAdmin('job_platforms', 'disabled_job_platforms', $created_by);
+                $query->forNonSuperAdmin('work_locations', 'disabled_work_locations', $created_by);
             });
         })
         ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
-            $query->forBusiness('job_platforms', "disabled_job_platforms", $created_by);
+            $query->forBusiness('work_locations', "disabled_work_locations", $created_by);
         })
         ->first();
 
@@ -58,9 +58,9 @@ class ValidateJobPlatformName implements Rule
 
 
             if ($data->is_active) {
-                $this->errMessage = "A job platform with the same name already exists.";
+                $this->errMessage = "A work site with the same name already exists.";
             } else {
-                $this->errMessage = "A job platform with the same name exists but is deactivated. Please activate it to use.";
+                $this->errMessage = "A work site with the same name exists but is deactivated. Please activate it to use.";
             }
 
 
@@ -79,4 +79,6 @@ class ValidateJobPlatformName implements Rule
     {
         return $this->errMessage;
     }
+
+
 }

@@ -6,7 +6,7 @@ use App\Models\Business;
 use App\Models\RecruitmentProcess;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateRecruitmentProcessIdClient implements Rule
+class ValidateRecruitmentProcessClient implements Rule
 {
     /**
      * Create a new rule instance.

@@ -37,67 +37,21 @@ class ValidateDesignationName implements Rule
             $created_by = auth()->user()->business->created_by;
         }
 
-        $data = Designation::where("designations.name",$value)
-        ->when(!empty($this->id),function($query) {
-            $query->whereNotIn("id",[$this->id]);
+        $data = Designation::where("name", $value)
+        ->when(!empty($this->id), function($query) {
+
+            $query->whereNotIn("id", [$this->id]);
         })
-        ->when(empty(auth()->user()->business_id), function ($query) {
-
-            $query->where(function($query) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 1);
-                        // ->where('designations.is_active', 1);
-
-                } else {
-                    return $query->where('designations.business_id', NULL)
-                        ->where('designations.is_default', 1)
-                        ->where('designations.is_active', 1)
-                        // ->whereDoesntHave("disabled", function($q) {
-                        //     $q->whereIn("disabled_designations.created_by", [auth()->user()->id]);
-                        // })
-
-                        ->orWhere(function ($query)  {
-                            $query->where('designations.business_id', NULL)
-                                ->where('designations.is_default', 0)
-                                ->where('designations.created_by', auth()->user()->id);
-
-                        });
-                }
+        ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+            $query->when(auth()->user()->hasRole('superadmin'), function ($query)  {
+                $query->forSuperAdmin('designations');
+            }, function ($query) use ($created_by) {
+                $query->forNonSuperAdmin('designations', 'disabled_designations', $created_by);
             });
-
         })
-            ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by) {
-
-                $query->where(function($query) use($created_by) {
-                    $query->where('designations.business_id', NULL)
-                    ->where('designations.is_default', 1)
-                    ->where('designations.is_active', 1)
-                    ->whereDoesntHave("disabled", function($q) use($created_by) {
-                        $q->whereIn("disabled_designations.created_by", [$created_by]);
-                    })
-                    // ->whereDoesntHave("disabled", function($q)  {
-                    //     $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
-                    // })
-
-                    ->orWhere(function ($query) use( $created_by){
-                        $query->where('designations.business_id', NULL)
-                            ->where('designations.is_default', 0)
-                            ->where('designations.created_by', $created_by)
-                            ->where('designations.is_active', 1);
-                            // ->whereDoesntHave("disabled", function($q) {
-                            //     $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
-                            // });
-                    })
-                    ->orWhere(function ($query)   {
-                        $query->where('designations.business_id', auth()->user()->business_id)
-                            ->where('designations.is_default', 0);
-                            // ->where('designations.is_active', 1);
-
-                    });
-                });
-
-            })
+        ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+            $query->forBusiness('designations', "disabled_designations", $created_by);
+        })
         ->first();
         if(!empty($data)){
 

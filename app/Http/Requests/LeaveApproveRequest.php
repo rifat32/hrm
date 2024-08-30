@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Utils\BasicUtil;
 use App\Models\Department;
 use App\Models\Leave;
-use App\Rules\ValidateLeaveId;
+use App\Rules\ValidateLeave;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveApproveRequest extends BaseFormRequest

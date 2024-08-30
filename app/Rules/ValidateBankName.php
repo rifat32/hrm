@@ -2,10 +2,10 @@
 
 namespace App\Rules;
 
-use App\Models\JobPlatform;
+use App\Models\Bank;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateJobPlatformName implements Rule
+class ValidateBankName implements Rule
 {
     /**
      * Create a new rule instance.
@@ -22,7 +22,6 @@ class ValidateJobPlatformName implements Rule
 
     }
 
-
     /**
      * Determine if the validation rule passes.
      *
@@ -37,30 +36,29 @@ class ValidateJobPlatformName implements Rule
             $created_by = auth()->user()->business->created_by;
         }
 
-        $data = JobPlatform::where("name", $value)
+        $data = Bank::where("name", $value)
         ->when(!empty($this->id), function($query) {
 
             $query->whereNotIn("id", [$this->id]);
         })
         ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
             $query->when(auth()->user()->hasRole('superadmin'), function ($query)  {
-                $query->forSuperAdmin('job_platforms');
+                $query->forSuperAdmin('banks');
             }, function ($query) use ($created_by) {
-                $query->forNonSuperAdmin('job_platforms', 'disabled_job_platforms', $created_by);
+                $query->forNonSuperAdmin('banks', 'disabled_banks', $created_by);
             });
         })
         ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
-            $query->forBusiness('job_platforms', "disabled_job_platforms", $created_by);
+            $query->forBusiness('banks', "disabled_banks", $created_by);
         })
         ->first();
-
         if(!empty($data)){
 
 
             if ($data->is_active) {
-                $this->errMessage = "A job platform with the same name already exists.";
+                $this->errMessage = "A bank with the same name already exists.";
             } else {
-                $this->errMessage = "A job platform with the same name exists but is deactivated. Please activate it to use.";
+                $this->errMessage = "A bank with the same name exists but is deactivated. Please activate it to use.";
             }
 
 
@@ -79,4 +77,8 @@ class ValidateJobPlatformName implements Rule
     {
         return $this->errMessage;
     }
+
+
+
+
 }

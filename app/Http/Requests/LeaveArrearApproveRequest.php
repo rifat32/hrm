@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Utils\BasicUtil;
-use App\Rules\ValidateLeaveRecordId;
+use App\Rules\ValidateLeaveRecord;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LeaveArrearApproveRequest extends FormRequest
@@ -32,7 +32,7 @@ class LeaveArrearApproveRequest extends FormRequest
             'leave_record_ids.*' => [
                 'required',
                 'numeric',
-                new ValidateLeaveRecordId($all_manager_department_ids),
+                new ValidateLeaveRecord($all_manager_department_ids),
 
             ],
         ];

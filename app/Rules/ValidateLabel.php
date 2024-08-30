@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\Label;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateLabelId implements Rule
+class ValidateLabel implements Rule
 {
     /**
      * Create a new rule instance.

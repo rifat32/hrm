@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\JobPlatform;
 use App\Rules\ValidateJobListing;
 use App\Rules\ValidateJobPlatform;
-use App\Rules\ValidateRecruitmentProcessId;
+use App\Rules\ValidateRecruitmentProcess;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
@@ -82,7 +82,7 @@ class CandidateUpdateRequest extends BaseFormRequest
             'recruitment_processes.*.recruitment_process_id' => [
                 "required",
                 'numeric',
-                new ValidateRecruitmentProcessId()
+                new ValidateRecruitmentProcess()
             ],
             'recruitment_processes.*.description' => "nullable|string",
             'recruitment_processes.*.attachments' => "present|array",

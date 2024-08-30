@@ -2,10 +2,10 @@
 
 namespace App\Rules;
 
-use App\Models\EmploymentStatus;
+use App\Models\TerminationType;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateEmploymentStatus implements Rule
+class ValidateTerminationType implements Rule
 {
     /**
      * Create a new rule instance.
@@ -31,19 +31,18 @@ class ValidateEmploymentStatus implements Rule
             $created_by = auth()->user()->business->created_by;
         }
 
-        $exists = EmploymentStatus::where("employment_statuses.id",$value)
+        $exists = TerminationType::where("termination_types.id",$value)
         ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
             $query->when(auth()->user()->hasRole('superadmin'), function ($query)  {
-                $query->forSuperAdmin('employment_statuses');
+                $query->forSuperAdmin('termination_types');
             }, function ($query) use ($created_by) {
-                $query->forNonSuperAdmin('employment_statuses', 'disabled_employment_statuses', $created_by);
+                $query->forNonSuperAdmin('termination_types', 'disabled_termination_types', $created_by);
             });
         })
         ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
-            $query->forBusiness('employment_statuses', "disabled_employment_statuses", $created_by);
+            $query->forBusiness('termination_types', "disabled_termination_types", $created_by);
         })
         ->exists();
-
         return $exists;
     }
 

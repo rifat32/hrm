@@ -13,8 +13,8 @@ use App\Models\User;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Rules\ValidateDepartment;
-use App\Rules\ValidateDesignationId;
-use App\Rules\ValidateRecruitmentProcessId;
+use App\Rules\ValidateDesignation;
+use App\Rules\ValidateRecruitmentProcess;
 use App\Rules\ValidateEmploymentStatus;
 use App\Rules\ValidateUser;
 use App\Rules\ValidateWorkLocation;
@@ -198,7 +198,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'recruitment_processes.*.recruitment_process_id' => [
                 "required",
                 'numeric',
-                new ValidateRecruitmentProcessId()
+                new ValidateRecruitmentProcess()
             ],
             'recruitment_processes.*.description' => "nullable|string",
             'recruitment_processes.*.attachments' => "present|array",
@@ -221,7 +221,7 @@ class UserUpdateV2Request extends BaseFormRequest
             'designation_id' => [
                 "required",
                 'numeric',
-                new ValidateDesignationId()
+                new ValidateDesignation()
             ],
             'employment_status_id' => [
                 "required",

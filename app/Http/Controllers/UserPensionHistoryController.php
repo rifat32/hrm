@@ -238,19 +238,17 @@ DB::commit();
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
-                $all_manager_department_ids = $this->get_all_departments_of_manager();
+
 
                 $current_user_id =  $request_data["user_id"];
                 $issue_date_column = 'pension_enrollment_issue_date';
                 $expiry_date_column = 'pension_re_enrollment_due_date';
 
+
+
                 $current_pension = $this->getCurrentPensionHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 
-                $user_pension_history_query_params = [
-                    "id" => $request_data["id"],
-                    // "is_manual" => 1
-                ];
 
                 if ($current_pension && $current_pension->id == $request_data["id"]) {
                     $request_data["is_manual"] = 0;
@@ -291,32 +289,40 @@ DB::commit();
 
 
                 } else {
-                    $user_pension_history  =  tap(EmployeePensionHistory::where($user_pension_history_query_params))->update(
-                        collect($request_data)->only([
+                     // Retrieve the existing record
+    $user_pension_history = EmployeePensionHistory::where('id', $request_data['id'])->first();
 
-                            'pension_eligible',
-                            'pension_enrollment_issue_date',
-                            'pension_letters',
-                            'pension_scheme_status',
-                            'pension_scheme_opt_out_date',
-                            'pension_re_enrollment_due_date',
+    // Check if the record was found
+    if (!$user_pension_history) {
+        return response()->json([
+            "message" => "Record not found."
+        ], 404);
+    }
 
-                            "is_manual",
-                            'user_id',
-                            "from_date",
-                            "to_date",
+    // Fill the object with the new data
+    $user_pension_history->fill(collect($request_data)->only([
+        'pension_eligible',
+        'pension_enrollment_issue_date',
+        'pension_letters',
+        'pension_scheme_status',
+        'pension_scheme_opt_out_date',
+        'pension_re_enrollment_due_date',
+        'is_manual',
+        'user_id',
+        'from_date',
+        'to_date',
+    ])->toArray());
 
-                        ])->toArray()
-                    )
-                        ->first();
-                        if ($user_pension_history) {
-                            return response()->json([
-                                "message" => "something went wrong."
-                            ], 500);
-                        }
+    // Save the changes to the database
+    $user_pension_history->save();
 
-                        DB::commit();
-                        return response($user_pension_history, 201);
+    if (!$user_pension_history) {
+        return response()->json([
+            "message" => "Something went wrong"
+        ], 500);
+    }
+
+
                 }
 
 

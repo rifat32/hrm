@@ -464,6 +464,11 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::get('/v2.0/users/{id}', [UserManagementController::class, "getUserByIdV2"]);
     Route::get('/v3.0/users/{id}', [UserManagementController::class, "getUserByIdV3"]);
     Route::get('/v4.0/users/{id}', [UserManagementController::class, "getUserByIdV4"]);
+
+    Route::get('/v5.0/users/{id}', [UserManagementController::class, "getUserByIdV5"]);
+
+
+
     Route::get('/v1.0/users/generate/employee-id', [UserManagementController::class, "generateEmployeeId"]);
     Route::get('/v1.0/users/validate/employee-id/{user_id}', [UserManagementController::class, "validateEmployeeId"]);
     Route::get('/v1.0/users/get-leave-details/{id}', [UserManagementController::class, "getLeaveDetailsByUserId"]);

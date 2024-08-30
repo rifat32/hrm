@@ -12,6 +12,7 @@ use App\Models\Department;
 use App\Models\EmloyeeSponsorshipHistory;
 use App\Models\EmployeeSponsorship;
 use App\Models\EmployeeSponsorshipHistory;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -210,26 +211,27 @@ class UserSponsorshipHistoryController extends Controller
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
-                $all_manager_department_ids = $this->get_all_departments_of_manager();
-
-                $current_user_id =  $request_data["user_id"];
-                $issue_date_column = 'date_assigned';
-                $expiry_date_column = 'expiry_date';
-
-                $current_sponsorship = $this->getCurrentHistory(EmployeeSponsorshipHistory::class, 'current_sponsorship_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 
-                $user_sponsorship_history_query_params = [
-                    "id" => $request_data["id"],
-                    // "is_manual" => 1
-                ];
+               $user = User::where([
+                "id" => $request_data["user_id"]
+            ])
+               ->first();
+
+                $current_sponsorship = $user->sponsorship_detail;
+
+
+
 
                 if ($current_sponsorship && $current_sponsorship->id == $request_data["id"]) {
                     $request_data["is_manual"] = 0;
                     $user_sponsorship_history =   EmployeeSponsorshipHistory::create($request_data);
 
                 } else {
-                    $user_sponsorship_history  =  tap(EmployeeSponsorshipHistory::where($user_sponsorship_history_query_params))->update(
+                    $user_sponsorship_history  =  tap(EmployeeSponsorshipHistory::where([
+                        "id" => $request_data["id"],
+                        // "is_manual" => 1
+                    ]))->update(
                         collect($request_data)->only([
         "business_id",
         'date_assigned',
@@ -381,6 +383,7 @@ class UserSponsorshipHistoryController extends Controller
             $current_user_id = request()->user_id;
             $issue_date_column = 'date_assigned';
             $expiry_date_column = 'expiry_date';
+
             $current_sponsorship = $this->getCurrentHistory(EmployeeSponsorshipHistory::class, 'current_sponsorship_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 

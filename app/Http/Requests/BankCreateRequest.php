@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Bank;
-use App\Rules\ValidateUniqueBankName;
+use App\Rules\ValidateBankName;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BankCreateRequest extends BaseFormRequest
@@ -31,7 +31,7 @@ class BankCreateRequest extends BaseFormRequest
             'name' => [
                 "required",
                 'string',
-              new  ValidateUniqueBankName(NULL),
+              new  ValidateBankName(NULL),
 
             ],
         ];

@@ -7,7 +7,7 @@ use App\Models\Designation;
 use App\Models\EmploymentStatus;
 use App\Models\Role;
 use App\Models\User;
-use App\Rules\ValidateDesignationId;
+use App\Rules\ValidateDesignation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateRequest extends BaseFormRequest
@@ -99,7 +99,7 @@ class UserUpdateRequest extends BaseFormRequest
         'designation_id' => [
             "nullable",
             'numeric',
-            new ValidateDesignationId()
+            new ValidateDesignation()
         ],
 
         'joining_date' => "nullable|date",

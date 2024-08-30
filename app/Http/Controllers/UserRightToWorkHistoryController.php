@@ -11,6 +11,7 @@ use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
 use App\Models\EmployeeRightToWork;
 use App\Models\EmployeeRightToWorkHistory;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -236,11 +237,15 @@ class UserRightToWorkHistoryController extends Controller
                 $all_manager_department_ids = $this->get_all_departments_of_manager();
 
 
-                $current_user_id =  $request_data["user_id"];
-                $issue_date_column = 'right_to_work_check_date';
-                $expiry_date_column = 'right_to_work_expiry_date';
 
-                $current_right_to_work = $this->getCurrentHistory(EmployeeRightToWorkHistory::class, 'current_right_to_work_id', $current_user_id, $issue_date_column, $expiry_date_column);
+                $user = User::where([
+                    "id" => $request_data["user_id"]
+                ])
+                   ->first();
+
+                $current_right_to_work = $user->right_to_work;
+
+
 
 
                 $user_right_ro_work_history_query_params = [

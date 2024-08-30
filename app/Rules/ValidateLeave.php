@@ -2,17 +2,18 @@
 
 namespace App\Rules;
 
-use App\Models\Department;
+use App\Models\Leave;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateParentDepartmentId implements Rule
+class ValidateLeave implements Rule
 {
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    protected $all_manager_department_ids;
+
+     protected $all_manager_department_ids;
     public function __construct($all_manager_department_ids)
     {
         $this->all_manager_department_ids = $all_manager_department_ids;
@@ -27,16 +28,16 @@ class ValidateParentDepartmentId implements Rule
      */
     public function passes($attribute, $value)
     {
-        if(!empty($value)){
-            $parent_department = Department::where('id', $value)
-            ->where('departments.business_id', '=', auth()->user()->business_id)
-            ->first();
-
-        if (!$parent_department || !in_array($parent_department->id,$this->all_manager_department_ids)) {
-            return false;
-        }
-        }
-        return true;
+        $exists = Leave::where('leaves.id', $value)
+        ->where('leaves.business_id', '=', auth()->user()->business_id)
+        ->whereHas("employee.department_user.department", function($query)  {
+            $query->whereIn("departments.id",$this->all_manager_department_ids);
+         })
+         ->whereHas("employee", function ($query){
+            $query->whereNotIn("users.id",[auth()->user()->id]);
+        })
+        ->exists();
+        return $exists;
     }
 
     /**
@@ -46,6 +47,6 @@ class ValidateParentDepartmentId implements Rule
      */
     public function message()
     {
-        return 'The selected :attribute is invalid.';
+        return 'The validation error message.';
     }
 }

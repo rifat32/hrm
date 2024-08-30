@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\LeaveRecord;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidateLeaveRecordId implements Rule
+class ValidateLeaveRecord implements Rule
 {
     /**
      * Create a new rule instance.

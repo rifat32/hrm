@@ -7,8 +7,8 @@ use App\Rules\ValidateJobListing;
 use App\Rules\ValidateJobListingClient;
 use App\Rules\ValidateJobPlatform;
 use App\Rules\ValidateJobPlatformClient;
-use App\Rules\ValidateRecruitmentProcessId;
-use App\Rules\ValidateRecruitmentProcessIdClient;
+use App\Rules\ValidateRecruitmentProcess;
+use App\Rules\ValidateRecruitmentProcessClient;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
@@ -70,7 +70,7 @@ class CandidateCreateRequestClient extends BaseFormRequest
         'recruitment_processes.*.recruitment_process_id' => [
             "required",
             'numeric',
-            new ValidateRecruitmentProcessIdClient()
+            new ValidateRecruitmentProcessClient()
         ],
         'recruitment_processes.*.description' => "nullable|string",
         'recruitment_processes.*.attachments' => "present|array",
