@@ -454,52 +454,67 @@ class UserManagementComponent
 
 
 
-            ->when(!empty(request()->start_sponsorship_date_assigned), function ($query) {
-                return $query->whereHas("sponsorship_details", function ($query) {
-                    $query->where("employee_sponsorship_histories.date_assigned", ">=", (request()->start_sponsorship_date_assigned));
+            // ->when(!empty(request()->start_sponsorship_date_assigned), function ($query) {
+            //     return $query->whereHas("sponsorship_details", function ($query) {
+            //         $query->where("employee_sponsorship_histories.date_assigned", ">=", (request()->start_sponsorship_date_assigned));
+            //     });
+            // })
+            // ->when(!empty(request()->end_sponsorship_date_assigned), function ($query) {
+            //     return $query->whereHas("sponsorship_details", function ($query) {
+            //         $query->where("employee_sponsorship_histories.date_assigned", "<=", (request()->end_sponsorship_date_assigned . ' 23:59:59'));
+            //     });
+            // })
+
+            ->when(request()->filled("sponsorship_date_assigned"), function ($query) {
+                // Split the date range string into start and end dates
+                $dates = explode(',', request()->input("sponsorship_date_assigned"));
+                $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                // Filter based on the passport details relationship
+                $query->whereHas("sponsorship_details", function ($query) use ($startDate, $endDate) {
+                    if ($startDate) {
+                        $query->where('employee_sponsorship_histories.date_assigned', '>=', $startDate);
+                    }
+
+                    if ($endDate) {
+                        $query->where('employee_sponsorship_histories.date_assigned', '<=', $endDate);
+                    }
+
+                    // Only select the record with the maximum expiry date per user
+                    $query->whereRaw('employee_sponsorship_histories.expiry_date = (SELECT MAX(esh.expiry_date) FROM employee_sponsorship_histories esh WHERE esh.user_id = employee_sponsorship_histories.user_id)');
+
+                    return $query;
                 });
+
+                return $query;
             })
-            ->when(!empty(request()->end_sponsorship_date_assigned), function ($query) {
-                return $query->whereHas("sponsorship_details", function ($query) {
-                    $query->where("employee_sponsorship_histories.date_assigned", "<=", (request()->end_sponsorship_date_assigned . ' 23:59:59'));
+            ->when(request()->filled("sponsorship_expiry_date"), function ($query) {
+                // Split the date range string into start and end dates
+                $dates = explode(',', request()->input("sponsorship_expiry_date"));
+                $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                // Filter based on the passport details relationship
+                $query->whereHas("sponsorship_details", function ($query) use ($startDate, $endDate) {
+                    if ($startDate) {
+                        $query->where('employee_sponsorship_histories.expiry_date', '>=', $startDate);
+                    }
+
+                    if ($endDate) {
+                        $query->where('employee_sponsorship_histories.expiry_date', '<=', $endDate);
+                    }
+
+                    // Only select the record with the maximum expiry date per user
+                    $query->whereRaw('employee_sponsorship_histories.expiry_date = (SELECT MAX(esh.expiry_date) FROM employee_sponsorship_histories esh WHERE esh.user_id = employee_sponsorship_histories.user_id)');
+
+                    return $query;
                 });
+
+                return $query;
             })
 
-            ->when(!empty(request()->sponsorship_date_assigned), function ($query) {
-                $data_pairs = explode(',', request()->sponsorship_date_assigned);
 
-                $start_sponsorship_date_assigned = !empty($data_pairs[0]) ? $data_pairs[0] : "";
-                $end_sponsorship_date_assigned = !empty($data_pairs[1]) ? $data_pairs[1] : "";
-
-                return $query->when(!empty($start_sponsorship_date_assigned), function ($query) use ($start_sponsorship_date_assigned, $end_sponsorship_date_assigned) {
-                    return $query->whereHas("sponsorship_details", function ($query)  use ($start_sponsorship_date_assigned) {
-                        $query->where("employee_sponsorship_histories.date_assigned", ">=", ($start_sponsorship_date_assigned));
-                    });
-                })
-                    ->when(!empty($end_sponsorship_date_assigned), function ($query) use ($end_sponsorship_date_assigned) {
-                        return $query->whereHas("sponsorship_details", function ($query)  use ($end_sponsorship_date_assigned) {
-                            $query->where("employee_sponsorship_histories.date_assigned", "<=", ($end_sponsorship_date_assigned . ' 23:59:59'));
-                        });
-                    });
-            })
-
-            ->when(!empty(request()->sponsorship_expiry_date), function ($query) {
-                $data_pairs = explode(',', request()->sponsorship_expiry_date);
-
-                $start_sponsorship_expiry_date = !empty($data_pairs[0]) ? $data_pairs[0] : "";
-                $end_sponsorship_expiry_date = !empty($data_pairs[1]) ? $data_pairs[1] : "";
-
-                return $query->when(!empty($start_sponsorship_date_assigned), function ($query) use ($start_sponsorship_expiry_date) {
-                    return $query->whereHas("sponsorship_details", function ($query)  use ($start_sponsorship_expiry_date) {
-                        $query->where("employee_sponsorship_histories.expiry_date", ">=", ($start_sponsorship_expiry_date));
-                    });
-                })
-                    ->when(!empty($end_sponsorship_date_assigned), function ($query) use ($end_sponsorship_expiry_date) {
-                        return $query->whereHas("sponsorship_details", function ($query)  use ($end_sponsorship_expiry_date) {
-                            $query->where("employee_sponsorship_histories.expiry_date", "<=", ($end_sponsorship_expiry_date . ' 23:59:59'));
-                        });
-                    });
-            })
 
 
 

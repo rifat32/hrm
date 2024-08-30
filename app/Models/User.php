@@ -320,6 +320,31 @@ class User extends Authenticatable
     }
 
 
+    public function sponsorship_details()
+    {
+        $issue_date_column = 'date_assigned';
+        $expiry_date_column = 'expiry_date';
+
+
+        return $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
+            ->where($issue_date_column, '<', now())
+            ->joinSub(
+                EmployeeSponsorshipHistory::select('user_id', $expiry_date_column)
+                    ->whereColumn('user_id', 'employee_sponsorship_histories.user_id')
+                    ->where($issue_date_column, '<', now())
+                    ->orderBy($expiry_date_column, 'DESC')
+                    ->limit(1),
+                'latest_data_expiry',
+                function ($join) use ($expiry_date_column) {
+                    $join->on('employee_sponsorship_histories.user_id', '=', 'latest_data_expiry.user_id')
+                         ->on('employee_sponsorship_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
+                }
+            )
+            ->orderByDesc('employee_sponsorship_histories.id');
+    }
+
+
+
 
     public function passport_detail()
     {
@@ -367,28 +392,6 @@ class User extends Authenticatable
             ->orderByDesc('employee_visa_detail_histories.id');
     }
 
-    public function sponsorship_details()
-    {
-        $issue_date_column = 'date_assigned';
-        $expiry_date_column = 'expiry_date';
-
-
-        return $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
-            ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeeSponsorshipHistory::select('user_id', $expiry_date_column)
-                    ->whereColumn('user_id', 'employee_sponsorship_histories.user_id')
-                    ->where($issue_date_column, '<', now())
-                    ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_sponsorship_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_sponsorship_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
-            ->orderByDesc('employee_sponsorship_histories.id');
-    }
 
 
 
