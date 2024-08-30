@@ -72,20 +72,20 @@ trait AttendanceUtil
 
         if (!empty($work_location->is_geo_location_enabled)) {
             if (empty($latitude) || empty($longitude)) {
-                throw new Exception("Geo-location mismatch: Latitude or longitude is missing for verification.", 401);
+                throw new Exception("Geo-location mismatch: Latitude or longitude is missing for verification.", 403);
             }
 
             $isWithin = $this->isLocationWithinBounds($latitude, $longitude, $work_location->latitude, $work_location->longitude, $work_location->max_radius);
 
             if (!$isWithin) {
-                throw new Exception("Geo-location mismatch: The provided latitude and longitude do not fall within the expected boundaries for this work location.", 401);
+                throw new Exception("Geo-location mismatch: The provided latitude and longitude do not fall within the expected boundaries for this work location.", 403);
             }
         }
 
 
             if (!empty($work_location->is_ip_enabled)) {
                 if ($work_location->ip_address != request()->ip()) {
-                    throw new Exception("IP address mismatch: The provided IP address does not match the expected IP address for this work location.", 401);
+                    throw new Exception("IP address mismatch: The provided IP address does not match the expected IP address for this work location.", 403);
                 }
 
             }

@@ -213,7 +213,12 @@ class AttendanceController extends Controller
             $item["out_time"] = $item["in_time"];
         }
 
-        $this->validateWorkLocation($work_location,$item["out_latitude"],$item["out_longitude"]);
+        $this->validateWorkLocation($work_location,$item["in_latitude"],$item["in_longitude"]);
+
+
+        if(!empty($item["out_latitude"]) && !empty($item["out_longitude"])) {
+            $this->validateWorkLocation($work_location,$item["out_latitude"],$item["out_longitude"]);
+        }
         return $item;
     })
     ->toArray();
