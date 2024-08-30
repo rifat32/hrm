@@ -354,33 +354,47 @@ class User extends Authenticatable
     public function pension_detail()
     {
         return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
-            ->where(function ($query) {
-                // Include conditions based on the user's pension eligibility status
-                $query->where(function ($query) {
-                    $query->where('users.pension_eligible', 1)
-                          ->where('employee_pension_histories.pension_enrollment_issue_date', '<', now());
-                })
-                ->orWhere(function ($query) {
-                    $query->where('users.pension_eligible', 0);
-                });
+
+        ->where(function ($query) {
+            // Include conditions based on the user's pension eligibility status
+            $query->where(function ($query) {
+                $query->
+                whereHas('employee', function ($query) {
+                    $query->where('users.pension_eligible', 1);
+                  })
+
+                ->where('employee_pension_histories.pension_enrollment_issue_date', '<', now());
             })
-            ->orderByDesc('employee_pension_histories.id');
+            ->orWhere(function ($query) {
+                $query->whereHas('employee', function ($query) {
+                    $query->where('users.pension_eligible', 0);
+                  });
+            });
+        })
+        ->orderByDesc('employee_pension_histories.id');
     }
 
     public function pension_details()
     {
         return $this->hasOne(EmployeePensionHistory::class, 'user_id', 'id')
-            ->where(function ($query) {
-                // Include conditions based on the user's pension eligibility status
-                $query->where(function ($query) {
-                    $query->where('users.pension_eligible', 1)
-                          ->where('employee_pension_histories.pension_enrollment_issue_date', '<', now());
-                })
-                ->orWhere(function ($query) {
-                    $query->where('users.pension_eligible', 0);
-                });
+
+        ->where(function ($query) {
+            // Include conditions based on the user's pension eligibility status
+            $query->where(function ($query) {
+                $query->
+                whereHas('employee', function ($query) {
+                    $query->where('users.pension_eligible', 1);
+                  })
+
+                ->where('employee_pension_histories.pension_enrollment_issue_date', '<', now());
             })
-            ->orderByDesc('employee_pension_histories.id');
+            ->orWhere(function ($query) {
+                $query->whereHas('employee', function ($query) {
+                    $query->where('users.pension_eligible', 0);
+                  });
+            });
+        })
+        ->orderByDesc('employee_pension_histories.id');
     }
 
 
@@ -390,22 +404,20 @@ class User extends Authenticatable
         $issue_date_column = 'passport_issue_date';
         $expiry_date_column = 'passport_expiry_date';
 
-        // Select the latest employee passport details by user ID and maximum expiry date
-        $latestExpirySubQuery = EmployeePassportDetailHistory::select('user_id', DB::raw("MAX($expiry_date_column) as $expiry_date_column"))
-            ->where($issue_date_column, '<', now())
-            ->groupBy('user_id');
-
-        // Join the employee passport details with the subquery to get the most recent expiry date
         return $this->hasOne(EmployeePassportDetailHistory::class, 'user_id', 'id')
+            ->where($issue_date_column, '<', now())
             ->joinSub(
-                $latestExpirySubQuery,
+                EmployeePassportDetailHistory::select('user_id', $expiry_date_column)
+                    ->whereColumn('user_id', 'employee_passport_detail_histories.user_id')
+                    ->where($issue_date_column, '<', now())
+                    ->orderBy($expiry_date_column, 'DESC')
+                    ->limit(1),
                 'latest_data_expiry',
                 function ($join) use ($expiry_date_column) {
                     $join->on('employee_passport_detail_histories.user_id', '=', 'latest_data_expiry.user_id')
                          ->on('employee_passport_detail_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
                 }
             )
-            ->where('employee_passport_detail_histories.' . $issue_date_column, '<', now())
             ->orderByDesc('employee_passport_detail_histories.id');
     }
 

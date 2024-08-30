@@ -37,28 +37,7 @@ class DropdownOptionsController extends Controller
 
  private function get_work_locations($business_created_by,$fields=[]) {
    $work_locations = WorkLocation::where(function($query) use($business_created_by) {
-    $query->where('work_locations.business_id', NULL)
-    ->where('work_locations.is_default', 1)
-    ->where('work_locations.is_active', 1)
-    ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-        $q->whereIn("disabled_work_locations.created_by", [$business_created_by]);
-    })
-    ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-        $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
-    })
-
-
-
-    ->orWhere(function ($query) use( $business_created_by){
-        $query->where('work_locations.business_id', NULL)
-            ->where('work_locations.is_default', 0)
-            ->where('work_locations.created_by', $business_created_by)
-            ->where('work_locations.is_active', 1)
-            ->whereDoesntHave("disabled", function($q) {
-                $q->whereIn("disabled_work_locations.business_id",[auth()->user()->business_id]);
-            });
-    })
-    ->orWhere(function ($query)  {
+    $query->where(function ($query)  {
         $query->where('work_locations.business_id', auth()->user()->business_id)
         ->where('work_locations.is_active', 1);
 
@@ -74,28 +53,8 @@ class DropdownOptionsController extends Controller
 
  private function get_designations($business_created_by,$fields=[]) {
     $designations = Designation::where(function($query) use($business_created_by) {
-     $query->where('designations.business_id', NULL)
-     ->where('designations.is_default', 1)
-     ->where('designations.is_active', 1)
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_designations.created_by", [$business_created_by]);
-     })
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
-     })
-
-
-
-     ->orWhere(function ($query) use( $business_created_by){
-         $query->where('designations.business_id', NULL)
-             ->where('designations.is_default', 0)
-             ->where('designations.created_by', $business_created_by)
-             ->where('designations.is_active', 1)
-             ->whereDoesntHave("disabled", function($q) {
-                 $q->whereIn("disabled_designations.business_id",[auth()->user()->business_id]);
-             });
-     })
-     ->orWhere(function ($query)  {
+     $query
+     ->where(function ($query)  {
          $query->where('designations.business_id', auth()->user()->business_id)
          ->where('designations.is_active', 1);
 
@@ -111,28 +70,7 @@ class DropdownOptionsController extends Controller
 
   private function get_employment_statuses($business_created_by,$fields=[]) {
     $employment_statuses = EmploymentStatus::where(function($query) use($business_created_by) {
-     $query->where('employment_statuses.business_id', NULL)
-     ->where('employment_statuses.is_default', 1)
-     ->where('employment_statuses.is_active', 1)
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.created_by", [$business_created_by]);
-     })
-     ->whereDoesntHave("disabled", function($q) use($business_created_by) {
-         $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-     })
-
-
-
-     ->orWhere(function ($query) use( $business_created_by){
-         $query->where('employment_statuses.business_id', NULL)
-             ->where('employment_statuses.is_default', 0)
-             ->where('employment_statuses.created_by', $business_created_by)
-             ->where('employment_statuses.is_active', 1)
-             ->whereDoesntHave("disabled", function($q) {
-                 $q->whereIn("disabled_employment_statuses.business_id",[auth()->user()->business_id]);
-             });
-     })
-     ->orWhere(function ($query)  {
+     $query->where(function ($query)  {
          $query->where('employment_statuses.business_id', auth()->user()->business_id)
          ->where('employment_statuses.is_active', 1);
 

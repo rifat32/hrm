@@ -240,13 +240,17 @@ DB::commit();
                 $request_data["business_id"] = auth()->user()->business_id;
 
 
-                $current_user_id =  $request_data["user_id"];
-                $issue_date_column = 'pension_enrollment_issue_date';
-                $expiry_date_column = 'pension_re_enrollment_due_date';
+
+
+                $user = User::where([
+                    "id" => $request_data["user_id"]
+                ])
+                   ->first();
+
+                $current_pension = $user->pension_detail;
 
 
 
-                $current_pension = $this->getCurrentPensionHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $issue_date_column, $expiry_date_column);
 
 
 
@@ -280,7 +284,10 @@ DB::commit();
                             "pension_eligible" => $user_pension_history->pension_eligible
                         ]);
 
+
                     }
+
+
 
 
                     DB::commit();
@@ -459,6 +466,32 @@ DB::commit();
             $expiry_date = 'pension_re_enrollment_due_date';
             $current_pension = $this->getCurrentPensionHistory(EmployeePensionHistory::class, 'current_pension_id', $current_user_id, $issue_date, $expiry_date);
 
+
+
+            if(request()->filled("user_id")){
+                if(!EmployeePensionHistory::where([
+                    'user_id' => request()->input("user_id")
+                ])
+                ->exists()
+                ){
+                    EmployeePensionHistory::create([
+                        'user_id' => request()->input("user_id"),
+                        'pension_eligible' => false,
+                        'pension_enrollment_issue_date' => NULL,
+                        'pension_letters' => [],
+                        'pension_scheme_status' => NULL,
+                        'pension_scheme_opt_out_date' => NULL,
+                        'pension_re_enrollment_due_date' => NULL,
+                        "is_manual" => 0,
+                        "from_date" => now(),
+                        "to_date" => NULL,
+                        "business_id" => auth()->user()->business_id,
+                        'created_by' => auth()->user()->id
+
+                    ]);
+                }
+
+            }
 
 
 
