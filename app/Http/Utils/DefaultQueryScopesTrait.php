@@ -73,7 +73,7 @@ trait DefaultQueryScopesTrait
     {
         return $query->where($table . '.business_id', NULL)
                      ->where($table . '.is_default', 1)
-                     ->when(isset(request()->is_active), function ($query) use ($table) {
+                     ->when(request()->filled("is_active"), function ($query) use ($table) {
                          return $query->where($table . '.is_active', request()->boolean('is_active'));
                      });
     }

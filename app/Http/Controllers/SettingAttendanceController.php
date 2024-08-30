@@ -278,7 +278,7 @@ class SettingAttendanceController extends Controller
                 if (auth()->user()->hasRole('superadmin')) {
                     return $query->where('setting_attendances.business_id', NULL)
                         ->where('setting_attendances.is_default', 1)
-                        ->when(isset($request->is_active), function ($query) use ($request) {
+                        ->when(request()->filled("is_active"), function ($query) use ($request) {
                             return $query->where('setting_attendances.is_active', request()->boolean("is_active"));
                         });
                 } else {

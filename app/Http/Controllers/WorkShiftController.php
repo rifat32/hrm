@@ -33,10 +33,9 @@ class WorkShiftController extends Controller
     protected $workShiftHistoryComponent;
 
 
-    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent, )
+    public function __construct(WorkShiftHistoryComponent $workShiftHistoryComponent,)
     {
         $this->workShiftHistoryComponent = $workShiftHistoryComponent;
-
     }
 
 
@@ -159,7 +158,7 @@ class WorkShiftController extends Controller
 
         try {
 
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('work_shift_create')) {
@@ -169,32 +168,29 @@ class WorkShiftController extends Controller
                 }
                 $request_data = $request->validated();
 
-                if(empty($request_data['departments'])) {
+                if (empty($request_data['departments'])) {
 
                     $request_data['departments'] = Department::where(
                         [
 
-                        "business_id" => auth()->user()->business_id,
-                        "manager_id" => auth()->user()->id
+                            "business_id" => auth()->user()->business_id,
+                            "manager_id" => auth()->user()->id
 
                         ]
 
-                        )
+                    )
                         ->pluck("id");
-
                 }
 
-if($request_data["type"] !== "flexible") {
-    $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
-    if(!$check_work_shift_details["ok"]) {
+                if ($request_data["type"] !== "flexible") {
+                    $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
+                    if (!$check_work_shift_details["ok"]) {
 
-        throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
-    }
-
-} else {
-    $this->isModuleEnabled("flexible_shifts");
-
-}
+                        throw new Exception(json_encode($check_work_shift_details["error"]), $check_work_shift_details["status"]);
+                    }
+                } else {
+                    $this->isModuleEnabled("flexible_shifts");
+                }
 
 
 
@@ -214,10 +210,10 @@ if($request_data["type"] !== "flexible") {
 
                 $request_data['details'] = collect($request_data['details'])->map(function ($el) {
 
-if($el["is_weekend"]) {
-    $el["start_at"] = NULL;
-    $el["end_at"] = NULL;
-}
+                    if ($el["is_weekend"]) {
+                        $el["start_at"] = NULL;
+                        $el["end_at"] = NULL;
+                    }
                     return $el;
                 })->toArray();
                 $work_shift->details()->createMany($request_data['details']);
@@ -229,13 +225,13 @@ if($el["is_weekend"]) {
                 $employee_work_shift_history_data["from_date"] = auth()->user()->business->start_date;
                 $employee_work_shift_history_data["to_date"] = NULL;
 
-                 $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-                 $employee_work_shift_history->departments()->sync($request_data['departments']);
+                $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+                $employee_work_shift_history->departments()->sync($request_data['departments']);
 
 
 
 
-                 $employee_work_shift_history->details()->createMany($request_data['details']);
+                $employee_work_shift_history->details()->createMany($request_data['details']);
 
 
 
@@ -364,7 +360,7 @@ if($el["is_weekend"]) {
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             return DB::transaction(function () use ($request) {
 
                 if (!$request->user()->hasPermissionTo('work_shift_update')) {
@@ -375,20 +371,19 @@ if($el["is_weekend"]) {
 
 
                 $request_data = $request->validated();
-                if(empty($request_data['departments'])) {
-                    $request_data['departments'] = [Department::where("business_id",auth()->user()->business_id)->whereNull("parent_id")->first()->id];
+                if (empty($request_data['departments'])) {
+                    $request_data['departments'] = [Department::where("business_id", auth()->user()->business_id)->whereNull("parent_id")->first()->id];
                 }
 
 
 
 
-                if($request_data["type"] !== "flexible") {
+                if ($request_data["type"] !== "flexible") {
                     $check_work_shift_details =  $this->checkWorkShiftDetails($request_data['details']);
-                    if(!$check_work_shift_details["ok"]) {
+                    if (!$check_work_shift_details["ok"]) {
 
-                        throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
+                        throw new Exception(json_encode($check_work_shift_details["error"]), $check_work_shift_details["status"]);
                     }
-
                 } else {
                     $this->isModuleEnabled("flexible_shifts");
                 }
@@ -406,19 +401,19 @@ if($el["is_weekend"]) {
 
                 $work_shift  =  tap(WorkShift::where($work_shift_query_params))->update(
                     collect($request_data)->only([
-        'name',
-        'type',
-        "description",
+                        'name',
+                        'type',
+                        "description",
 
-        'is_personal',
-        'break_type',
-        'break_hours',
+                        'is_personal',
+                        'break_type',
+                        'break_hours',
 
-        // 'start_date',
-        // 'end_date',
-        // "is_active",
-        // "business_id",
-        // "created_by"
+                        // 'start_date',
+                        // 'end_date',
+                        // "is_active",
+                        // "business_id",
+                        // "created_by"
 
                     ])->toArray()
                 )
@@ -447,14 +442,14 @@ if($el["is_weekend"]) {
 
 
                 $fields_to_check = [
-                'name',
-                'type',
-                "description",
+                    'name',
+                    'type',
+                    "description",
 
-                'is_personal',
-                'break_type',
-                'break_hours'
-            ];
+                    'is_personal',
+                    'break_type',
+                    'break_hours'
+                ];
                 $fields_changed = false; // Initialize to false
                 foreach ($fields_to_check as $field) {
                     $value1 = $work_shift_prev->$field;
@@ -467,38 +462,31 @@ if($el["is_weekend"]) {
                 }
 
 
-if(!$fields_changed){
-    $fields_to_check = [
-        'work_shift_id',
-        'day',
-        "start_at",
-        'end_at',
-        'is_weekend',
-    ];
-        $fields_changed = false; // Initialize to false
-        foreach ($fields_to_check as $field) {
+                if (!$fields_changed) {
+                    $fields_to_check = [
+                        'work_shift_id',
+                        'day',
+                        "start_at",
+                        'end_at',
+                        'is_weekend',
+                    ];
+                    $fields_changed = false; // Initialize to false
+                    foreach ($fields_to_check as $field) {
 
-            foreach($work_shift_prev_details as $key=>$prev_detail){
-                   $value1 = $prev_detail[$field];
-                    $value2 = $work_shift->details[$key]->$field;
-
-
+                        foreach ($work_shift_prev_details as $key => $prev_detail) {
+                            $value1 = $prev_detail[$field];
+                            $value2 = $work_shift->details[$key]->$field;
 
 
-                    if ($value1 != $value2) {
-                        $fields_changed = true;
-                        break 2;
+
+
+                            if ($value1 != $value2) {
+                                $fields_changed = true;
+                                break 2;
+                            }
+                        }
                     }
-
-
-
-
-            }
-
-        }
-
-
-}
+                }
 
 
 
@@ -511,42 +499,38 @@ if(!$fields_changed){
                     WorkShiftHistory::where([
                         "to_date" => NULL
                     ])
-                    ->where("work_shift_id",$work_shift_prev->id)
-                    // ->whereHas('users',function($query) use($work_shift_prev)  {
-                    //     $query->whereIn("users.id",$work_shift_prev->users()->pluck("users.id"));
-                    // })
-                    ->update([
-                        "to_date" => now()
-                    ]);
+                        ->where("work_shift_id", $work_shift_prev->id)
+                        // ->whereHas('users',function($query) use($work_shift_prev)  {
+                        //     $query->whereIn("users.id",$work_shift_prev->users()->pluck("users.id"));
+                        // })
+                        ->update([
+                            "to_date" => now()
+                        ]);
 
-                    $last_inactive_date = WorkShiftHistory::
-                        where("work_shift_id",$work_shift->id)
+                    $last_inactive_date = WorkShiftHistory::where("work_shift_id", $work_shift->id)
                         ->latest()->first();
 
-        $employee_work_shift_history_data = $work_shift->toArray();
-        $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-        $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
-        $employee_work_shift_history_data["to_date"] = NULL;
-         $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-         $employee_work_shift_history->details()->createMany($request_data['details']);
-         $employee_work_shift_history->departments()->sync($request_data['departments']);
+                    $employee_work_shift_history_data = $work_shift->toArray();
+                    $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+                    $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
+                    $employee_work_shift_history_data["to_date"] = NULL;
+                    $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+                    $employee_work_shift_history->details()->createMany($request_data['details']);
+                    $employee_work_shift_history->departments()->sync($request_data['departments']);
 
 
 
 
 
-        //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"));
+                    //  $employee_work_shift_history->users()->sync($work_shift->users()->pluck("id"));
 
-        $user_ids = $work_shift->users()->pluck('users.id')->toArray();
+                    $user_ids = $work_shift->users()->pluck('users.id')->toArray();
 
-        // Define the additional pivot data for each user
-        $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
-            return [$user_id => ['from_date' => now(), 'to_date' => null]];
-        });
-        $employee_work_shift_history->users()->sync($pivot_data);
-
-
-
+                    // Define the additional pivot data for each user
+                    $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
+                        return [$user_id => ['from_date' => now(), 'to_date' => null]];
+                    });
+                    $employee_work_shift_history->users()->sync($pivot_data);
                 }
 
 
@@ -568,7 +552,7 @@ if(!$fields_changed){
     }
 
 
-  /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/work-shifts/toggle-active",
@@ -623,28 +607,28 @@ if(!$fields_changed){
      */
 
 
-     public function toggleActiveWorkShift(GetIdRequest $request)
-     {
+    public function toggleActiveWorkShift(GetIdRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $work_shift = WorkShift::where([
                 "id" => $request_data["id"],
                 "business_id" => auth()->user()->business_id
             ])
-            ->whereHas("departments",function($query) use($all_manager_department_ids) {
-                $query->whereIn("departments.id",$all_manager_department_ids);
-            })
+                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
+                })
 
 
                 ->first();
@@ -656,35 +640,30 @@ if(!$fields_changed){
             }
             $is_active = !$work_shift->is_active;
 
-if(!$is_active) {
-// Assuming you have a 'Details' model for your 'details' table
-// Transform the retrieved data into the required structure using the collection
-$details = $work_shift->details->map(function ($detail) {
-    return [
-        'day' => $detail->day,
-        'is_weekend' => (bool) $detail->is_weekend,
-        'start_at' => $detail->start_at,
-        'end_at' => $detail->end_at,
-    ];
-});
+            if (!$is_active) {
+                // Assuming you have a 'Details' model for your 'details' table
+                // Transform the retrieved data into the required structure using the collection
+                $details = $work_shift->details->map(function ($detail) {
+                    return [
+                        'day' => $detail->day,
+                        'is_weekend' => (bool) $detail->is_weekend,
+                        'start_at' => $detail->start_at,
+                        'end_at' => $detail->end_at,
+                    ];
+                });
 
 
 
-if($work_shift->type !== "flexible") {
-    $check_work_shift_details =  $this->checkWorkShiftDetails($details);
-    if(!$check_work_shift_details["ok"]) {
+                if ($work_shift->type !== "flexible") {
+                    $check_work_shift_details =  $this->checkWorkShiftDetails($details);
+                    if (!$check_work_shift_details["ok"]) {
 
-        throw new Exception(json_encode($check_work_shift_details["error"]),$check_work_shift_details["status"]);
-    }
-} else {
-    $this->isModuleEnabled("flexible_shifts");
-}
-
-
-
-
-
-}
+                        throw new Exception(json_encode($check_work_shift_details["error"]), $check_work_shift_details["status"]);
+                    }
+                } else {
+                    $this->isModuleEnabled("flexible_shifts");
+                }
+            }
 
 
 
@@ -693,34 +672,33 @@ if($work_shift->type !== "flexible") {
 
 
 
-             $work_shift->update([
-                 'is_active' => $is_active
-             ]);
+            $work_shift->update([
+                'is_active' => $is_active
+            ]);
 
 
 
 
-             if($is_active) {
+            if ($is_active) {
 
-                $last_inactive_date = WorkShiftHistory::
-                    where("work_shift_id",$work_shift->id)
+                $last_inactive_date = WorkShiftHistory::where("work_shift_id", $work_shift->id)
                     ->latest()->first();
 
 
-                    $employee_work_shift_history_data = $work_shift->toArray();
+                $employee_work_shift_history_data = $work_shift->toArray();
 
-                    $employee_work_shift_history_data["is_active"] = $is_active;
+                $employee_work_shift_history_data["is_active"] = $is_active;
 
-                    $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
-                    $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
-                    $employee_work_shift_history_data["to_date"] = NULL;
-                    $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
-                    $employee_work_shift_history->details()->createMany($work_shift->details->toArray());
-                    $user_ids = $work_shift->users()->pluck('users.id')->toArray();
-                    $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
+                $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
+                $employee_work_shift_history_data["from_date"] = $last_inactive_date->to_date;
+                $employee_work_shift_history_data["to_date"] = NULL;
+                $employee_work_shift_history =  WorkShiftHistory::create($employee_work_shift_history_data);
+                $employee_work_shift_history->details()->createMany($work_shift->details->toArray());
+                $user_ids = $work_shift->users()->pluck('users.id')->toArray();
+                $pivot_data = collect($user_ids)->mapWithKeys(function ($user_id) {
                     return [$user_id => ['from_date' => now(), 'to_date' => null]];
-                    });
-                    $employee_work_shift_history->users()->sync($pivot_data);
+                });
+                $employee_work_shift_history->users()->sync($pivot_data);
 
                 // $employee_work_shift_history_data = $work_shift->toArray();
                 // $employee_work_shift_history_data["work_shift_id"] = $work_shift->id;
@@ -737,32 +715,30 @@ if($work_shift->type !== "flexible") {
                 // return [$user_id => ['from_date' => now(), 'to_date' => null]];
                 // });
                 // $employee_work_shift_history->users()->sync($pivot_data);
-             } else {
+            } else {
 
                 WorkShiftHistory::where([
                     "to_date" => NULL
                 ])
-                ->where("work_shift_id",$work_shift->id)
-                // ->whereHas('users',function($query) use($work_shift)  {
-                //     $query->whereIn("users.id",$work_shift->users()->pluck("users.id"));
-                // })
-                ->update([
-                    "to_date" => now()
-                ]);
-
-
-             }
+                    ->where("work_shift_id", $work_shift->id)
+                    // ->whereHas('users',function($query) use($work_shift)  {
+                    //     $query->whereIn("users.id",$work_shift->users()->pluck("users.id"));
+                    // })
+                    ->update([
+                        "to_date" => now()
+                    ]);
+            }
 
 
 
 
 
-             return response()->json(['message' => 'department status updated successfully'], 200);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response()->json(['message' => 'department status updated successfully'], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Get(
@@ -900,22 +876,22 @@ if($work_shift->type !== "flexible") {
     public function getWorkShifts(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('work_shift_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
-        // $business_times =  BusinessTime::where([
-        //         "is_weekend" => 1,
-        //         "business_id" => auth()->user()->business_id,
-        //     ])->get();
+            // $business_times =  BusinessTime::where([
+            //         "is_weekend" => 1,
+            //         "business_id" => auth()->user()->business_id,
+            //     ])->get();
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $work_shifts_query = WorkShift::with("details","departments","users","work_locations");
+            $work_shifts_query = WorkShift::with("details", "departments", "users", "work_locations");
 
-            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($all_manager_department_ids,$work_shifts_query)
+            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($all_manager_department_ids, $work_shifts_query)
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("work_shifts.id", $request->order_by);
@@ -929,17 +905,17 @@ if($work_shift->type !== "flexible") {
                 });
 
 
-                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                    if (strtoupper($request->response_type) == 'PDF') {
-                        $pdf = PDF::loadView('pdf.work_shifts', ["work_shifts" => $work_shifts]);
-                        return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                    } elseif (strtoupper($request->response_type) === 'CSV') {
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.work_shifts', ["work_shifts" => $work_shifts]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                } elseif (strtoupper($request->response_type) === 'CSV') {
 
-                        return Excel::download(new WorkShiftsExport($work_shifts), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
-                    }
-                } else {
-                    return response()->json($work_shifts, 200);
+                    return Excel::download(new WorkShiftsExport($work_shifts), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
                 }
+            } else {
+                return response()->json($work_shifts, 200);
+            }
 
 
             return response()->json($work_shifts, 200);
@@ -1082,41 +1058,41 @@ if($work_shift->type !== "flexible") {
      *     )
      */
 
-     public function getWorkShiftsV2(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('work_shift_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+    public function getWorkShiftsV2(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('work_shift_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $work_shifts_query = WorkShift::with(
+            $work_shifts_query = WorkShift::with(
 
-              [
-                "departments" => function ($query) {
-                    $query->select(
-                        'departments.id',
-                        'departments.name',
-                    );
-                },
-                "work_locations" => function ($query) {
-                    $query->select(
-                        'work_locations.id',
-                        'work_locations.name',
-                    );
-                },
+                [
+                    "departments" => function ($query) {
+                        $query->select(
+                            'departments.id',
+                            'departments.name',
+                        );
+                    },
+                    "work_locations" => function ($query) {
+                        $query->select(
+                            'work_locations.id',
+                            'work_locations.name',
+                        );
+                    },
 
 
 
                 ]
             );
 
-            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($all_manager_department_ids,$work_shifts_query)
+            $work_shifts = $this->workShiftHistoryComponent->updateWorkShiftsQuery($all_manager_department_ids, $work_shifts_query)
 
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("work_shifts.id", $request->order_by);
@@ -1126,17 +1102,17 @@ if($work_shift->type !== "flexible") {
                 ->select(
 
 
-         "work_shifts.id",
-"work_shifts.name",
-"work_shifts.type",
-"work_shifts.break_type",
-"work_shifts.business_id",
+                    "work_shifts.id",
+                    "work_shifts.name",
+                    "work_shifts.type",
+                    "work_shifts.break_type",
+                    "work_shifts.business_id",
 
-"work_shifts.description",
-"work_shifts.is_active",
-"work_shifts.is_business_default",
-"work_shifts.is_default",
-"work_shifts.is_personal",
+                    "work_shifts.description",
+                    "work_shifts.is_active",
+                    "work_shifts.is_business_default",
+                    "work_shifts.is_default",
+                    "work_shifts.is_personal",
 
                 )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
@@ -1146,27 +1122,27 @@ if($work_shift->type !== "flexible") {
                 });
 
 
-                if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
-                    // if (strtoupper($request->response_type) == 'PDF') {
-                    //     $pdf = PDF::loadView('pdf.work_shifts', ["work_shifts" => $work_shifts]);
-                    //     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
-                    // } elseif (strtoupper($request->response_type) === 'CSV') {
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                // if (strtoupper($request->response_type) == 'PDF') {
+                //     $pdf = PDF::loadView('pdf.work_shifts', ["work_shifts" => $work_shifts]);
+                //     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                // } elseif (strtoupper($request->response_type) === 'CSV') {
 
-                    //     return Excel::download(new WorkShiftsExport($work_shifts), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
-                    // }
-                } else {
-                    return response()->json($work_shifts, 200);
-                }
-
-
+                //     return Excel::download(new WorkShiftsExport($work_shifts), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                // }
+            } else {
+                return response()->json($work_shifts, 200);
+            }
 
 
-             return response()->json($work_shifts, 200);
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+            return response()->json($work_shifts, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
     /**
      *
      * @OA\Get(
@@ -1225,7 +1201,7 @@ if($work_shift->type !== "flexible") {
     public function getWorkShiftById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('work_shift_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1235,32 +1211,30 @@ if($work_shift->type !== "flexible") {
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-            $work_shift =  WorkShift::with("details","departments","users","work_locations")
-            ->where([
-                "id" => $id
-            ])
-            ->where(function($query) use($all_manager_department_ids) {
-                $query
+            $work_shift =  WorkShift::with("details", "departments", "users", "work_locations")
                 ->where([
-                    "work_shifts.business_id" => auth()->user()->business_id
+                    "id" => $id
                 ])
-                ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
+                ->where(function ($query) use ($all_manager_department_ids) {
+                    $query
+                        ->where([
+                            "work_shifts.business_id" => auth()->user()->business_id
+                        ])
+                        ->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                            $query->whereIn("departments.id", $all_manager_department_ids);
+                        })
+
+
+                    ;
                 })
 
-
-                ;
-
-            })
-
-            ->orWhere(function($query){
-                $query->where([
-                    "is_active" => 1,
-                    "business_id" => NULL,
-                    "is_default" => 1
-                ]);
-
-            })
+                ->orWhere(function ($query) {
+                    $query->where([
+                        "is_active" => 1,
+                        "business_id" => NULL,
+                        "is_default" => 1
+                    ]);
+                })
                 ->first();
             if (!$work_shift) {
 
@@ -1274,11 +1248,10 @@ if($work_shift->type !== "flexible") {
         } catch (Exception $e) {
             return $this->sendError($e, 500, $request);
         }
-
     }
 
 
-  /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/work-shifts/get-by-user-id/{user_id}",
@@ -1333,28 +1306,28 @@ if($work_shift->type !== "flexible") {
      */
 
 
-     public function getWorkShiftByUserId($user_id, Request $request)
-     {
+    public function getWorkShiftByUserId($user_id, Request $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-             $user_id = intval($user_id);
-             $request_user_id = auth()->user()->id;
+            $user_id = intval($user_id);
+            $request_user_id = auth()->user()->id;
 
-             $hasPermission = auth()->user()->hasPermissionTo('work_shift_view');
+            $hasPermission = auth()->user()->hasPermissionTo('work_shift_view');
 
-             if ((!$hasPermission && ($request_user_id !== $user_id))) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+            if ((!$hasPermission && ($request_user_id !== $user_id))) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-             $this->validateUserQuery($user_id,$all_manager_department_ids);
+            $this->validateUserQuery($user_id, $all_manager_department_ids);
 
 
             //  $business_times =    BusinessTime::where([
@@ -1365,17 +1338,17 @@ if($work_shift->type !== "flexible") {
 
 
 
-         $work_shift =   $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
+            $work_shift =   $this->workShiftHistoryComponent->getWorkShiftByUserId($user_id);
 
 
 
 
-             return response()->json($work_shift, 200);
-         } catch (Exception $e) {
+            return response()->json($work_shift, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
     /**
      *
@@ -1435,7 +1408,7 @@ if($work_shift->type !== "flexible") {
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('work_shift_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

@@ -185,21 +185,22 @@ class WorkShiftHistoryComponent
         })
 
         ->when(!empty(request()->type), function ($query)  {
-            return $query->where('work_shifts.type', (request()->type));
+            return $query->where('work_shifts.type', request()->type);
         })
 
-        ->when(request()->boolean("is_active"), function ($query)  {
-            return $query->where('work_shifts.is_active', 1);
-    })
+        ->when(request()->filled("is_active"), function ($query)  {
+            return $query->where('work_shifts.is_active', request()->boolean("is_active"));
+         })
 
-        ->when(isset(request()->is_personal), function ($query)  {
-            return $query->where('work_shifts.is_personal', intval(request()->is_personal));
+
+        ->when(request()->filled("is_personal"), function ($query)  {
+            return $query->where('work_shifts.is_personal', request()->boolean("is_personal"));
         })
         ->when(!isset(request()->is_personal), function ($query)  {
             return $query->where('work_shifts.is_personal', 0);
         })
-        ->when(isset(request()->is_default), function ($query)  {
-            return $query->where('work_shifts.is_default', intval(request()->is_personal));
+        ->when(request()->filled("is_default"), function ($query)  {
+            return $query->where('work_shifts.is_default', request()->boolean("is_default"));
         })
         //    ->when(!empty(request()->product_category_id), function ($query)  {
         //        return $query->where('product_category_id', request()->product_category_id);

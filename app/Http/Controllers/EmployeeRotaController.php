@@ -805,8 +805,8 @@ if ($processedDetails->isNotEmpty()) {
 
 
 
-                ->when(isset($request->is_default), function ($query) use ($request) {
-                    return $query->where('employee_rotas.is_default', intval($request->is_default));
+                ->when(request()->filled("is_default"), function ($query) use ($request) {
+                    return $query->where('employee_rotas.is_default', request()->boolean("is_default"));
                 })
 
 

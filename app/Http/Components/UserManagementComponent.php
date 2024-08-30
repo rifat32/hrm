@@ -402,8 +402,8 @@ class UserManagementComponent
                     $query->where("holidays.id", request()->holiday_id);
                 });
             })
-            ->when(isset(request()->is_active), function ($query) {
-                return $query->where('is_active', intval(request()->is_active));
+            ->when(request()->filled("is_active"), function ($query) {
+                return $query->where('is_active', request()->boolean("is_active"));
             })
             ->when(
                 request()->boolean("is_terminated"),
@@ -569,7 +569,7 @@ class UserManagementComponent
             })
 
 
-            
+
 
             ->when(!empty(request()->pension_scheme_status), function ($query) {
                 return $query->whereHas("pension_details", function ($query) {
