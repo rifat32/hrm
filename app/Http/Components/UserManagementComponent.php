@@ -575,34 +575,42 @@ class UserManagementComponent
             })
 
 
-            ->when(!empty(request()->start_passport_expiry_date), function ($query) {
-                return $query->whereHas("passport_details", function ($query) {
-                    $query->where("employee_passport_detail_histories.passport_expiry_date", ">=", request()->start_passport_expiry_date);
+            // ->when(!empty(request()->start_passport_expiry_date), function ($query) {
+            //     return $query->whereHas("passport_details", function ($query) {
+            //         $query->where("employee_passport_detail_histories.passport_expiry_date", ">=", request()->start_passport_expiry_date);
+            //     });
+            // })
+            // ->when(!empty(request()->end_passport_expiry_date), function ($query) {
+            //     return $query->whereHas("passport_details", function ($query) {
+            //         $query->where("employee_passport_detail_histories.passport_expiry_date", "<=", request()->end_passport_expiry_date . ' 23:59:59');
+            //     });
+            // })
+            ->when(request()->filled("passport_expiry_date"), function ($query) {
+                // Split the date range string into start and end dates
+                $dates = explode(',', request()->input("passport_expiry_date"));
+                $startDate = !empty(trim($dates[0])) ? Carbon::parse(trim($dates[0])) : "";
+                $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
+
+                // Filter based on the passport details relationship
+                $query->whereHas("passport_details", function ($query) use ($startDate, $endDate) {
+                    if ($startDate) {
+                        $query->where('employee_passport_detail_histories.passport_expiry_date', '>=', $startDate);
+                    }
+
+                    if ($endDate) {
+                        $query->where('employee_passport_detail_histories.passport_expiry_date', '<=', $endDate);
+                    }
+
+                    // Only select the record with the maximum expiry date per user
+                    $query->whereRaw('employee_passport_detail_histories.passport_expiry_date = (SELECT MAX(epdh.passport_expiry_date) FROM employee_passport_detail_histories epdh WHERE epdh.user_id = employee_passport_detail_histories.user_id)');
+
+                    return $query;
                 });
-            })
-            ->when(!empty(request()->end_passport_expiry_date), function ($query) {
-                return $query->whereHas("passport_details", function ($query) {
-                    $query->where("employee_passport_detail_histories.passport_expiry_date", "<=", request()->end_passport_expiry_date . ' 23:59:59');
-                });
+
+                return $query;
             })
 
-            ->when(!empty(request()->passport_expiry_date), function ($query) {
-                $data_pairs = explode(',', request()->passport_expiry_date);
 
-                $start_date = !empty($data_pairs[0]) ? $data_pairs[0] : "";
-                $end_date = !empty($data_pairs[1]) ? $data_pairs[1] : "";
-
-                return $query->when(!empty($start_date), function ($query) use ($start_date, $end_date) {
-                    return $query->whereHas("passport_details", function ($query)  use ($start_date) {
-                        $query->where("employee_passport_detail_histories.passport_expiry_date", ">=", ($start_date));
-                    });
-                })
-                    ->when(!empty($end_date), function ($query) use ($end_date) {
-                        return $query->whereHas("passport_details", function ($query)  use ($end_date) {
-                            $query->where("employee_passport_detail_histories.passport_expiry_date", "<=", ($end_date . ' 23:59:59'));
-                        });
-                    });
-            })
 
 
 
@@ -646,7 +654,6 @@ class UserManagementComponent
                 $endDate = !empty(trim($dates[1])) ? Carbon::parse(trim($dates[1])) : "";
 
 
-
                $query->whereHas("visa_details", function ($query)  use ($startDate,$endDate) {
                         if ($startDate) {
                             $query->where('employee_visa_detail_histories.visa_expiry_date', '>=', $startDate);
@@ -655,6 +662,11 @@ class UserManagementComponent
                         if ($endDate) {
                             $query->where('employee_visa_detail_histories.visa_expiry_date', '<=', $endDate);
                         }
+
+                        // Only select the record with the maximum expiry date per user
+                    $query->whereRaw('employee_visa_detail_histories.visa_expiry_date = (SELECT MAX(evdh.visa_expiry_date) FROM employee_visa_detail_histories evdh WHERE evdh.user_id = employee_visa_detail_histories.user_id)');
+
+
                         return $query;
 
                     });
