@@ -8,6 +8,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Attendance;
+use App\Models\Business;
 use App\Models\Department;
 use App\Models\EmployeePassportDetailHistory;
 use App\Models\EmployeePensionHistory;
@@ -183,20 +184,20 @@ class DashboardManagementControllerV2 extends Controller
                 "leaves.business_id" => auth()->user()->business_id,
             ]);
         })
-        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+            ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
-        });
+            });
 
 
         $data["individual_total"] = $this->getLeaveData($data_query);
 
-        $year = request()->input('year', Carbon::now()->year);
+
 
         // if (!request()->input("year")) {
         //     throw new Exception("year is required", 400);
         // }
 
-        $last12MonthsDates = $this->getLast12MonthsDates($year);
+        $last12MonthsDates = $this->getLast12MonthsDates(request()->input('year'));
 
         foreach ($last12MonthsDates as $month) {
             $leaveData =  $this->getLeaveData($data_query, $month['start_date'], $month['end_date']);
@@ -360,9 +361,9 @@ class DashboardManagementControllerV2 extends Controller
                 "leaves.business_id" => auth()->user()->business_id,
             ]);
         })
-        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+            ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
-        });
+            });
 
         $leave_statuses = ['pending_approval', 'in_progress', 'approved', 'rejected'];
         foreach ($leave_statuses as $leave_status) {
@@ -437,9 +438,9 @@ class DashboardManagementControllerV2 extends Controller
                 "leaves.business_id" => auth()->user()->business_id,
             ]);
         })
-        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+            ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
-        });
+            });
 
 
 
@@ -522,12 +523,9 @@ class DashboardManagementControllerV2 extends Controller
                 "leaves.business_id" => auth()->user()->business_id,
             ]);
         })
-        ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
+            ->whereHas("leave.employee.department_user.department", function ($query) use ($all_manager_department_ids) {
                 $query->whereIn("departments.id", $all_manager_department_ids);
-        })
-
-
-        ;
+            });
         $leave_statuses = ['pending_approval', 'in_progress', 'approved', 'rejected'];
 
         foreach ($leave_statuses as $leave_status) {
@@ -1416,7 +1414,7 @@ class DashboardManagementControllerV2 extends Controller
 
         $data_query  = EmployeeSponsorshipHistory::whereIn('id', $employee_sponsorship_history_ids)
             ->where($expiry_date_column, ">=", today());
-// @@@crw
+        // @@@crw
 
 
         if ($duration == "today") {
@@ -1967,10 +1965,10 @@ class DashboardManagementControllerV2 extends Controller
             $all_manager_user_ids,
             $data_query,
             [
-                "start_date" => $start_date_of_this_week,
-                "end_date" => $end_date_of_this_week,
-                "previous_start_date" => $start_date_of_previous_week,
-                "previous_end_date" => $end_date_of_previous_week,
+                "start_date" => $start_date_of_this_month,
+                "end_date" => $end_date_of_this_month,
+                "previous_start_date" => $start_date_of_previous_month,
+                "previous_end_date" => $end_date_of_previous_month,
             ]
         );
 
@@ -1988,6 +1986,130 @@ class DashboardManagementControllerV2 extends Controller
 
         return $data;
     }
+
+    public function businesses(
+        $today,
+        $start_date_of_next_month,
+        $end_date_of_next_month,
+        $start_date_of_this_month,
+        $end_date_of_this_month,
+        $start_date_of_previous_month,
+        $end_date_of_previous_month,
+        $start_date_of_next_week,
+        $end_date_of_next_week,
+        $start_date_of_this_week,
+        $end_date_of_this_week,
+        $start_date_of_previous_week,
+        $end_date_of_previous_week,
+        $is_active = null
+    ) {
+        // Initial query with optional filtering by active status
+        $data_query = Business::where("created_by", auth()->user()->id)
+            ->when($is_active !== null, function ($query) use ($is_active) {
+                $query->where(function ($subQuery) use ($is_active) {
+                    if ($is_active) {
+                        // For active or subscribed businesses
+                        $subQuery->where('is_active', 1)
+                            ->where(function ($q) {
+                                $q->where('is_self_registered_businesses', 0) // Automatically subscribed
+                                    ->orWhere(function ($q) {
+                                        $q->where('is_self_registered_businesses', 1)
+                                            ->where(function ($innerQuery) {
+                                                $innerQuery->whereNotNull('trail_end_date')
+                                                    ->where(function ($trailQuery) {
+                                                        $trailQuery->where(function ($trailEndQuery) {
+                                                            $trailEndQuery->where('trail_end_date', '>', now())
+                                                                ->orWhere('trail_end_date', now()->toDateString());
+                                                        })
+                                                        ->orWhereHas('subscriptions', function ($subQuery) {
+                                                            $subQuery->where(function ($subscriptionQuery) {
+                                                                $subscriptionQuery->where('start_date', '<=', now())
+                                                                    ->where(function ($endDateQuery) {
+                                                                        $endDateQuery->whereNull('end_date')
+                                                                            ->orWhere('end_date', '>=', now());
+                                                                    });
+                                                            });
+                                                        });
+                                                    });
+                                            });
+                                    });
+                            });
+                    } else {
+                        // For inactive or unsubscribed businesses
+                        $subQuery->where('is_active', 0)
+                            ->orWhere(function ($q) {
+                                $q->where('is_self_registered_businesses', 1)
+                                    ->where(function ($innerQuery) {
+                                        $innerQuery->whereNotNull('trail_end_date')
+                                            ->where(function ($trailQuery) {
+                                                $trailQuery->where('trail_end_date', '<', now())
+                                                    ->whereNot('trail_end_date', now()->toDateString())
+                                                    ->whereDoesntHave('subscriptions', function ($subQuery) {
+                                                        $subQuery->where('start_date', '<=', now())
+                                                            ->where(function ($endDateQuery) {
+                                                                $endDateQuery->whereNull('end_date')
+                                                                    ->orWhere('end_date', '>=', now());
+                                                            });
+                                                    });
+                                            });
+                                    });
+                            });
+                    }
+                });
+            });
+
+        // Total count
+        $data["total"] = (clone $data_query)->count();
+
+        // Total count for today's date
+        $data["today"] = (clone $data_query)
+            ->whereDate("created_at", $today)
+            ->count();
+
+        // Monthly data
+        $data["monthly"]["this_month"] = (clone $data_query)
+            ->whereBetween("created_at", [
+                $start_date_of_this_month,
+                $end_date_of_this_month
+            ])->count();
+
+        $data["monthly"]["previous_month"] = (clone $data_query)
+            ->whereBetween("created_at", [
+                $start_date_of_previous_month,
+                $end_date_of_previous_month
+            ])->count();
+
+        // Weekly data
+        $data["weekly"]["this_week"] = (clone $data_query)
+            ->whereBetween("created_at", [
+                $start_date_of_this_week,
+                $end_date_of_this_week
+            ])->count();
+
+        $data["weekly"]["previous_week"] = (clone $data_query)
+            ->whereBetween("created_at", [
+                $start_date_of_previous_week,
+                $end_date_of_previous_week
+            ])->count();
+
+        // Calculate businesses expiring within 15, 30, or 60 days
+        if ($is_active === null) {
+            $expires_in_days = [15, 30, 60];
+            $data['expires'] = [];
+
+            foreach ($expires_in_days as $days) {
+                $expirationDate = now()->addDays($days);
+                $data['expires'][$days] = (clone $data_query)
+                    ->whereHas('subscriptions', function ($query) use ($expirationDate) {
+                        $query->where('end_date', $expirationDate->toDateString());
+                    })
+                    ->count();
+            }
+        }
+
+        return $data;
+    }
+
 
 
     public function presentAbsent(
@@ -2155,13 +2277,13 @@ class DashboardManagementControllerV2 extends Controller
                 ->where('work_shift_histories.from_date', '<=', $date)
                 ->where(function ($query) use ($date) {
                     $query->where('work_shift_histories.to_date', '>', $date)
-                          ->orWhereNull('work_shift_histories.to_date');
+                        ->orWhereNull('work_shift_histories.to_date');
                 })
                 ->whereIn('employee_user_work_shift_histories.user_id', $all_manager_user_ids)
                 ->where('employee_user_work_shift_histories.from_date', '<=', $date)
                 ->where(function ($query) use ($date) {
                     $query->where('employee_user_work_shift_histories.to_date', '>', $date)
-                          ->orWhereNull('employee_user_work_shift_histories.to_date');
+                        ->orWhereNull('employee_user_work_shift_histories.to_date');
                 })
                 ->where([
                     ['work_shift_detail_histories.day', '=', $date->dayOfWeek],
@@ -2169,8 +2291,8 @@ class DashboardManagementControllerV2 extends Controller
                 ])
                 ->first();
 
-                // Extract total seconds from the query result
-             $totalSeconds = $query->total_seconds ?? 0;
+            // Extract total seconds from the query result
+            $totalSeconds = $query->total_seconds ?? 0;
 
             // Convert total seconds to hours directly
             $totalHours = $totalSeconds / 3600;
@@ -3362,26 +3484,26 @@ class DashboardManagementControllerV2 extends Controller
             $created_by = auth()->user()->business->created_by;
         }
         $employmentStatuses = EmploymentStatus::when(empty(auth()->user()->business_id), function ($query) use ($created_by) {
-                if (auth()->user()->hasRole('superadmin')) {
-                    return $query->where('employment_statuses.business_id', NULL)
-                        ->where('employment_statuses.is_default', 1)
-                        ->where('employment_statuses.is_active', 1);
-                } else {
-                    return $query->where('employment_statuses.business_id', NULL)
-                        ->where('employment_statuses.is_default', 1)
-                        ->where('employment_statuses.is_active', 1)
-                        ->whereDoesntHave("disabled", function ($q) {
-                            $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
-                        })
+            if (auth()->user()->hasRole('superadmin')) {
+                return $query->where('employment_statuses.business_id', NULL)
+                    ->where('employment_statuses.is_default', 1)
+                    ->where('employment_statuses.is_active', 1);
+            } else {
+                return $query->where('employment_statuses.business_id', NULL)
+                    ->where('employment_statuses.is_default', 1)
+                    ->where('employment_statuses.is_active', 1)
+                    ->whereDoesntHave("disabled", function ($q) {
+                        $q->whereIn("disabled_employment_statuses.created_by", [auth()->user()->id]);
+                    })
 
-                        ->orWhere(function ($query) {
-                            $query->where('employment_statuses.business_id', NULL)
-                                ->where('employment_statuses.is_default', 0)
-                                ->where('employment_statuses.created_by', auth()->user()->id)
-                                ->where('employment_statuses.is_active', 1);
-                        });
-                }
-            })
+                    ->orWhere(function ($query) {
+                        $query->where('employment_statuses.business_id', NULL)
+                            ->where('employment_statuses.is_default', 0)
+                            ->where('employment_statuses.created_by', auth()->user()->id)
+                            ->where('employment_statuses.is_active', 1);
+                    });
+            }
+        })
             ->when(!empty(auth()->user()->business_id), function ($query) use ($created_by) {
                 return $query->where('employment_statuses.business_id', NULL)
                     ->where('employment_statuses.is_default', 1)
@@ -3483,6 +3605,163 @@ class DashboardManagementControllerV2 extends Controller
         ];
 
         return $data;
+    }
+    /**
+     *
+     * @OA\Get(
+     *      path="/v2.0/business-manager-dashboard",
+     *      operationId="getResellerDashboardData",
+     *      tags={"dashboard_management.reseller"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="get all dashboard data combined",
+     *      description="get all dashboard data combined",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getResellerDashboardData(Request $request)
+    {
+
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+            $today = today();
+
+
+
+            $start_date_of_next_month = Carbon::now()->startOfMonth()->addMonth(1);
+            $end_date_of_next_month = Carbon::now()->endOfMonth()->addMonth(1);
+            $start_date_of_this_month = Carbon::now()->startOfMonth();
+            $end_date_of_this_month = Carbon::now()->endOfMonth();
+            $start_date_of_previous_month = Carbon::now()->startOfMonth()->subMonth(1);
+            $end_date_of_previous_month = Carbon::now()->startOfMonth()->subDay(1);
+
+            $start_date_of_next_week = Carbon::now()->startOfWeek()->addWeek(1);
+            $end_date_of_next_week = Carbon::now()->endOfWeek()->addWeek(1);
+            $start_date_of_this_week = Carbon::now()->startOfWeek();
+            $end_date_of_this_week = Carbon::now()->endOfWeek();
+            $start_date_of_previous_week = Carbon::now()->startOfWeek()->subWeek(1);
+            $end_date_of_previous_week = Carbon::now()->endOfWeek()->subWeek(1);
+
+
+
+
+
+
+
+
+
+            $data["businesses"] = $this->businesses(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+
+            );
+
+            $data["active_businesses"] = $this->businesses(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                1
+
+            );
+
+            $data["deactive_businesses"] = $this->businesses(
+                $today,
+                $start_date_of_next_month,
+                $end_date_of_next_month,
+                $start_date_of_this_month,
+                $end_date_of_this_month,
+                $start_date_of_previous_month,
+                $end_date_of_previous_month,
+                $start_date_of_next_week,
+                $end_date_of_next_week,
+                $start_date_of_this_week,
+                $end_date_of_this_week,
+                $start_date_of_previous_week,
+                $end_date_of_previous_week,
+                0
+
+            );
+
+
+        // Get last 12 months dates
+        $months = $this->getLast12MonthsDates(request()->inut("year"));
+
+        // Fetch businesses for each month directly
+        $chart_data = [];
+        foreach ($months as $month) {
+            $chart_data[$month['month']] = Business::where('created_by', auth()->user()->id)
+                ->whereBetween('created_at', [$month['start_date'], $month['end_date']])
+                ->count();
+        }
+
+        // Add chart_data to response
+        $data["chart_data"] = $chart_data;
+
+
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return $this->sendError($e, 500, $request);
+        }
     }
 
     /**
@@ -4405,7 +4684,6 @@ class DashboardManagementControllerV2 extends Controller
                     $all_manager_department_ids,
                     "today"
                 );
-
             }
 
             $data["total_employee"] = $this->total_employee(

@@ -152,7 +152,7 @@ class SalaryReminderScheduler extends Command
   $helplessEmployees =  $this->getHelplessEmployees($settingPaymentDate->business_id,$dateRange["previous_last_day"],$dateRange["last_day"]);
 
   foreach($helplessEmployees as $employee){
-    $this->sendNotification($employee,$employee->business_id,$period,$dateRange);
+    $this->sendNotification($employee,$settingPaymentDate->business_id,$period,$dateRange);
   }
 
 
@@ -168,17 +168,6 @@ class SalaryReminderScheduler extends Command
 
         $notification_description =   "Salary for " . ($user->first_Name . ' ' . $user->middle_Name  . " " . $user->last_Name) .  " for the current ". $period . " is pending. Please address this promptly. Thank you.";
         $notification_link = ("employee") . "/" . ($user->id);
-
-
-
-
-
-
-
-
-
-
-
 
 
 

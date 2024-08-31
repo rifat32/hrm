@@ -684,13 +684,15 @@ class PayrunController extends Controller
                  });
             })
 
-            ->when(!empty($request->period), function ($query) use ($request) {
-                return $query->where('payruns.period_type', $request->period);
+            ->when(request()->filled("period"), function ($query) use ($request) {
+                $periods = explode(',', request()->input("period"));
+                return $query->whereIn('payruns.period_type', $periods);
+            })
+            ->when(request()->filled("type"), function ($query) use ($request) {
+                $types = explode(',', request()->input("type"));
+                return $query->whereIn('payruns.generating_type', $types);
             })
 
-            ->when(!empty($request->type), function ($query) use ($request) {
-                return $query->where('payruns.generating_type', $request->type);
-            })
             ->when(isset($request->is_considering_overtime), function ($query) use ($request) {
                 return $query->where('payruns.consider_overtime', intval($request->is_considering_overtime));
             })

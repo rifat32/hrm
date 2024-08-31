@@ -220,8 +220,10 @@ Route::middleware(['auth:api', "mail.setting",])->group(function () {
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+    Route::get('/v1.0/reseller-dashboard', [DashboardManagementControllerV2::class, "getResellerDashboardData"]);
 
     Route::get('/v2.0/business-manager-dashboard', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardData"]);
+
     Route::get('/v1.0/business-manager-dashboard/other-widgets', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataOtherWidgets"]);
     Route::get('/v1.0/business-manager-dashboard/sponsorship-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataSponsorshipExpiries"]);
     Route::get('/v1.0/business-manager-dashboard/right-to-work-expiries/{duration}', [DashboardManagementControllerV2::class, "getBusinessManagerDashboardDataRightToWorkExpiries"]);

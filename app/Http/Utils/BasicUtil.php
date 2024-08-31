@@ -26,6 +26,11 @@ trait BasicUtil
 {
 
     function getLast12MonthsDates($year) {
+        if (empty($year)) {
+            $year = Carbon::now()->year;
+        }
+
+
         $dates = [];
 
 

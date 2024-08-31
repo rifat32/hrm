@@ -130,7 +130,11 @@ if (Carbon::parse($latest_subscription->end_date)->isPast() && !Carbon::parse($b
         return $this->belongsTo(ServicePlan::class, 'service_plan_id', 'id');
     }
 
-
+    public function subscription()
+    {
+        return $this->hasOne(BusinessSubscription::class, 'business_id', 'id')
+        ->latest();
+    }
 
 
     public function default_work_shift()

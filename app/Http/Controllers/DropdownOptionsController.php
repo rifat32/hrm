@@ -206,6 +206,10 @@ class DropdownOptionsController extends Controller
          $query->whereIn("departments.id", $all_manager_department_ids);
 
     })
+    ->whereDoesntHave("lastTermination", function ($query) {
+        $query->where('terminations.date_of_termination', "<", today())
+            ->whereRaw('terminations.date_of_termination > users.joining_date');
+    })
     ->when(!empty($fields), function($query) use($fields) {
         $query->select($fields);
      })
