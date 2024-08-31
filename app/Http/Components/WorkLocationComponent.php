@@ -16,7 +16,8 @@ public function getWorkLocations () {
     if(auth()->user()->business) {
         $created_by = auth()->user()->business->created_by;
     }
-    $work_locations = WorkLocation::when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
+    $work_locations = WorkLocation::
+    when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
         $query->when(auth()->user()->hasRole('superadmin'), function ($query)  {
             $query->forSuperAdmin('work_locations');
         }, function ($query) use ( $created_by) {

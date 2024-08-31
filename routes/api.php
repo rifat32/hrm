@@ -1677,6 +1677,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::get('/v1.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownData"]);
     Route::get('/v2.0/dropdown-options/employee-form', [DropdownOptionsController::class, "getEmployeeFormDropdownDataV2"]);
     Route::get('/v1.0/dropdown-options/employee-filter', [DropdownOptionsController::class, "getEmployeeFilterDropdownData"]);
+    Route::get('/v1.0/dropdown-options/attendance-filter', [DropdownOptionsController::class, "getAttendanceFilterDropdownData"]);
 
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // end dropdown management section

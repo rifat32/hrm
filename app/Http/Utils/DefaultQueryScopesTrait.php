@@ -104,43 +104,43 @@ trait DefaultQueryScopesTrait
     }
 
 
-    public function scopeForBusiness(Builder $query, $table,$disabled_table, $created_by)
+    public function scopeForBusiness(Builder $query, $table,$disabled_table, $created_by, $activeData = false)
     {
-        return $query->where(function ($query) use ($table, $created_by, $disabled_table) {
-            $query->when(request()->boolean('include_defaults'), function ($query) use ($table, $created_by, $disabled_table) {
-                return $query->where(function ($query) use ($table, $created_by, $disabled_table) {
+        return $query->where(function ($query) use ($table, $created_by, $disabled_table, $activeData) {
+            $query->when(request()->boolean('include_defaults'), function ($query) use ($table, $created_by, $disabled_table, $activeData) {
+                return $query->where(function ($query) use ($table, $created_by, $disabled_table, $activeData) {
                     $query->where($table . '.business_id', NULL)
                           ->where($table . '.is_default', 1)
                           ->where($table . '.is_active', 1)
                           ->whereDoesntHave('disabled', function ($q) use ($created_by, $disabled_table) {
                               $q->whereIn($disabled_table . '.created_by', [$created_by]);
                           })
-                          ->when(request()->has('is_active'), function ($query) use ($disabled_table) {
-                              if (request()->boolean('is_active')) {
+                          ->when($activeData || request()->boolean('is_active'), function ($query) use ($disabled_table) {
+
                                   return $query->whereDoesntHave('disabled', function ($q) use ($disabled_table) {
                                       $q->whereIn($disabled_table . '.business_id', [auth()->user()->business_id]);
                                   });
-                              }
+
                           })
-                          ->orWhere(function ($query) use ($table,$disabled_table, $created_by) {
+                          ->orWhere(function ($query) use ($table,$disabled_table, $created_by, $activeData) {
                               $query->where($table . '.business_id', NULL)
                                     ->where($table . '.is_default', 0)
                                     ->where($table . '.created_by', $created_by)
                                     ->where($table . '.is_active', 1)
-                                    ->when(request()->has('is_active'), function ($query) use ($disabled_table) {
-                                        if (request()->boolean('is_active')) {
+                                    ->when($activeData || request()->boolean('is_active'), function ($query) use ($disabled_table) {
+
                                             return $query->whereDoesntHave('disabled', function ($q) use ($disabled_table) {
                                                 $q->whereIn($disabled_table . '.business_id', [auth()->user()->business_id]);
                                             });
-                                        }
+
                                     });
                           });
                 });
             })
-            ->orWhere(function ($query) use ($table) {
+            ->orWhere(function ($query) use ($table, $activeData) {
                 $query->where($table . '.business_id', auth()->user()->business_id)
                       ->where($table . '.is_default', 0)
-                      ->when(request()->boolean('is_active'), function ($query) use ($table) {
+                      ->when($activeData || request()->boolean('is_active'), function ($query) use ($table) {
                           return $query->where($table . '.is_active', 1);
                       });
             });
