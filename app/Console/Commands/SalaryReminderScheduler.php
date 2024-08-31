@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Utils\BasicUtil;
 use App\Models\Notification;
 use App\Models\SettingPaymentDate;
 use App\Models\User;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class SalaryReminderScheduler extends Command
 {
+    use BasicUtil;
     /**
      * The name and signature of the console command.
      *
@@ -98,16 +100,18 @@ class SalaryReminderScheduler extends Command
 
     public function getHelplessEmployees($business_id,$start_date,$end_date) {
 
+
      $helplessEmployees =  User::
         where([
             "business_id" => $business_id
         ])
         ->where("joining_date", "<=", ($end_date . ' 23:59:59'))
-        ->whereDoesntHave("payrolls",function($query) use($start_date, $end_date) {
-            $query->where("payrolls",">", ($start_date .  ' 00:00:00'))
-            ->where("payrolls","<=", ($end_date . ' 23:59:59'))
-            ;
+
+        ->whereDoesntHave("payrolls", function ($q) use ($start_date,$end_date) {
+            $q->where("payrolls.start_date", ">=", ($start_date .  ' 00:00:00'))
+                ->where("payrolls.end_date","<=", ($end_date . ' 23:59:59'));
         })
+
         ->get();
 
         return $helplessEmployees;
@@ -115,14 +119,17 @@ class SalaryReminderScheduler extends Command
 
     public function handle()
     {
-        Log::info('Reminder process started.');
+        Log::info('Salary Reminder process started.');
      $settingPaymentDates =   SettingPaymentDate::get();
 
      foreach($settingPaymentDates as $settingPaymentDate){
 
-        if(empty($settingPaymentDate->business_id)){
+
+
+        if(empty($settingPaymentDate->business)){
             continue;
         }
+        Log::info('business',["business" => $settingPaymentDate->business] );
 
         $period = "";
 
@@ -135,17 +142,17 @@ class SalaryReminderScheduler extends Command
      $period = "month";
 
         } else if($settingPaymentDate->payment_type == "custom") {
-    //  $dateRange = [
-    //     'last_day' => $settingPaymentDate->payment_type,
-    //     'previous_last_day' => $settingPaymentDate->payment_type
-    //  ];
+
+     $dateRange = [
+        'last_day' => $settingPaymentDate->custom_date,
+        'previous_last_day' => Carbon::parse($settingPaymentDate->custom_date)->subMonth()->format('Y-m-d'),
+     ];
         }
 
   $helplessEmployees =  $this->getHelplessEmployees($settingPaymentDate->business_id,$dateRange["previous_last_day"],$dateRange["last_day"]);
 
   foreach($helplessEmployees as $employee){
-    $this->sendNotification($employee,$settingPaymentDate->business_id,$period);
-
+    $this->sendNotification($employee,$employee->business_id,$period,$dateRange);
   }
 
 
@@ -155,9 +162,8 @@ class SalaryReminderScheduler extends Command
         return 0;
     }
 
-    public function sendNotification($user, $business_id, $period)
+    public function sendNotification($user, $business_id, $period,$dateRange)
     {
-
 
 
         $notification_description =   "Salary for " . ($user->first_Name . ' ' . $user->middle_Name  . " " . $user->last_Name) .  " for the current ". $period . " is pending. Please address this promptly. Thank you.";
@@ -196,6 +202,8 @@ class SalaryReminderScheduler extends Command
                 "business_id" => $business_id,
                 "is_system_generated" => 1,
                 "status" => "unread",
+                "start_date" => $dateRange["previous_last_day"],
+                "end_date" => $dateRange["last_day"]
             ]);
         }
 

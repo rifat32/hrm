@@ -25,6 +25,9 @@ class Notification extends Model
         "is_system_generated",
         "notification_template_id",
         "status",
+        "start_date",
+        "end_date"
+
 
     ];
 

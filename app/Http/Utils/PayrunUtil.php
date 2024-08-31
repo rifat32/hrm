@@ -608,19 +608,7 @@ trait PayrunUtil
     }
 
     // this function do all the task and returns transaction id or -1
-    public function estimate_payrun_data($employees, $start_date, $end_date)
-    {
-        // Convert end_date to Carbon instance
-        $end_date = Carbon::parse($end_date);
 
-        collect($employees)->each(function ($employee) use ($start_date, $end_date) {
-
-            $employee->payroll = $this->estimate_payroll($employee, $start_date, $end_date);
-            return $employee;
-        });
-
-        return $employees;
-    }
     public function estimate_payroll($employee, $start_date, $end_date)
     {
 
