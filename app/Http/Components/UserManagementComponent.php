@@ -36,13 +36,24 @@ class UserManagementComponent
     public function updateUsersQuery($all_manager_department_ids, $usersQuery)
     {
 
+
+
+
+
+
         $total_departments = Department::where([
             "business_id" => auth()->user()->business_id,
             "is_active" => 1
         ])->count();
 
         $today = today();
-        $usersQuery = $usersQuery->whereNotIn('id', [auth()->user()->id])
+        $usersQuery = $usersQuery
+        ->when(!request()->boolean("allow_self"), function ($query) use ($today) {
+            $query->whereNotIn('id', [auth()->user()->id]);
+        },
+       )
+
+
             ->when(empty(auth()->user()->business_id), function ($query) {
                 if (auth()->user()->hasRole("superadmin")) {
                     return  $query->where(function ($query) {
@@ -62,6 +73,7 @@ class UserManagementComponent
                 }
             })
 
+
             ->when(!empty(auth()->user()->business_id), function ($query) use ($all_manager_department_ids) {
                 return $query
                     ->when(
@@ -71,6 +83,9 @@ class UserManagementComponent
                                 return  $query->where('business_id', auth()->user()->business_id)
                                     ->whereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
                                         $query->whereIn("departments.id", $all_manager_department_ids);
+                                    })
+                                    ->when(request()->boolean("allow_self"), function ($query)  {
+                                        $query->orWhereIn("users.id", [auth()->user()->id]);
                                     });
                             });
                         }

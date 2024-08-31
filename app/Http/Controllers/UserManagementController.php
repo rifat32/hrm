@@ -6966,6 +6966,13 @@ class UserManagementController extends Controller
      *         required=true,
      *  example="json"
      *      ),
+     *      *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
      *      *   *              @OA\Parameter(
      *         name="file_name",
      *         in="query",
@@ -7003,6 +7010,14 @@ class UserManagementController extends Controller
      * required=true,
      * example="full_name"
      * ),
+     *     * @OA\Parameter(
+     * name="allow_self",
+     * in="query",
+     * description="allow_self",
+     * required=true,
+     * example="full_name"
+     * ),
+
 
      *
      *
@@ -9138,7 +9153,7 @@ class UserManagementController extends Controller
      *
      * @OA\Get(
      *      path="/v5.0/users/{id}",
-     *      operationId="getUserByIdV4",
+     *      operationId="getUserByIdV5",
      *      tags={"user_management.employee"},
      *       security={
      *           {"bearerAuth": {}}

@@ -301,21 +301,16 @@ class User extends Authenticatable
         $issue_date_column = 'date_assigned';
         $expiry_date_column = 'expiry_date';
 
-
         return $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
             ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeeSponsorshipHistory::select('user_id', $expiry_date_column)
+            ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+                $query->select('user_id')
+                    ->from('employee_sponsorship_histories')
                     ->whereColumn('user_id', 'employee_sponsorship_histories.user_id')
                     ->where($issue_date_column, '<', now())
                     ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_sponsorship_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_sponsorship_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
+                    ->limit(1);
+            })
             ->orderByDesc('employee_sponsorship_histories.id');
     }
 
@@ -325,21 +320,16 @@ class User extends Authenticatable
         $issue_date_column = 'date_assigned';
         $expiry_date_column = 'expiry_date';
 
-
         return $this->hasOne(EmployeeSponsorshipHistory::class, 'user_id', 'id')
             ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeeSponsorshipHistory::select('user_id', $expiry_date_column)
+            ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+                $query->select('user_id')
+                    ->from('employee_sponsorship_histories')
                     ->whereColumn('user_id', 'employee_sponsorship_histories.user_id')
                     ->where($issue_date_column, '<', now())
                     ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_sponsorship_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_sponsorship_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
+                    ->limit(1);
+            })
             ->orderByDesc('employee_sponsorship_histories.id');
     }
 
@@ -405,20 +395,16 @@ class User extends Authenticatable
         $expiry_date_column = 'passport_expiry_date';
 
         return $this->hasOne(EmployeePassportDetailHistory::class, 'user_id', 'id')
-            ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeePassportDetailHistory::select('user_id', $expiry_date_column)
-                    ->whereColumn('user_id', 'employee_passport_detail_histories.user_id')
-                    ->where($issue_date_column, '<', now())
-                    ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_passport_detail_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_passport_detail_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
-            ->orderByDesc('employee_passport_detail_histories.id');
+        ->where($issue_date_column, '<', now())
+        ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+            $query->select('user_id')
+                ->from('employee_passport_detail_histories')
+                ->whereColumn('user_id', 'employee_passport_detail_histories.user_id')
+                ->where($issue_date_column, '<', now())
+                ->orderBy($expiry_date_column, 'DESC')
+                ->limit(1);
+        })
+        ->orderByDesc('employee_passport_detail_histories.id');
     }
 
     public function passport_details()
@@ -427,20 +413,16 @@ class User extends Authenticatable
         $expiry_date_column = 'passport_expiry_date';
 
         return $this->hasOne(EmployeePassportDetailHistory::class, 'user_id', 'id')
-            ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeePassportDetailHistory::select('user_id', $expiry_date_column)
-                    ->whereColumn('user_id', 'employee_passport_detail_histories.user_id')
-                    ->where($issue_date_column, '<', now())
-                    ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_passport_detail_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_passport_detail_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
-            ->orderByDesc('employee_passport_detail_histories.id');
+        ->where($issue_date_column, '<', now())
+        ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+            $query->select('user_id')
+                ->from('employee_passport_detail_histories')
+                ->whereColumn('user_id', 'employee_passport_detail_histories.user_id')
+                ->where($issue_date_column, '<', now())
+                ->orderBy($expiry_date_column, 'DESC')
+                ->limit(1);
+        })
+        ->orderByDesc('employee_passport_detail_histories.id');
 
     }
 
@@ -450,20 +432,18 @@ class User extends Authenticatable
         $expiry_date_column = 'visa_expiry_date';
 
         return $this->hasOne(EmployeeVisaDetailHistory::class, 'user_id', 'id')
-            ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeeVisaDetailHistory::select('user_id', $expiry_date_column)
-                    ->whereColumn('user_id', 'employee_visa_detail_histories.user_id')
-                    ->where($issue_date_column, '<', now())
-                    ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_visa_detail_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_visa_detail_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
-            ->orderByDesc('employee_visa_detail_histories.id');
+        ->where($issue_date_column, '<', now())
+        ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+            $query->select('user_id')
+                ->from('employee_visa_detail_histories')
+                ->whereColumn('user_id', 'employee_visa_detail_histories.user_id')
+                ->where($issue_date_column, '<', now())
+                ->orderBy($expiry_date_column, 'DESC')
+                ->limit(1);
+        })
+        ->orderByDesc('employee_visa_detail_histories.id');
+
+
     }
 
 
@@ -473,22 +453,17 @@ class User extends Authenticatable
         $issue_date_column = 'visa_issue_date';
         $expiry_date_column = 'visa_expiry_date';
 
-        return $this->hasOne(EmployeeVisaDetailHistory::class, 'user_id', 'id')
-            ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeeVisaDetailHistory::select('user_id', $expiry_date_column)
-                    ->whereColumn('user_id', 'employee_visa_detail_histories.user_id')
-                    ->where($issue_date_column, '<', now())
-                    ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_visa_detail_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_visa_detail_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
-            ->orderByDesc('employee_visa_detail_histories.id');
-
+         return $this->hasOne(EmployeeVisaDetailHistory::class, 'user_id', 'id')
+        ->where($issue_date_column, '<', now())
+        ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+            $query->select('user_id')
+                ->from('employee_visa_detail_histories')
+                ->whereColumn('user_id', 'employee_visa_detail_histories.user_id')
+                ->where($issue_date_column, '<', now())
+                ->orderBy($expiry_date_column, 'DESC')
+                ->limit(1);
+        })
+        ->orderByDesc('employee_visa_detail_histories.id');
     }
 
 
@@ -498,42 +473,38 @@ class User extends Authenticatable
         $expiry_date_column = 'right_to_work_expiry_date';
 
         return $this->hasOne(EmployeeRightToWorkHistory::class, 'user_id', 'id')
-            ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeeRightToWorkHistory::select('user_id', $expiry_date_column)
-                    ->whereColumn('user_id', 'employee_right_to_work_histories.user_id')
-                    ->where($issue_date_column, '<', now())
-                    ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_right_to_work_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_right_to_work_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
-            ->orderByDesc('employee_right_to_work_histories.id');
+        ->where($issue_date_column, '<', now())
+        ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+            $query->select('user_id')
+                ->from('employee_right_to_work_histories')
+                ->whereColumn('user_id', 'employee_right_to_work_histories.user_id')
+                ->where($issue_date_column, '<', now())
+                ->orderBy($expiry_date_column, 'DESC')
+                ->limit(1);
+        })
+        ->orderByDesc('employee_right_to_work_histories.id');
+
+
     }
 
     public function right_to_works()
     {
+
+
         $issue_date_column = 'right_to_work_check_date';
         $expiry_date_column = 'right_to_work_expiry_date';
 
         return $this->hasOne(EmployeeRightToWorkHistory::class, 'user_id', 'id')
-            ->where($issue_date_column, '<', now())
-            ->joinSub(
-                EmployeeRightToWorkHistory::select('user_id', $expiry_date_column)
-                    ->whereColumn('user_id', 'employee_right_to_work_histories.user_id')
-                    ->where($issue_date_column, '<', now())
-                    ->orderBy($expiry_date_column, 'DESC')
-                    ->limit(1),
-                'latest_data_expiry',
-                function ($join) use ($expiry_date_column) {
-                    $join->on('employee_right_to_work_histories.user_id', '=', 'latest_data_expiry.user_id')
-                         ->on('employee_right_to_work_histories.' . $expiry_date_column, '=', 'latest_data_expiry.' . $expiry_date_column);
-                }
-            )
-            ->orderByDesc('employee_right_to_work_histories.id');
+        ->where($issue_date_column, '<', now())
+        ->whereExists(function ($query) use ($issue_date_column, $expiry_date_column) {
+            $query->select('user_id')
+                ->from('employee_right_to_work_histories')
+                ->whereColumn('user_id', 'employee_right_to_work_histories.user_id')
+                ->where($issue_date_column, '<', now())
+                ->orderBy($expiry_date_column, 'DESC')
+                ->limit(1);
+        })
+        ->orderByDesc('employee_right_to_work_histories.id');
     }
 
 

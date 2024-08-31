@@ -139,6 +139,9 @@ return [
         /*
          * Laravel Framework Service Providers...
          */
+           // Other Service Providers
+         App\Providers\HelperServiceProvider::class,
+         App\Providers\ComponentServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Propaganistas\LaravelDisposableEmail\DisposableEmailServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
