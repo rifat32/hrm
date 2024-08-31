@@ -831,6 +831,7 @@ class DepartmentController extends Controller
              $departments = Department::with([
                 'manager',
                 'recursiveChildren',
+                "users"
             ])
             ->where([
                 'business_id' => $business_id,
