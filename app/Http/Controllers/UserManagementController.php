@@ -10544,7 +10544,21 @@ class UserManagementController extends Controller
                 ], 401);
             }
 
+
+            // Fetch users with the "business_owner" role
+$businessOwners = User::whereIn('id', $existingIds)->whereHas('roles', function ($query) {
+    $query->where('name', 'business_owner');
+})->get();
+
+// Delete associated businesses for users with the "business_owner" role
+foreach ($businessOwners as $owner) {
+    Business::where('owner_id', $owner->id)->delete();
+}
+
             User::whereIn('id', $existingIds)->delete();
+
+
+
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
