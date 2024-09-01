@@ -12,6 +12,7 @@ use App\Http\Requests\GetIdRequest;
 use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\LetterTemplate;
 use App\Models\DisabledLetterTemplate;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\DB;
 
 class LetterTemplateController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, ModuleUtil;
     /**
      *
      * @OA\Post(
@@ -86,6 +87,7 @@ class LetterTemplateController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('letter_template_create')) {
                     return response()->json([
@@ -200,6 +202,7 @@ class LetterTemplateController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('letter_template_update')) {
                     return response()->json([
@@ -303,6 +306,7 @@ $letter_template->save();
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             if (!$request->user()->hasPermissionTo('letter_template_activate')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -539,6 +543,7 @@ $letter_template->save();
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             if (!$request->user()->hasPermissionTo('letter_template_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -662,6 +667,7 @@ $letter_template->save();
      {
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             $this->isModuleEnabled("letter_template");
              if (!$request->user()->hasPermissionTo('letter_template_view')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -741,6 +747,7 @@ $letterTemplateVariables = $this->getLetterTemplateVariablesFunc();
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             if (!$request->user()->hasPermissionTo('letter_template_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

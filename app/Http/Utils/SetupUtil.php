@@ -41,7 +41,7 @@ use App\Models\UserWorkLocation;
 use App\Models\WorkLocation;
 use App\Models\WorkShiftLocation;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 
 trait SetupUtil
@@ -314,7 +314,7 @@ trait SetupUtil
             'duration_months' => 1,
             'price' => 20,
             'business_tier_id' => 1,
-            'created_by' => auth()->id(),
+            'created_by' => 1,
         ]);
 
         $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
@@ -389,15 +389,29 @@ trait SetupUtil
 
     public function loadDefaultData($business, $defaultData, $modelClass)
     {
+        if($modelClass == "App\Models\JobPlatform#"){
+            echo $modelClass . " -----------------<br>";
+        }
+
         foreach ($defaultData as $data) {
+            if($modelClass == "App\Models\JobPlatform#"){
+                echo " $$$$$$$$$$$$$$$$$$$$$$$$<br>" . json_encode($data) . "<br>" ;
+            }
             $existingData = $modelClass::where([
                 "business_id" => $business->id,
             ])
                 ->where(function ($query) use ($data) {
                     $query->where("parent_id", $data->id)
-                        ->orWhere("name", $data->name);
+                    ->orWhere(function($query) use($data) {
+                        $query->where("parent_id", NULL)
+                        ->where("name", $data->name);
+                    });
                 })
                 ->first();
+
+                if($modelClass == "App\Models\JobPlatform#"){
+                    echo " #######################<br>" . json_encode($existingData) . "<br>" ;
+                }
 
             if (empty($existingData)) {
                 $data = $data->toArray();
@@ -411,6 +425,9 @@ trait SetupUtil
 
                 // Create the model with modified data
                 $modelClass::create($data);
+            } else {
+                $existingData->parent_id = $data->id;
+                $existingData->save();
             }
         }
     }
@@ -447,16 +464,21 @@ trait SetupUtil
         foreach ($this->defaultModels as $model) {
             $defaultData = $this->getDefaultData($model);
 
+
             foreach ($businesses as $business) {
+
+                Log::info("business loop->" . $business->id);
                 $this->loadDefaultData($business, $defaultData, $model);
 
                 // Handle updates for each model
                 $this->updateModelData($business, $defaultData, $model);
             }
+
         }
+
     }
 
-    protected function updateModelData($defaultData, $business, $modelClass)
+    protected function updateModelData($business, $defaultData, $modelClass)
     {
         switch ($modelClass) {
             case AssetType::class:
@@ -527,6 +549,7 @@ trait SetupUtil
 
     protected function updateBankData($business, $defaultData)
     {
+
         // Retrieve all banks related to the business
         $business_data = Bank::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
 
@@ -543,7 +566,7 @@ trait SetupUtil
             $newDataId = $business_data[$user->bank_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Bank ID for parent ID " . $user->bank_id . " not found.");
+                throw new Exception("Bank ID for parent ID " . $user->bank_id . " not found.");
             }
 
             $user->bank_id = $newDataId;
@@ -562,7 +585,7 @@ trait SetupUtil
             $newDataId = $business_data[$payslip->bank_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Bank ID for payslip with bank_id " . $payslip->bank_id . " not found.");
+                throw new Exception("Bank ID for payslip with bank_id " . $payslip->bank_id . " not found.");
             }
 
             // Update bank_id in the Payslip model
@@ -575,10 +598,10 @@ trait SetupUtil
 
     protected function updateDesignationData($business, $defaultData)
     {
-
+        // Retrieve all banks related to the business
         $business_data = Designation::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
 
-
+        // Retrieve users with bank_ids that exist in the $defaultData
         $default_data_ids = collect($defaultData)->pluck("id")->toArray();
 
         $users = User::where("business_id", $business->id)
@@ -591,7 +614,7 @@ trait SetupUtil
             $newDataId = $business_data[$user->designation_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Designation ID for parent ID " . $user->designation_id . " not found.");
+                throw new Exception("Designation ID for parent ID " . $user->designation_id . " not found.");
             }
 
             $user->designation_id = $newDataId;
@@ -618,7 +641,7 @@ trait SetupUtil
             $newDataId = $business_data[$user->employment_status_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Employment Status ID for parent ID " . $user->employment_status_id . " not found.");
+                throw new Exception("Employment Status ID for parent ID " . $user->employment_status_id . " not found.");
             }
 
             $user->employment_status_id = $newDataId;
@@ -637,7 +660,7 @@ trait SetupUtil
             $newDataId = $business_data[$settingPaidLeaveEmploymentStatus->employment_status_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Employment Status ID for parent ID " . $settingPaidLeaveEmploymentStatus->employment_status_id . " not found.");
+                throw new Exception("Employment Status ID for parent ID " . $settingPaidLeaveEmploymentStatus->employment_status_id . " not found.");
             }
 
             $settingPaidLeaveEmploymentStatus->employment_status_id = $newDataId;
@@ -656,7 +679,7 @@ trait SetupUtil
             $newDataId = $business_data[$settingUnpaidLeaveEmploymentStatus->employment_status_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Employment Status ID for parent ID " . $settingUnpaidLeaveEmploymentStatus->employment_status_id . " not found.");
+                throw new Exception("Employment Status ID for parent ID " . $settingUnpaidLeaveEmploymentStatus->employment_status_id . " not found.");
             }
 
             $settingUnpaidLeaveEmploymentStatus->employment_status_id = $newDataId;
@@ -675,7 +698,7 @@ trait SetupUtil
             $newDataId = $business_data[$leaveTypeEmploymentStatus->employment_status_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Employment Status ID for parent ID " . $leaveTypeEmploymentStatus->employment_status_id . " not found.");
+                throw new Exception("Employment Status ID for parent ID " . $leaveTypeEmploymentStatus->employment_status_id . " not found.");
             }
 
             $leaveTypeEmploymentStatus->employment_status_id = $newDataId;
@@ -701,12 +724,13 @@ trait SetupUtil
             ->get(["id", "job_platform_id"]);
 
 
+
         foreach ($job_listing_job_platforms as $job_listing_job_platform) {
 
             $newDataId = $business_data[$job_listing_job_platform->job_platform_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("job platform ID for parent ID " . $job_listing_job_platform->job_platform_id . " not found.");
+                throw new Exception("job platform ID for parent ID " . $job_listing_job_platform->job_platform_id . " not found.");
             }
 
             $job_listing_job_platform->job_platform_id = $newDataId;
@@ -726,7 +750,7 @@ trait SetupUtil
             $newDataId = $business_data[$candidate_job_platform->job_platform_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("job platform ID for parent ID " . $candidate_job_platform->job_platform_id . " not found.");
+                throw new Exception("job platform ID for parent ID " . $candidate_job_platform->job_platform_id . " not found.");
             }
 
             $candidate_job_platform->job_platform_id = $newDataId;
@@ -754,7 +778,7 @@ trait SetupUtil
             $newDataId = $business_data[$job_listing->job_type_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("job type ID for parent ID " . $job_listing->job_type_id . " not found.");
+                throw new Exception("job type ID for parent ID " . $job_listing->job_type_id . " not found.");
             }
 
             $job_listing->job_type_id = $newDataId;
@@ -785,7 +809,7 @@ trait SetupUtil
             $newDataId = $business_data[$user->recruitment_process_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("recruitment process ID for parent ID " . $user->recruitment_process_id . " not found.");
+                throw new Exception("recruitment process ID for parent ID " . $user->recruitment_process_id . " not found.");
             }
 
             $user->recruitment_process_id = $newDataId;
@@ -804,7 +828,7 @@ trait SetupUtil
             $newDataId = $business_data[$user_recruitment_process->recruitment_process_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("recruitment process ID for parent ID " . $user_recruitment_process->recruitment_process_id . " not found.");
+                throw new Exception("recruitment process ID for parent ID " . $user_recruitment_process->recruitment_process_id . " not found.");
             }
 
             $user_recruitment_process->recruitment_process_id = $newDataId;
@@ -825,7 +849,7 @@ trait SetupUtil
             $newDataId = $business_data[$candidate_recruitment_process->recruitment_process_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("recruitment process ID for parent ID " . $candidate_recruitment_process->recruitment_process_id . " not found.");
+                throw new Exception("recruitment process ID for parent ID " . $candidate_recruitment_process->recruitment_process_id . " not found.");
             }
 
             $candidate_recruitment_process->recruitment_process_id = $newDataId;
@@ -860,7 +884,7 @@ trait SetupUtil
             $newDataId = $business_data[$task->task_category_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("task category ID for parent ID " . $task->task_category_id . " not found.");
+                throw new Exception("task category ID for parent ID " . $task->task_category_id . " not found.");
             }
 
             $task->task_category_id = $newDataId;
@@ -889,7 +913,7 @@ trait SetupUtil
             $newDataId = $business_data[$termination->termination_reason_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("termination reason ID for parent ID " . $termination->termination_reason_id . " not found.");
+                throw new Exception("termination reason ID for parent ID " . $termination->termination_reason_id . " not found.");
             }
 
             $termination->termination_reason_id = $newDataId;
@@ -918,7 +942,7 @@ trait SetupUtil
             $newDataId = $business_data[$termination->termination_type_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("termination type ID for parent ID " . $termination->termination_type_id . " not found.");
+                throw new Exception("termination type ID for parent ID " . $termination->termination_type_id . " not found.");
             }
 
             $termination->termination_type_id = $newDataId;
@@ -950,7 +974,7 @@ trait SetupUtil
             $newDataId = $business_data[$department->work_location_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Work Location ID for parent ID " . $department->work_location_id . " not found.");
+                throw new Exception("Work Location ID for parent ID " . $department->work_location_id . " not found.");
             }
 
             $department->work_location_id = $newDataId;
@@ -973,7 +997,7 @@ trait SetupUtil
             $newDataId = $business_data[$attendance->work_location_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Work Location ID for parent ID " . $attendance->work_location_id . " not found.");
+                throw new Exception("Work Location ID for parent ID " . $attendance->work_location_id . " not found.");
             }
 
             $attendance->work_location_id = $newDataId;
@@ -993,10 +1017,10 @@ trait SetupUtil
 
         foreach ($attendance_histories as $attendance_history) {
 
-            $newDataId = $business_data[$attendance->work_location_id] ?? null;
+            $newDataId = $business_data[$attendance_history->work_location_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Work Location ID for parent ID " . $attendance_history->work_location_id . " not found.");
+                throw new Exception("Work Location ID for parent ID " . $attendance_history->work_location_id . " not found.");
             }
 
             $attendance_history->work_location_id = $newDataId;
@@ -1013,7 +1037,7 @@ trait SetupUtil
             $newDataId = $business_data[$job_listing->work_location_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("job type ID for parent ID " . $job_listing->work_location_id . " not found.");
+                throw new Exception("job type ID for parent ID " . $job_listing->work_location_id . " not found.");
             }
 
             $job_listing->work_location_id = $newDataId;
@@ -1032,7 +1056,7 @@ trait SetupUtil
             $newDataId = $business_data[$user_work_location->work_location_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("termination type ID for parent ID " . $user_work_location->work_location_id . " not found.");
+                throw new Exception("termination type ID for parent ID " . $user_work_location->work_location_id . " not found.");
             }
 
             $user_work_location->work_location_id = $newDataId;
@@ -1054,7 +1078,7 @@ trait SetupUtil
             $newDataId = $business_data[$work_shift_location->work_location_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("termination type ID for parent ID " . $work_shift_location->work_location_id . " not found.");
+                throw new Exception("termination type ID for parent ID " . $work_shift_location->work_location_id . " not found.");
             }
 
             $work_shift_location->work_location_id = $newDataId;
@@ -1089,7 +1113,7 @@ trait SetupUtil
             $newDataId = $business_data[$leave->leave_type_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Leave type ID for parent ID " . $leave->leave_type_id . " not found.");
+                throw new Exception("Leave type ID for parent ID " . $leave->leave_type_id . " not found.");
             }
 
             $leave->leave_type_id = $newDataId;
@@ -1112,7 +1136,7 @@ trait SetupUtil
             $newDataId = $business_data[$leave_history->leave_type_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("Leave type ID for parent ID " . $leave_history->leave_type_id . " not found.");
+                throw new Exception("Leave type ID for parent ID " . $leave_history->leave_type_id . " not found.");
             }
 
             $leave_history->leave_type_id = $newDataId;
@@ -1134,7 +1158,7 @@ trait SetupUtil
             $newDataId = $business_data[$leaveTypeEmploymentStatus->setting_leave_type_id] ?? null;
 
             if ($newDataId === null) {
-                throw new ModelNotFoundException("leave type ID for parent ID " . $leaveTypeEmploymentStatus->setting_leave_type_id . " not found.");
+                throw new Exception("leave type ID for parent ID " . $leaveTypeEmploymentStatus->setting_leave_type_id . " not found.");
             }
 
             $leaveTypeEmploymentStatus->setting_leave_type_id = $newDataId;

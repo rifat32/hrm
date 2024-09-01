@@ -3,6 +3,8 @@
 namespace App\Http\Components;
 
 use App\Http\Utils\BasicUtil;
+use App\Http\Utils\BusinessUtil;
+use App\Models\Business;
 use App\Models\Leave;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeave;
@@ -14,7 +16,7 @@ use Exception;
 class LeaveComponent
 {
 
-    use BasicUtil;
+    use BasicUtil, BusinessUtil;
     protected $authorizationComponent;
 
     protected $departmentComponent;
@@ -369,9 +371,16 @@ class LeaveComponent
             ->where('setting_leaves.is_default', 0)
             ->first();
         if (empty($setting_leave)) {
-            return response()->json(
-                ["message" => "No leave setting found."]
-            );
+            $this->loadDefaultSettingLeave(Business::where(["id" => auth()->user()->business_id])->first());
+            $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
+            ->where('setting_leaves.is_default', 0)
+            ->first();
+            if (empty($setting_leave)){
+                return response()->json(
+                    ["message" => "No leave setting found."]
+                );
+            }
+
         }
         if (empty($setting_leave->start_month)) {
             $setting_leave->start_month = 1;

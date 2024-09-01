@@ -12,6 +12,7 @@ use App\Http\Utils\BasicUtil;
 use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\EmailLogUtil;
 use App\Http\Utils\ErrorUtil;
+use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Mail\UserLetterMail;
 use App\Models\UserLetter;
@@ -30,7 +31,7 @@ use PDF;
 class UserLetterController extends Controller
 {
 
-    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, EmailLogUtil;
+    use ErrorUtil, UserActivityUtil, BusinessUtil, BasicUtil, EmailLogUtil, ModuleUtil;
 
 
     /**
@@ -100,6 +101,7 @@ class UserLetterController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('user_letter_create')) {
                     return response()->json([
@@ -201,6 +203,7 @@ class UserLetterController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('user_letter_create')) {
                     return response()->json([
@@ -383,6 +386,7 @@ class UserLetterController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             $request_data = $request->validated();
 
             $user_letter =  UserLetter::where([
@@ -582,6 +586,7 @@ class UserLetterController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             return DB::transaction(function () use ($request) {
                 if (!$request->user()->hasPermissionTo('user_letter_update')) {
                     return response()->json([
@@ -689,6 +694,7 @@ class UserLetterController extends Controller
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             $this->isModuleEnabled("letter_template");
              return DB::transaction(function () use ($request) {
 
                 //  if (!$request->user()->hasPermissionTo('user_letter_update')) {
@@ -893,6 +899,7 @@ class UserLetterController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             if (!$request->user()->hasPermissionTo('user_letter_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1134,6 +1141,7 @@ class UserLetterController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             $this->isModuleEnabled("letter_template");
              if (!$request->user()->hasPermissionTo('user_letter_view')) {
                  return response()->json([
                      "message" => "You can not perform this action"
@@ -1278,6 +1286,7 @@ class UserLetterController extends Controller
 
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            $this->isModuleEnabled("letter_template");
             if (!$request->user()->hasPermissionTo('user_letter_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"

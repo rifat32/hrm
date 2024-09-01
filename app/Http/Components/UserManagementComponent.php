@@ -4,7 +4,9 @@ namespace App\Http\Components;
 
 use App\Http\Utils\AttendanceUtil;
 use App\Http\Utils\BasicUtil;
+use App\Http\Utils\BusinessUtil;
 use App\Models\Attendance;
+use App\Models\Business;
 use App\Models\Department;
 use App\Models\LeaveRecord;
 use App\Models\SettingLeave;
@@ -17,7 +19,7 @@ use Exception;
 class UserManagementComponent
 {
 
-    use BasicUtil, AttendanceUtil;
+    use BasicUtil, AttendanceUtil, BusinessUtil;
 
     protected $holidayComponent;
     protected $workShiftHistoryComponent;
@@ -929,7 +931,16 @@ class UserManagementComponent
             ->where('setting_leaves.is_default', 0)
             ->first();
         if (empty($setting_leave)) {
-            throw new Exception("No leave setting found.", 409);
+            $this->loadDefaultSettingLeave(Business::where(["id" => auth()->user()->business_id])->first());
+            $setting_leave = SettingLeave::where('setting_leaves.business_id', auth()->user()->business_id)
+            ->where('setting_leaves.is_default', 0)
+            ->first();
+            if (empty($setting_leave)){
+                return response()->json(
+                    ["message" => "No leave setting found."]
+                );
+            }
+
         }
 
         if (!$setting_leave->start_month) {

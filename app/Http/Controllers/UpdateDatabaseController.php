@@ -22,6 +22,7 @@ class UpdateDatabaseController extends Controller
     {
 
 
+
         // Prepare initial email templates
         $email_templates = collect([
             $this->prepareEmailTemplateData("business_welcome_mail", NULL),
@@ -67,9 +68,10 @@ class UpdateDatabaseController extends Controller
     public function updateDatabase()
     {
 
+
+
+
         $i = 1;
-
-
         for ($i; $i <= 20; $i++) {
 
             if ($i == 1) {
@@ -157,7 +159,7 @@ class UpdateDatabaseController extends Controller
                         'duration_months' => 1,
                         'price' => 20,
                         'business_tier_id' => 1,
-                        'created_by' => auth()->id(),
+                        'created_by' => 1,
                     ]);
 
                     $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
@@ -165,7 +167,7 @@ class UpdateDatabaseController extends Controller
                             'is_enabled' => 1,
                             'service_plan_id' => $service_plan->id,
                             'module_id' => $module_id,
-                            'created_by' => auth()->id(),
+                            'created_by' => 1,
                         ];
                     })->toArray();
 
@@ -308,7 +310,7 @@ class UpdateDatabaseController extends Controller
             }
             if ($i == 13) {
                 DB::statement("
-                ALTER tasks {$table}
+                ALTER Table tasks
                 MODIFY COLUMN task_category_id BIGINT UNSIGNED NULL;
             ");
             }
@@ -322,6 +324,6 @@ class UpdateDatabaseController extends Controller
 
 
 
-        return "ok";
+    return "ok";
     }
 }
