@@ -9,19 +9,25 @@ use App\Models\EmailTemplate;
 use App\Models\EmploymentStatus;
 use App\Models\JobPlatform;
 use App\Models\JobType;
+use App\Models\LeaveTypeEmploymentStatus;
 use App\Models\LetterTemplate;
 use App\Models\Module;
+use App\Models\Payslip;
 use App\Models\RecruitmentProcess;
 use App\Models\Role;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
 use App\Models\SettingLeaveType;
+use App\Models\SettingPaidLeaveEmploymentStatus;
+use App\Models\SettingUnpaidLeaveEmploymentStatus;
 use App\Models\SocialSite;
 use App\Models\TaskCategory;
 use App\Models\TerminationReason;
 use App\Models\TerminationType;
+use App\Models\User;
 use App\Models\WorkLocation;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Permission\Models\Permission;
 
 trait SetupUtil
@@ -391,7 +397,6 @@ trait SetupUtil
 
                 // Create the model with modified data
                 $modelClass::create($data);
-
             }
         }
     }
@@ -430,7 +435,282 @@ trait SetupUtil
 
             foreach ($businesses as $business) {
                 $this->loadDefaultData($business, $defaultData, $model);
+
+                // Handle updates for each model
+                $this->updateModelData($business, $defaultData, $model);
             }
         }
+    }
+
+    protected function updateModelData($defaultData, $business, $modelClass)
+    {
+        switch ($modelClass) {
+            case AssetType::class:
+                $this->updateAssetTypeData($business);
+                break;
+
+            case Bank::class:
+                $this->updateBankData($business, $defaultData);
+                break;
+
+            case Designation::class:
+                $this->updateDesignationData($business, $defaultData);
+                break;
+
+            case EmploymentStatus::class:
+                $this->updateEmploymentStatusData($business, $defaultData);
+                break;
+
+            case JobPlatform::class:
+                $this->updateJobPlatformData($business);
+                break;
+
+            case JobType::class:
+                $this->updateJobTypeData($business);
+                break;
+
+            case LetterTemplate::class:
+                $this->updateLetterTemplateData($business);
+                break;
+
+            case RecruitmentProcess::class:
+                $this->updateRecruitmentProcessData($business);
+                break;
+
+            case TaskCategory::class:
+                $this->updateTaskCategoryData($business);
+                break;
+
+            case TerminationReason::class:
+                $this->updateTerminationReasonData($business);
+                break;
+
+            case TerminationType::class:
+                $this->updateTerminationTypeData($business);
+                break;
+
+            case WorkLocation::class:
+                $this->updateWorkLocationData($business);
+                break;
+
+            case SettingLeaveType::class:
+                $this->updateSettingLeaveTypeData($business);
+                break;
+
+            default:
+                // Handle default case if necessary
+                break;
+        }
+    }
+
+
+    protected function updateAssetTypeData($business)
+    {
+        // Implement the logic to update AssetType data
+
+
+    }
+
+    protected function updateBankData($business, $defaultData)
+    {
+        // Retrieve all banks related to the business
+        $business_data = Bank::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+        // Retrieve users with bank_ids that exist in the $defaultData
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $users = User::where("business_id", $business->id)
+            ->whereIn("bank_id", $default_data_ids)
+            ->get(["id", "bank_id"]);
+
+        // Update bank_id for each user
+        foreach ($users as $user) {
+            // Get the new bank_id based on the parent_id
+            $newDataId = $business_data[$user->bank_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Bank ID for parent ID " . $user->bank_id . " not found.");
+            }
+
+            $user->bank_id = $newDataId;
+            $user->save();
+        }
+
+        $payslips = Payslip::whereHas("user", function ($query) use ($business) {
+                $query->where("users.business_id", $business->id);
+            })
+            ->whereIn("bank_id", $default_data_ids)
+            ->get();
+
+        // Update bank_id for each payslip
+        foreach ($payslips as $payslip) {
+            // Get the new bank_id for the payslip
+            $newDataId = $business_data[$payslip->bank_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Bank ID for payslip with bank_id " . $payslip->bank_id . " not found.");
+            }
+
+            // Update bank_id in the Payslip model
+            $payslip->bank_id = $newDataId;
+            $payslip->save();
+        }
+    }
+
+
+
+    protected function updateDesignationData($business, $defaultData)
+    {
+        // Retrieve all banks related to the business
+        $business_data = Designation::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+        // Retrieve users with bank_ids that exist in the $defaultData
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $users = User::where("business_id", $business->id)
+            ->whereIn("designation_id", $default_data_ids)
+            ->get(["id", "designation_id"]);
+
+        // Update bank_id for each user
+        foreach ($users as $user) {
+            // Get the new bank_id based on the parent_id
+            $newDataId = $business_data[$user->designation_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Designation ID for parent ID " . $user->designation_id . " not found.");
+            }
+
+            $user->designation_id = $newDataId;
+            $user->save();
+        }
+    }
+
+    protected function updateEmploymentStatusData($business, $defaultData)
+    {
+        // Retrieve all banks related to the business
+        $business_data = EmploymentStatus::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+        // Retrieve users with bank_ids that exist in the $defaultData
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+
+        $users = User::where("business_id", $business->id)
+            ->whereIn("employment_status_id", $default_data_ids)
+            ->get(["id", "employment_status_id"]);
+
+        // Update bank_id for each user
+        foreach ($users as $user) {
+            // Get the new bank_id based on the parent_id
+            $newDataId = $business_data[$user->employment_status_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Employment Status ID for parent ID " . $user->employment_status_id . " not found.");
+            }
+
+            $user->employment_status_id = $newDataId;
+            $user->save();
+        }
+
+        $settingPaidLeaveEmploymentStatuses = SettingPaidLeaveEmploymentStatus::whereHas("setting_leave", function ($query) use ($business) {
+                $query->where("setting_leaves.business_id", $business->id);
+            })
+            ->whereIn("employment_status_id", $default_data_ids)
+            ->get(["id", "employment_status_id"]);
+
+        // Update bank_id for each user
+        foreach ($settingPaidLeaveEmploymentStatuses as $settingPaidLeaveEmploymentStatus) {
+            // Get the new bank_id based on the parent_id
+            $newDataId = $business_data[$settingPaidLeaveEmploymentStatus->employment_status_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Employment Status ID for parent ID " . $settingPaidLeaveEmploymentStatus->employment_status_id . " not found.");
+            }
+
+            $settingPaidLeaveEmploymentStatus->employment_status_id = $newDataId;
+            $settingPaidLeaveEmploymentStatus->save();
+        }
+
+        $settingUnpaidLeaveEmploymentStatuses = SettingUnpaidLeaveEmploymentStatus::whereHas("setting_leave", function ($query) use ($business) {
+                $query->where("setting_leaves.business_id", $business->id);
+            })
+            ->whereIn("employment_status_id", $default_data_ids)
+            ->get(["id", "employment_status_id"]);
+
+        // Update bank_id for each user
+        foreach ($settingUnpaidLeaveEmploymentStatuses as $settingUnpaidLeaveEmploymentStatus) {
+            // Get the new bank_id based on the parent_id
+            $newDataId = $business_data[$settingUnpaidLeaveEmploymentStatus->employment_status_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Employment Status ID for parent ID " . $settingUnpaidLeaveEmploymentStatus->employment_status_id . " not found.");
+            }
+
+            $settingUnpaidLeaveEmploymentStatus->employment_status_id = $newDataId;
+            $settingUnpaidLeaveEmploymentStatus->save();
+        }
+
+        $leaveTypeEmploymentStatuses = LeaveTypeEmploymentStatus::whereHas("setting_leave_type", function ($query) use ($business) {
+                $query->where("setting_leave_types.business_id", $business->id);
+            })
+            ->whereIn("employment_status_id", $default_data_ids)
+            ->get(["id", "employment_status_id"]);
+
+        // Update bank_id for each user
+        foreach ($leaveTypeEmploymentStatuses as $leaveTypeEmploymentStatus) {
+            // Get the new bank_id based on the parent_id
+            $newDataId = $business_data[$leaveTypeEmploymentStatus->employment_status_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Employment Status ID for parent ID " . $leaveTypeEmploymentStatus->employment_status_id . " not found.");
+            }
+
+            $leaveTypeEmploymentStatus->employment_status_id = $newDataId;
+            $leaveTypeEmploymentStatus->save();
+        }
+    }
+
+    protected function updateJobPlatformData($business)
+    {
+        // Implement the logic to update JobPlatform data
+    }
+
+    protected function updateJobTypeData($business)
+    {
+        // Implement the logic to update JobType data
+    }
+
+    protected function updateLetterTemplateData($business)
+    {
+        // Implement the logic to update LetterTemplate data
+    }
+
+    protected function updateRecruitmentProcessData($business)
+    {
+        // Implement the logic to update RecruitmentProcess data
+    }
+
+    protected function updateTaskCategoryData($business)
+    {
+        // Implement the logic to update TaskCategory data
+    }
+
+    protected function updateTerminationReasonData($business)
+    {
+        // Implement the logic to update TerminationReason data
+    }
+
+    protected function updateTerminationTypeData($business)
+    {
+        // Implement the logic to update TerminationType data
+    }
+
+    protected function updateWorkLocationData($business)
+    {
+        // Implement the logic to update WorkLocation data
+    }
+
+    protected function updateSettingLeaveTypeData($business)
+    {
+        // Implement the logic to update SettingLeaveType data
     }
 }

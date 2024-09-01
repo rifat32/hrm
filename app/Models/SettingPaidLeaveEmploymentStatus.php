@@ -13,6 +13,13 @@ class SettingPaidLeaveEmploymentStatus extends Model
         'setting_leave_id', 'employment_status_id'
     ];
     protected $table = "paid_leave_employment_statuses";
+
+
+    public function setting_leave()
+    {
+        return $this->belongsTo(SettingLeave::class,"setting_leave_id","id");
+    }
+
     // public function getCreatedAtAttribute($value)
     // {
     //     return (new Carbon($value))->format('d-m-Y');

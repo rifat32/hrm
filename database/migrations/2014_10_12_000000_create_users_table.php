@@ -98,6 +98,8 @@ class CreateUsersTable extends Migration
 
             $table->unsignedBigInteger("bank_id")->nullable();
             $table->foreign('bank_id')->references('id')->on('banks')->onDelete('restrict');
+
+
             $table->string("sort_code")->nullable();
             $table->string("account_number")->nullable();
             $table->string("account_name")->nullable();
