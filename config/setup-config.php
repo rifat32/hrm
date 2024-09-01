@@ -81,7 +81,7 @@ return [
         "business_tier_view",
         "business_tier_delete",
 
-       
+
 
 
 
@@ -1525,7 +1525,8 @@ return [
         "employee_login",
         "employee_location_attendance",
         "flexible_shifts",
-        "rota"
+        "rota",
+        "letter_template"
     ]
 
 

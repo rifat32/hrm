@@ -71,7 +71,31 @@ class UpdateDatabaseController extends Controller
 
 
         for ($i; $i <= 20; $i++) {
+
+            if ($i == 1) {
+                $modules = config("setup-config.system_modules");
+                foreach ($modules as $module) {
+                 $module_exists = Module::where([
+                      "name" => $module
+                    ])
+                    ->exists();
+
+                    if(!$module_exists) {
+                      Module::create([
+                          "name"=> $module,
+                          "is_enabled" => 1,
+                          'created_by' => 1,
+                      ]);
+                    }
+
+                }
+
+              }
+
+
             // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
+
+
             if ($i == 1) {
                 $this->storeEmailTemplates();
             }
@@ -288,6 +312,8 @@ class UpdateDatabaseController extends Controller
                 MODIFY COLUMN task_category_id BIGINT UNSIGNED NULL;
             ");
             }
+
+
 
 
 

@@ -392,7 +392,7 @@ ADD CONSTRAINT `users_designation_id_foreign` FOREIGN KEY (`designation_id`) REF
 
 
 
-hr compliance -> 46
+hr compliance -> 60
 
 
 hrm-> 31
