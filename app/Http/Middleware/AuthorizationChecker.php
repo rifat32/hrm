@@ -29,7 +29,7 @@ class AuthorizationChecker
             if($user->hasRole(("business_employee#" . $business->id))) {
             $moduleEnabled =  $this->isModuleEnabled("employee_login", false);
             if(!$moduleEnabled){
-                return response(['message' => 'Module is not enabled'], 401);
+                // return response(['message' => 'Module is not enabled'], 401);
             }
 
             }

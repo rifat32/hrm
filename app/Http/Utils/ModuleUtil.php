@@ -87,7 +87,7 @@ trait ModuleUtil
 
 
         if (!$is_enabled && $throwErr) {
-            throw new Exception('Module is not enabled', 401);
+            throw new Exception('Module is not enabled', 403);
         }
 
         return $is_enabled;

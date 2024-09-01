@@ -104,6 +104,7 @@ class HolidayController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
              $this->isModuleEnabled("employee_login");
 
              return DB::transaction(function () use ($request) {
