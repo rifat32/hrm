@@ -575,10 +575,10 @@ trait SetupUtil
 
     protected function updateDesignationData($business, $defaultData)
     {
-        // Retrieve all banks related to the business
+
         $business_data = Designation::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
 
-        // Retrieve users with bank_ids that exist in the $defaultData
+
         $default_data_ids = collect($defaultData)->pluck("id")->toArray();
 
         $users = User::where("business_id", $business->id)

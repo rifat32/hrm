@@ -46,15 +46,28 @@ class UpdateDatabaseController extends Controller
         $email_templates = $email_templates->merge($business_email_templates);
 
 
-        error_log("template creating 1");
         // Insert all email templates at once
-        EmailTemplate::insert($email_templates->toArray());
+        EmailTemplate::upsert(
+            $email_templates->toArray(),
+            ['type', 'business_id'], // Columns that determine uniqueness
+            [
+            "name",
+            // "type",
+            "template",
+            "is_active",
+            "is_default",
+            // "business_id",
+            'wrapper_id',
+            "template_variables"
+            ] // Columns to update if a match is found
+        );
+
     }
 
     public function updateDatabase()
     {
 
-        $i = 6;
+        $i = 1;
 
 
         for ($i; $i <= 20; $i++) {
