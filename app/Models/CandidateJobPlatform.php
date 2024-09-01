@@ -11,4 +11,9 @@ class CandidateJobPlatform extends Model
     protected $fillable = [
         'candidate_id', 'job_platform_id'
     ];
+
+    public function candidate()
+    {
+        return $this->belongsTo(Candidate::class,"candidate_id","id");
+    }
 }

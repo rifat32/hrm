@@ -18,7 +18,6 @@ class CreateSettingLeaveTypesTable extends Migration
             $table->string('name');
             $table->enum('type', ['paid', 'unpaid'])->default("unpaid");
             $table->string('amount');
-
             $table->boolean('is_earning_enabled');
 
 

@@ -113,14 +113,6 @@ class Attendance extends Model
 
 
 
-
-
-
-
-
-
-
-
     public function work_location()
     {
         return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
@@ -130,12 +122,17 @@ class Attendance extends Model
 
 
 
-
-
-
     public function projects() {
         return $this->belongsToMany(Project::class, 'attendance_projects', 'attendance_id', 'project_id');
     }
+
+
+
+
+
+
+
+
 
 
 

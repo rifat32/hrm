@@ -3,12 +3,21 @@
 namespace App\Http\Utils;
 
 use App\Models\AssetType;
+use App\Models\Attendance;
+use App\Models\AttendanceHistory;
 use App\Models\Bank;
+use App\Models\CandidateJobPlatform;
+use App\Models\CandidateRecruitmentProcess;
+use App\Models\Department;
 use App\Models\Designation;
 use App\Models\EmailTemplate;
 use App\Models\EmploymentStatus;
+use App\Models\JobListing;
+use App\Models\JobListingJobPlatforms;
 use App\Models\JobPlatform;
 use App\Models\JobType;
+use App\Models\Leave;
+use App\Models\LeaveHistory;
 use App\Models\LeaveTypeEmploymentStatus;
 use App\Models\LetterTemplate;
 use App\Models\Module;
@@ -21,11 +30,16 @@ use App\Models\SettingLeaveType;
 use App\Models\SettingPaidLeaveEmploymentStatus;
 use App\Models\SettingUnpaidLeaveEmploymentStatus;
 use App\Models\SocialSite;
+use App\Models\Task;
 use App\Models\TaskCategory;
+use App\Models\Termination;
 use App\Models\TerminationReason;
 use App\Models\TerminationType;
 use App\Models\User;
+use App\Models\UserRecruitmentProcess;
+use App\Models\UserWorkLocation;
 use App\Models\WorkLocation;
+use App\Models\WorkShiftLocation;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Permission\Models\Permission;
@@ -462,11 +476,11 @@ trait SetupUtil
                 break;
 
             case JobPlatform::class:
-                $this->updateJobPlatformData($business);
+                $this->updateJobPlatformData($business, $defaultData);
                 break;
 
             case JobType::class:
-                $this->updateJobTypeData($business);
+                $this->updateJobTypeData($business, $defaultData);
                 break;
 
             case LetterTemplate::class:
@@ -474,27 +488,27 @@ trait SetupUtil
                 break;
 
             case RecruitmentProcess::class:
-                $this->updateRecruitmentProcessData($business);
+                $this->updateRecruitmentProcessData($business, $defaultData);
                 break;
 
             case TaskCategory::class:
-                $this->updateTaskCategoryData($business);
+                $this->updateTaskCategoryData($business, $defaultData);
                 break;
 
             case TerminationReason::class:
-                $this->updateTerminationReasonData($business);
+                $this->updateTerminationReasonData($business, $defaultData);
                 break;
 
             case TerminationType::class:
-                $this->updateTerminationTypeData($business);
+                $this->updateTerminationTypeData($business, $defaultData);
                 break;
 
             case WorkLocation::class:
-                $this->updateWorkLocationData($business);
+                $this->updateWorkLocationData($business, $defaultData);
                 break;
 
             case SettingLeaveType::class:
-                $this->updateSettingLeaveTypeData($business);
+                $this->updateSettingLeaveTypeData($business, $defaultData);
                 break;
 
             default:
@@ -537,8 +551,8 @@ trait SetupUtil
         }
 
         $payslips = Payslip::whereHas("user", function ($query) use ($business) {
-                $query->where("users.business_id", $business->id);
-            })
+            $query->where("users.business_id", $business->id);
+        })
             ->whereIn("bank_id", $default_data_ids)
             ->get();
 
@@ -612,8 +626,8 @@ trait SetupUtil
         }
 
         $settingPaidLeaveEmploymentStatuses = SettingPaidLeaveEmploymentStatus::whereHas("setting_leave", function ($query) use ($business) {
-                $query->where("setting_leaves.business_id", $business->id);
-            })
+            $query->where("setting_leaves.business_id", $business->id);
+        })
             ->whereIn("employment_status_id", $default_data_ids)
             ->get(["id", "employment_status_id"]);
 
@@ -631,8 +645,8 @@ trait SetupUtil
         }
 
         $settingUnpaidLeaveEmploymentStatuses = SettingUnpaidLeaveEmploymentStatus::whereHas("setting_leave", function ($query) use ($business) {
-                $query->where("setting_leaves.business_id", $business->id);
-            })
+            $query->where("setting_leaves.business_id", $business->id);
+        })
             ->whereIn("employment_status_id", $default_data_ids)
             ->get(["id", "employment_status_id"]);
 
@@ -650,8 +664,8 @@ trait SetupUtil
         }
 
         $leaveTypeEmploymentStatuses = LeaveTypeEmploymentStatus::whereHas("setting_leave_type", function ($query) use ($business) {
-                $query->where("setting_leave_types.business_id", $business->id);
-            })
+            $query->where("setting_leave_types.business_id", $business->id);
+        })
             ->whereIn("employment_status_id", $default_data_ids)
             ->get(["id", "employment_status_id"]);
 
@@ -669,48 +683,462 @@ trait SetupUtil
         }
     }
 
-    protected function updateJobPlatformData($business)
+    protected function updateJobPlatformData($business, $defaultData)
     {
-        // Implement the logic to update JobPlatform data
+
+        // job_listing_job_platforms, candidate_job_platforms,
+
+
+        $business_data = JobPlatform::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $job_listing_job_platforms = JobListingJobPlatforms::whereHas("job_listing", function ($query) use ($business) {
+                $query->where("job_listings.business_id", $business->id);
+            })
+            ->whereIn("job_platform_id", $default_data_ids)
+            ->get(["id", "job_platform_id"]);
+
+
+        foreach ($job_listing_job_platforms as $job_listing_job_platform) {
+
+            $newDataId = $business_data[$job_listing_job_platform->job_platform_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("job platform ID for parent ID " . $job_listing_job_platform->job_platform_id . " not found.");
+            }
+
+            $job_listing_job_platform->job_platform_id = $newDataId;
+            $job_listing_job_platform->save();
+        }
+
+
+        $candidate_job_platforms = CandidateJobPlatform::whereHas("candidate", function ($query) use ($business) {
+                $query->where("candidates.business_id", $business->id);
+            })
+            ->whereIn("job_platform_id", $default_data_ids)
+            ->get(["id", "job_platform_id"]);
+
+
+        foreach ($candidate_job_platforms as $candidate_job_platform) {
+
+            $newDataId = $business_data[$candidate_job_platform->job_platform_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("job platform ID for parent ID " . $candidate_job_platform->job_platform_id . " not found.");
+            }
+
+            $candidate_job_platform->job_platform_id = $newDataId;
+            $candidate_job_platform->save();
+        }
     }
 
-    protected function updateJobTypeData($business)
+    protected function updateJobTypeData($business, $defaultData)
     {
-        // Implement the logic to update JobType data
+        // job_listings,
+
+
+        $business_data = JobType::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $job_listings = JobListing::where("business_id", $business->id)
+            ->whereIn("job_type_id", $default_data_ids)
+            ->get(["id", "job_type_id"]);
+
+
+        foreach ($job_listings as $job_listing) {
+
+            $newDataId = $business_data[$job_listing->job_type_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("job type ID for parent ID " . $job_listing->job_type_id . " not found.");
+            }
+
+            $job_listing->job_type_id = $newDataId;
+            $job_listing->save();
+        }
     }
 
-    protected function updateLetterTemplateData($business)
+    protected function updateLetterTemplateData($business) {}
+
+    protected function updateRecruitmentProcessData($business, $defaultData)
     {
-        // Implement the logic to update LetterTemplate data
+        // users * recruitment_process_id,
+        // user_recruitment_processes *recruitment_process_id,
+        // candidate_recruitment_processes *recruitment_process_id,
+
+        $business_data = RecruitmentProcess::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $users = User::where("business_id", $business->id)
+            ->whereIn("recruitment_process_id", $default_data_ids)
+            ->get(["id", "recruitment_process_id"]);
+
+
+        foreach ($users as $user) {
+
+            $newDataId = $business_data[$user->recruitment_process_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("recruitment process ID for parent ID " . $user->recruitment_process_id . " not found.");
+            }
+
+            $user->recruitment_process_id = $newDataId;
+            $user->save();
+        }
+
+        $user_recruitment_processes = UserRecruitmentProcess::whereHas("user", function ($query) use ($business) {
+                $query->where("users.business_id", $business->id);
+            })
+            ->whereIn("recruitment_process_id", $default_data_ids)
+            ->get(["id", "recruitment_process_id"]);
+
+
+        foreach ($user_recruitment_processes as $user_recruitment_process) {
+
+            $newDataId = $business_data[$user_recruitment_process->recruitment_process_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("recruitment process ID for parent ID " . $user_recruitment_process->recruitment_process_id . " not found.");
+            }
+
+            $user_recruitment_process->recruitment_process_id = $newDataId;
+            $user_recruitment_process->save();
+        }
+
+
+
+        $candidate_recruitment_processes = CandidateRecruitmentProcess::whereHas("candidate", function ($query) use ($business) {
+                $query->where("candidates.business_id", $business->id);
+            })
+            ->whereIn("recruitment_process_id", $default_data_ids)
+            ->get(["id", "recruitment_process_id"]);
+
+
+        foreach ($candidate_recruitment_processes as $candidate_recruitment_process) {
+
+            $newDataId = $business_data[$candidate_recruitment_process->recruitment_process_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("recruitment process ID for parent ID " . $candidate_recruitment_process->recruitment_process_id . " not found.");
+            }
+
+            $candidate_recruitment_process->recruitment_process_id = $newDataId;
+            $candidate_recruitment_process->save();
+        }
     }
 
-    protected function updateRecruitmentProcessData($business)
+
+
+
+
+
+
+
+    protected function updateTaskCategoryData($business, $defaultData)
     {
-        // Implement the logic to update RecruitmentProcess data
+        // tasks * task_category_id ,
+
+
+        $business_data = TaskCategory::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $tasks = Task::where("business_id", $business->id)
+            ->whereIn("task_category_id", $default_data_ids)
+            ->get(["id", "task_category_id"]);
+
+
+        foreach ($tasks as $task) {
+
+            $newDataId = $business_data[$task->task_category_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("task category ID for parent ID " . $task->task_category_id . " not found.");
+            }
+
+            $task->task_category_id = $newDataId;
+            $task->save();
+        }
     }
 
-    protected function updateTaskCategoryData($business)
+    protected function updateTerminationReasonData($business, $defaultData)
     {
-        // Implement the logic to update TaskCategory data
+        // terminations * termination_reason_id ,
+
+
+        $business_data = TerminationReason::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $terminations = Termination::whereHas("user", function ($query) use ($business) {
+                $query->where("users.business_id", $business->id);
+            })
+            ->whereIn("termination_reason_id", $default_data_ids)
+            ->get(["id", "termination_reason_id"]);
+
+
+        foreach ($terminations as $termination) {
+
+            $newDataId = $business_data[$termination->termination_reason_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("termination reason ID for parent ID " . $termination->termination_reason_id . " not found.");
+            }
+
+            $termination->termination_reason_id = $newDataId;
+            $termination->save();
+        }
     }
 
-    protected function updateTerminationReasonData($business)
+
+    protected function updateTerminationTypeData($business, $defaultData)
     {
-        // Implement the logic to update TerminationReason data
+        // terminations * termination_type_id ,
+
+        $business_data = TerminationType::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $terminations = Termination::whereHas("user", function ($query) use ($business) {
+                $query->where("users.business_id", $business->id);
+            })
+            ->whereIn("termination_type_id", $default_data_ids)
+            ->get(["id", "termination_type_id"]);
+
+
+        foreach ($terminations as $termination) {
+
+            $newDataId = $business_data[$termination->termination_type_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("termination type ID for parent ID " . $termination->termination_type_id . " not found.");
+            }
+
+            $termination->termination_type_id = $newDataId;
+            $termination->save();
+        }
     }
 
-    protected function updateTerminationTypeData($business)
+    protected function updateWorkLocationData($business, $defaultData)
     {
-        // Implement the logic to update TerminationType data
+        // departments * work_location_id ,
+        // attendances * work_location_id ,
+        // attendance_histories * work_location_id ,
+        // job_listings * work_location_id ,
+        // user_work_locations * work_location_id ,
+        // work_shift_locations * work_location_id ,
+
+
+        $business_data = WorkLocation::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $departments = Department::where("business_id", $business->id)
+            ->whereIn("work_location_id", $default_data_ids)
+            ->get(["id", "work_location_id"]);
+
+
+        foreach ($departments as $department) {
+
+            $newDataId = $business_data[$department->work_location_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Work Location ID for parent ID " . $department->work_location_id . " not found.");
+            }
+
+            $department->work_location_id = $newDataId;
+            $department->save();
+        }
+
+        $attendances = Attendance::where(function ($query) use ($business) {
+                $query->where("business_id", $business->id)
+                    ->orWhereHas("employee", function ($query) use ($business) {
+                        $query->where("users.business_id", $business->id);
+                    });
+            })
+
+            ->whereIn("work_location_id", $default_data_ids)
+            ->get(["id", "work_location_id"]);
+
+
+        foreach ($attendances as $attendance) {
+
+            $newDataId = $business_data[$attendance->work_location_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Work Location ID for parent ID " . $attendance->work_location_id . " not found.");
+            }
+
+            $attendance->work_location_id = $newDataId;
+            $attendance->save();
+        }
+
+        $attendance_histories = AttendanceHistory::where(function ($query) use ($business) {
+                $query->where("business_id", $business->id)
+                    ->orWhereHas("employee", function ($query) use ($business) {
+                        $query->where("users.business_id", $business->id);
+                    });
+            })
+
+            ->whereIn("work_location_id", $default_data_ids)
+            ->get(["id", "work_location_id"]);
+
+
+        foreach ($attendance_histories as $attendance_history) {
+
+            $newDataId = $business_data[$attendance->work_location_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Work Location ID for parent ID " . $attendance_history->work_location_id . " not found.");
+            }
+
+            $attendance_history->work_location_id = $newDataId;
+            $attendance_history->save();
+        }
+
+        $job_listings = JobListing::where("business_id", $business->id)
+            ->whereIn("work_location_id", $default_data_ids)
+            ->get(["id", "work_location_id"]);
+
+
+        foreach ($job_listings as $job_listing) {
+
+            $newDataId = $business_data[$job_listing->work_location_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("job type ID for parent ID " . $job_listing->work_location_id . " not found.");
+            }
+
+            $job_listing->work_location_id = $newDataId;
+            $job_listing->save();
+        }
+
+        $user_work_locations = UserWorkLocation::whereHas("user", function ($query) use ($business) {
+                $query->where("users.business_id", $business->id);
+            })
+            ->whereIn("work_location_id", $default_data_ids)
+            ->get(["id", "work_location_id"]);
+
+
+        foreach ($user_work_locations as $user_work_location) {
+
+            $newDataId = $business_data[$user_work_location->work_location_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("termination type ID for parent ID " . $user_work_location->work_location_id . " not found.");
+            }
+
+            $user_work_location->work_location_id = $newDataId;
+            $user_work_location->save();
+        }
+
+
+
+
+        $work_shift_locations = WorkShiftLocation::whereHas("work_shift", function ($query) use ($business) {
+                $query->where("work_shifts.business_id", $business->id);
+            })
+            ->whereIn("work_location_id", $default_data_ids)
+            ->get(["id", "work_location_id"]);
+
+
+        foreach ($work_shift_locations as $work_shift_location) {
+
+            $newDataId = $business_data[$work_shift_location->work_location_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("termination type ID for parent ID " . $work_shift_location->work_location_id . " not found.");
+            }
+
+            $work_shift_location->work_location_id = $newDataId;
+            $work_shift_location->save();
+        }
     }
 
-    protected function updateWorkLocationData($business)
+    protected function updateSettingLeaveTypeData($business, $defaultData)
     {
-        // Implement the logic to update WorkLocation data
-    }
+        // leaves * leave_type_id ,
+        // leave_histories * leave_type_id ,
+        // leave_type_employment_statuses * setting_leave_type_id ,
 
-    protected function updateSettingLeaveTypeData($business)
-    {
-        // Implement the logic to update SettingLeaveType data
+
+        $business_data = SettingLeaveType::where("business_id", $business->id)->pluck('id', 'parent_id')->toArray();
+
+        $default_data_ids = collect($defaultData)->pluck("id")->toArray();
+
+        $leaves = Leave::where(function ($query) use ($business) {
+                $query->where("business_id", $business->id)
+                    ->orWhereHas("employee", function ($query) use ($business) {
+                        $query->where("users.business_id", $business->id);
+                    });
+            })
+
+            ->whereIn("leave_type_id", $default_data_ids)
+            ->get(["id", "leave_type_id"]);
+
+
+        foreach ($leaves as $leave) {
+
+            $newDataId = $business_data[$leave->leave_type_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Leave type ID for parent ID " . $leave->leave_type_id . " not found.");
+            }
+
+            $leave->leave_type_id = $newDataId;
+            $leave->save();
+        }
+
+        $leave_histories = LeaveHistory::where(function ($query) use ($business) {
+                $query->where("business_id", $business->id)
+                    ->orWhereHas("employee", function ($query) use ($business) {
+                        $query->where("users.business_id", $business->id);
+                    });
+            })
+
+            ->whereIn("leave_type_id", $default_data_ids)
+            ->get(["id", "leave_type_id"]);
+
+
+        foreach ($leave_histories as $leave_history) {
+
+            $newDataId = $business_data[$leave_history->leave_type_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("Leave type ID for parent ID " . $leave_history->leave_type_id . " not found.");
+            }
+
+            $leave_history->leave_type_id = $newDataId;
+            $leave_history->save();
+        }
+
+
+
+
+        $leaveTypeEmploymentStatuses = LeaveTypeEmploymentStatus::whereHas("setting_leave_type", function ($query) use ($business) {
+            $query->where("setting_leave_types.business_id", $business->id);
+        })
+            ->whereIn("setting_leave_type_id", $default_data_ids)
+            ->get(["id", "setting_leave_type_id"]);
+
+        // Update bank_id for each user
+        foreach ($leaveTypeEmploymentStatuses as $leaveTypeEmploymentStatus) {
+            // Get the new bank_id based on the parent_id
+            $newDataId = $business_data[$leaveTypeEmploymentStatus->setting_leave_type_id] ?? null;
+
+            if ($newDataId === null) {
+                throw new ModelNotFoundException("leave type ID for parent ID " . $leaveTypeEmploymentStatus->setting_leave_type_id . " not found.");
+            }
+
+            $leaveTypeEmploymentStatus->setting_leave_type_id = $newDataId;
+            $leaveTypeEmploymentStatus->save();
+        }
     }
 }
