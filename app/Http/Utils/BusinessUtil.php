@@ -42,33 +42,26 @@ trait BusinessUtil
 
 
 
-    public function businessOwnerCheck($business_id)
+    public function businessOwnerCheck($business_id, $strict=FALSE)
     {
 
-        $businessQuery  = Business::where(["id" => $business_id]);
-        if (!auth()->user()->hasRole('superadmin')) {
-            $businessQuery = $businessQuery->where(function ($query) {
-
+        $business = Business::where('id', $business_id)
+        ->when(
+           $strict || !request()->user()->hasRole('superadmin'),
+            function ($query)  {
                 $query->where(function ($query) {
-                    return   $query
-                        ->when(
-                            !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
-                            function ($query) {
-                                $query->where('id', auth()->user()->business_id)
-                                    ->orWhere('created_by', auth()->user()->id)
-                                    ->orWhere('owner_id', auth()->user()->id);
-                            },
-                            function ($query) {
-                                $query->where('is_self_registered_businesses', 1)
-                                    ->orWhere('created_by', auth()->user()->id);
-                            }
-
-                        );
+                    $query
+                    // ->where('id', auth()->user()->business_id)
+                    // ->orWhere('created_by', auth()->user()->id)
+                        ->orWhere('owner_id', auth()->user()->id)
+                        ->orWhere('reseller_id', auth()->user()->id)
+                        ;
                 });
-            });
-        }
+            },
+        )
+        ->first();
 
-        $business =  $businessQuery->first();
+
         if (empty($business)) {
             throw new Exception("you are not the owner of the business or the requested business does not exist.", 401);
         }
@@ -908,11 +901,15 @@ trait BusinessUtil
             if(!empty($request_data['reseller_id'])){
               $created_by_user = $request_data['reseller_id'];
             } else {
+
               $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
+
             }
 
-
             $request_data["business"]["number_of_employees_allowed"] = 0;
+        }
+        if(!empty($request_data['reseller_id'])){
+            $request_data['reseller_id'] = $created_by_user->id;
         }
 
 

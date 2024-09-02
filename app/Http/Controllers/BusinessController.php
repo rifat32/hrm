@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRegisterBusinessRequest;
 use App\Http\Requests\BusinessCreateRequest;
+use App\Http\Requests\BusinessTakeOverRequest;
 use App\Http\Requests\BusinessUpdatePart1Request;
 use App\Http\Requests\BusinessUpdatePart2Request;
 use App\Http\Requests\BusinessUpdatePart2RequestV2;
@@ -177,6 +178,7 @@ class BusinessController extends Controller
             $request_data['business']['status'] = "pending";
 
             $request_data['business']['created_by'] = $request->user()->id;
+            $request_data['business']['reseller_id'] = $request->user()->id;
             $request_data['business']['is_active'] = true;
             $request_data['business']['is_self_registered_businesses'] = false;
             $request_data['business']["pension_scheme_letters"] = [];
@@ -748,21 +750,24 @@ class BusinessController extends Controller
 
             $request_data = $request->validated();
 
+            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
+
             $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
 
-            $business = $this->businessOwnerCheck($request_data['business']["id"]);
+
 
             //    user email check
             $userPrev = User::where([
                 "id" => $request_data["user"]["id"]
             ]);
-            if (!$request->user()->hasRole('superadmin')) {
-                $userPrev  = $userPrev->where(function ($query) {
-                    return  $query->where('created_by', auth()->user()->id)
-                        ->orWhere('id', auth()->user()->id);
-                });
-            }
+            // if (!$request->user()->hasRole('superadmin')) {
+            //     $userPrev  = $userPrev->where(function ($query) {
+            //         return  $query
+            //         ->where('created_by', auth()->user()->id)
+            //             ->orWhere('id', auth()->user()->id);
+            //     });
+            // }
             $userPrev = $userPrev->first();
 
             if (!$userPrev) {
@@ -866,10 +871,10 @@ class BusinessController extends Controller
                 "pension_scheme_name",
                 "pension_scheme_letters",
                 "number_of_employees_allowed",
-
-
                 "owner_id",
-                'created_by'
+
+
+                // 'created_by'
             ])->toArray());
 
             $business->save();
@@ -959,8 +964,6 @@ class BusinessController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-
-
     /**
      *
      * @OA\Put(
@@ -1046,8 +1049,7 @@ class BusinessController extends Controller
             $request_data = $request->validated();
 
 
-
-            $business = $this->businessOwnerCheck($request_data['business']["id"]);
+            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
 
 
             // $user->syncRoles(["business_owner"]);
@@ -1067,6 +1069,123 @@ class BusinessController extends Controller
                 "service_plan_discount_amount",
                 "number_of_employees_allowed",
             ])->toArray());
+
+            $business->save();
+
+
+            if (empty($business)) {
+                return response()->json([
+                    "massage" => "something went wrong"
+                ], 500);
+            }
+
+
+
+
+            DB::commit();
+
+            return response([
+
+                "business" => $business
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+    /**
+     *
+     * @OA\Put(
+     *      path="/v1.0/businesses-take-over",
+     *      operationId="takeOverBusiness",
+     *      tags={"business_management"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to take over business",
+     *      description="This method is to  take over business",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"user","business"},
+
+     *
+     *  @OA\Property(property="business", type="string", format="array",example={
+     *   *  * "id":1,
+     *      * "trail_end_date" : "",
+     * "is_self_registered_businesses":1,
+     * "service_plan_id" : 0,
+     * "service_plan_discount_code" : 0,
+
+     * "number_of_employees_allowed":20
+     *
+     * }),
+     *
+
+     *
+     *
+
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+    public function takeOverBusiness(BusinessTakeOverRequest $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+            if (!$request->user()->hasRole('superadmin')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            $request_data = $request->validated();
+
+
+            $business = $this->businessOwnerCheck($request_data["id"],TRUE);
+
+
+            $business->reseller_id = auth()->user()->id;
+
 
             $business->save();
 
@@ -1182,19 +1301,19 @@ class BusinessController extends Controller
                 ], 401);
             }
 
-            $business = $this->businessOwnerCheck(auth()->user()->business_id);
+            $business = $this->businessOwnerCheck(auth()->user()->business_id,TRUE);
 
             $request_data = $request->validated();
             //    user email check
             $userPrev = User::where([
                 "id" => $request_data["user"]["id"]
             ]);
-            if (!$request->user()->hasRole('superadmin')) {
-                $userPrev  = $userPrev->where(function ($query) {
-                    return  $query->where('created_by', auth()->user()->id)
-                        ->orWhere('id', auth()->user()->id);
-                });
-            }
+            // if (!$request->user()->hasRole('superadmin')) {
+            //     $userPrev  = $userPrev->where(function ($query) {
+            //         return  $query->where('created_by', auth()->user()->id)
+            //             ->orWhere('id', auth()->user()->id);
+            //     });
+            // }
             $userPrev = $userPrev->first();
 
             if (!$userPrev) {
@@ -1373,6 +1492,10 @@ class BusinessController extends Controller
 
 
             $request_data = $request->validated();
+
+            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
+
+
             if (!empty($request_data["business"]["images"])) {
                 $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"], "", "business_images");
                 $this->makeFilePermanent($request_data["business"]["images"], "");
@@ -1391,7 +1514,7 @@ class BusinessController extends Controller
             }
 
 
-            $business = $this->businessOwnerCheck($request_data['business']["id"]);
+
 
 
             $business->fill(collect($request_data['business'])->only([
@@ -1543,6 +1666,9 @@ class BusinessController extends Controller
 
 
             $request_data = $request->validated();
+
+            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
+
             if (!empty($request_data["business"]["images"])) {
                 $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"], "", "business_images");
                 $this->makeFilePermanent($request_data["business"]["images"], "");
@@ -1561,7 +1687,7 @@ class BusinessController extends Controller
             }
 
 
-            $business = $this->businessOwnerCheck($request_data['business']["id"]);
+
 
 
             $business->fill(collect($request_data['business'])->only([
@@ -1713,18 +1839,14 @@ class BusinessController extends Controller
                 ], 401);
             }
 
-            $business = $this->businessOwnerCheck(auth()->user()->business_id);
+            $business = $this->businessOwnerCheck(auth()->user()->business_id,TRUE);
 
 
 
 
             $request_data = $request->validated();
 
-            $business  =  Business::where([
-                "id" => auth()->user()->business_id
-            ])
-                // ->with("somthing")
-                ->first();
+
 
             if (!empty($request_data["times"])) {
 
@@ -1883,21 +2005,14 @@ class BusinessController extends Controller
 
 
             $request_data = $request->validated();
-            $business = $this->businessOwnerCheck($request_data['business']["id"]);
+            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
 
             $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"], "", "pension_scheme_letters");
 
             $this->makeFilePermanent($request_data["business"]["pension_scheme_letters"], "");
 
 
-            $business = Business::where([
-                "id" => $request_data['business']["id"]
-            ])
-                ->first();
 
-            if (empty($business)) {
-                throw new Exception("something went wrong!");
-            }
             $pension_scheme_data =  collect($request_data['business'])->only([
                 "pension_scheme_registered",
                 "pension_scheme_name",
@@ -1923,15 +2038,13 @@ class BusinessController extends Controller
             }
 
 
-            $business = Business::where([
-                'id' => $request_data['business']['id']
-            ])->first();
 
-            if ($business) {
+
+
                 $business
                     ->fill($pension_scheme_data)
                     ->save();
-            }
+
 
 
 
@@ -2035,27 +2148,7 @@ class BusinessController extends Controller
             }
             $request_data = $request->validated();
 
-            $businessQuery  = Business::where(["id" => $request_data["id"]]);
-            if (!auth()->user()->hasRole('superadmin')) {
-                $businessQuery = $businessQuery->where(function ($query) {
-                    return   $query
-                        ->when(
-                            !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
-                            function ($query) {
-                                $query->where('id', auth()->user()->business_id)
-                                    ->orWhere('created_by', auth()->user()->id)
-                                    ->orWhere('owner_id', auth()->user()->id);
-                            },
-                            function ($query) {
-                                $query->where('is_self_registered_businesses', 1)
-                                    ->orWhere('created_by', auth()->user()->id);
-                            }
-
-                        );
-                });
-            }
-
-            $business =  $businessQuery->first();
+            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
 
 
             if (empty($business)) {
@@ -2176,7 +2269,7 @@ class BusinessController extends Controller
 
 
             $request_data = $request->validated();
-            $business = $this->businessOwnerCheck($request_data['business']["id"]);
+            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
 
             //  business info ##############
             // $request_data['business']['status'] = "pending";
@@ -2402,9 +2495,12 @@ class BusinessController extends Controller
                     !$request->user()->hasRole('superadmin'),
                     function ($query) use ($request) {
                         $query->where(function ($query) {
-                            $query->where('id', auth()->user()->business_id)
-                                ->orWhere('created_by', auth()->user()->id)
-                                ->orWhere('owner_id', auth()->user()->id);
+                            $query
+                            // ->where('id', auth()->user()->business_id)
+                            // ->orWhere('created_by', auth()->user()->id)
+                                ->orWhere('owner_id', auth()->user()->id)
+                                ->orWhere('reseller_id', auth()->user()->id)
+                                ;
                         });
                     },
                 )
@@ -2662,7 +2758,6 @@ class BusinessController extends Controller
             } else {
                 $service_plan =    ServicePlan::where("id", $business->service_plan_id)->first();
 
-
                 if ($service_plan) {
 
                     // Check if trail_end_date is empty or a past date
@@ -2769,32 +2864,25 @@ class BusinessController extends Controller
                 ], 401);
             }
 
-            $businessQuery  = Business::where(["id" => $id]);
-            if (!auth()->user()->hasRole('superadmin')) {
-                $businessQuery = $businessQuery->where(function ($query) {
-
+            $business  = Business::where(["id" => $id])
+            ->when(
+                !$request->user()->hasRole('superadmin'),
+                function ($query) use ($request) {
                     $query->where(function ($query) {
-                        return   $query
-                            ->when(
-                                !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
-                                function ($query) {
-                                    $query->where('id', auth()->user()->business_id)
-                                        ->orWhere('created_by', auth()->user()->id)
-                                        ->orWhere('owner_id', auth()->user()->id);
-                                },
-                                function ($query) {
-                                    $query->where('is_self_registered_businesses', 1)
-                                        ->orWhere('created_by', auth()->user()->id);
-                                }
-
-                            );
+                        $query
+                        // ->where('id', auth()->user()->business_id)
+                        // ->orWhere('created_by', auth()->user()->id)
+                            ->orWhere('owner_id', auth()->user()->id)
+                            ->orWhere('reseller_id', auth()->user()->id)
+                            ;
                     });
-                });
-            }
+                },
+            )
+            ->select("id", "name", "email", "phone", "address_line_1", "city", "country", "postcode", "start_date", "web_page","reseller_id")
+            ->first();
 
-            $business =  $businessQuery
-                ->select("id", "name", "email", "phone", "address_line_1", "city", "country", "postcode", "start_date", "web_page")
-                ->first();
+
+
             if (empty($business)) {
                 throw new Exception("you are not the owner of the business or the requested business does not exist.", 401);
             }
@@ -2972,27 +3060,7 @@ class BusinessController extends Controller
 
             $businessPensionHistoriesQuery =  BusinessPensionHistory::where([
                 "business_id" => $id
-            ])
-                ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
-
-
-                    $query->whereHas("business", function ($query) {
-                        $query
-                            ->when(
-                                !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
-                                function ($query) {
-                                    $query->where('businesses.id', auth()->user()->business_id)
-                                        ->orWhere('businesses.created_by', auth()->user()->id)
-                                        ->orWhere('businesses.owner_id', auth()->user()->id);
-                                },
-                                function ($query) {
-                                    $query->where('businesses.is_self_registered_businesses', 1)
-                                        ->orWhere('businesses.created_by', auth()->user()->id);
-                                }
-
-                            );
-                    });
-                });
+            ]);
 
 
             $businessPensionHistories = $this->retrieveData($businessPensionHistoriesQuery, "business_pension_histories.id");
@@ -3077,26 +3145,15 @@ class BusinessController extends Controller
             $idsArray = explode(',', $ids);
             $existingIds = BusinessPensionHistory::whereIn('business_pension_histories.id', $idsArray)
 
-                ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
-
-
-                    $query->whereHas("business", function ($query) {
+            ->where(function ($query) {
                         $query
-                            ->when(
-                                !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
-                                function ($query) {
-                                    $query->where('businesses.id', auth()->user()->business_id)
-                                        ->orWhere('businesses.created_by', auth()->user()->id)
-                                        ->orWhere('businesses.owner_id', auth()->user()->id);
-                                },
-                                function ($query) {
-                                    $query->where('businesses.is_self_registered_businesses', 1)
-                                        ->orWhere('businesses.created_by', auth()->user()->id);
-                                }
+                            // ->where('id', auth()->user()->business_id)
+                            // ->orWhere('created_by', auth()->user()->id)
+                            ->orWhere('owner_id', auth()->user()->id)
+                            ->orWhere('reseller_id', auth()->user()->id)
+                            ;
+             })
 
-                            );
-                    });
-                })
 
                 ->select('business_pension_histories.id')
                 ->get()
@@ -3186,30 +3243,17 @@ class BusinessController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  auth()->user()->business_id;
+
             $idsArray = explode(',', $ids);
             $existingIds = Business::whereIn('id', $idsArray)
-                ->when(
-                    !$request->user()->hasRole('superadmin'),
-                    function ($query) use ($request) {
-                        $query->where(function ($query) {
-                            $query
-                                ->when(
-                                    !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
-                                    function ($query) {
-                                        $query->where('id', auth()->user()->business_id)
-                                            ->orWhere('created_by', auth()->user()->id)
-                                            ->orWhere('owner_id', auth()->user()->id);
-                                    },
-                                    function ($query) {
-                                        $query->where('is_self_registered_businesses', 1)
-                                            ->orWhere('created_by', auth()->user()->id);
-                                    }
-
-                                );
-                        });
-                    },
-                )
+            ->where(function ($query) {
+                $query
+                // ->where('id', auth()->user()->business_id)
+                    // ->orWhere('created_by', auth()->user()->id)
+                    ->orWhere('owner_id', auth()->user()->id)
+                    ->orWhere('reseller_id', auth()->user()->id)
+                    ;
+     })
                 ->select('id')
                 ->get()
                 ->pluck('id')

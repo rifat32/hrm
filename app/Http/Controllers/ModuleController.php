@@ -420,7 +420,7 @@ class ModuleController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('module_view')) {
+             if (!$request->user()->hasPermissionTo('business_create')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);
@@ -533,7 +533,7 @@ class ModuleController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('module_view')) {
+             if (!$request->user()->hasPermissionTo('business_create')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);

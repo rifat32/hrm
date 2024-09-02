@@ -158,6 +158,7 @@ return array(
     'App\\Http\\Requests\\BusinessUpdatePart3Request' => $baseDir . '/app/Http/Requests/BusinessUpdatePart3Request.php',
     'App\\Http\\Requests\\BusinessUpdatePensionRequest' => $baseDir . '/app/Http/Requests/BusinessUpdatePensionRequest.php',
     'App\\Http\\Requests\\BusinessUpdateRequest' => $baseDir . '/app/Http/Requests/BusinessUpdateRequest.php',
+    'App\\Http\\Requests\\BusinessUpdateRequestPart4' => $baseDir . '/app/Http/Requests/BusinessUpdateRequestPart4.php',
     'App\\Http\\Requests\\BusinessUpdateSeparateRequest' => $baseDir . '/app/Http/Requests/BusinessUpdateSeparateRequest.php',
     'App\\Http\\Requests\\CandidateCreateRequest' => $baseDir . '/app/Http/Requests/CandidateCreateRequest.php',
     'App\\Http\\Requests\\CandidateCreateRequestClient' => $baseDir . '/app/Http/Requests/CandidateCreateRequestClient.php',

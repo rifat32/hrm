@@ -870,6 +870,7 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Http\\Requests\\BusinessUpdatePart3Request' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdatePart3Request.php',
         'App\\Http\\Requests\\BusinessUpdatePensionRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdatePensionRequest.php',
         'App\\Http\\Requests\\BusinessUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdateRequest.php',
+        'App\\Http\\Requests\\BusinessUpdateRequestPart4' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdateRequestPart4.php',
         'App\\Http\\Requests\\BusinessUpdateSeparateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/BusinessUpdateSeparateRequest.php',
         'App\\Http\\Requests\\CandidateCreateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/CandidateCreateRequest.php',
         'App\\Http\\Requests\\CandidateCreateRequestClient' => __DIR__ . '/../..' . '/app/Http/Requests/CandidateCreateRequestClient.php',

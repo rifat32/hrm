@@ -49,7 +49,8 @@ class Business extends Model
 
 
         "owner_id",
-        'created_by'
+        'created_by',
+        "reseller_id"
 
     ];
 
