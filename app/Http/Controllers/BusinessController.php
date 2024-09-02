@@ -27,6 +27,7 @@ use App\Models\Business;
 use App\Models\BusinessPensionHistory;
 use App\Models\BusinessSubscription;
 use App\Models\BusinessTime;
+use App\Models\ServicePlan;
 use App\Models\User;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
@@ -42,7 +43,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BusinessController extends Controller
 {
-    use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil,BasicUtil,EmailLogUtil;
+    use ErrorUtil, BusinessUtil, UserActivityUtil, DiscountUtil, BasicUtil, EmailLogUtil;
 
 
 
@@ -139,60 +140,59 @@ class BusinessController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_create')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
-                $request_data = $request->validated();
+            if (!$request->user()->hasPermissionTo('business_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
-                $request_data["business"] = $this->businessImageStore($request_data["business"]);
-
-
-                $user = User::where([
-                    "id" =>  $request_data['business']['owner_id']
-                ])
-                    ->first();
-
-                if (!$user) {
-                    $error =  [
-                        "message" => "The given data was invalid.",
-                        "errors" => ["owner_id" => ["No User Found"]]
-                    ];
-                    throw new Exception(json_encode($error), 422);
-                }
-
-                if (!$user->hasRole('business_owner')) {
-                    $error =  [
-                        "message" => "The given data was invalid.",
-                        "errors" => ["owner_id" => ["The user is not a businesses Owner"]]
-                    ];
-                    throw new Exception(json_encode($error), 422);
-                }
+            $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
 
+            $user = User::where([
+                "id" =>  $request_data['business']['owner_id']
+            ])
+                ->first();
 
-                $request_data['business']['status'] = "pending";
+            if (!$user) {
+                $error =  [
+                    "message" => "The given data was invalid.",
+                    "errors" => ["owner_id" => ["No User Found"]]
+                ];
+                throw new Exception(json_encode($error), 422);
+            }
 
-                $request_data['business']['created_by'] = $request->user()->id;
-                $request_data['business']['is_active'] = true;
-                $request_data['business']['is_self_registered_businesses'] = false;
-                $request_data['business']["pension_scheme_letters"] = [];
-                $business =  Business::create($request_data['business']);
+            if (!$user->hasRole('business_owner')) {
+                $error =  [
+                    "message" => "The given data was invalid.",
+                    "errors" => ["owner_id" => ["The user is not a businesses Owner"]]
+                ];
+                throw new Exception(json_encode($error), 422);
+            }
 
-                $this->storeDefaultsToBusiness($business);
 
 
-                DB::commit();
+            $request_data['business']['status'] = "pending";
 
-                return response([
-                    "business" => $business
-                ], 201);
+            $request_data['business']['created_by'] = $request->user()->id;
+            $request_data['business']['is_active'] = true;
+            $request_data['business']['is_self_registered_businesses'] = false;
+            $request_data['business']["pension_scheme_letters"] = [];
+            $business =  Business::create($request_data['business']);
 
+            $this->storeDefaultsToBusiness($business);
+
+
+            DB::commit();
+
+            return response([
+                "business" => $business
+            ], 201);
         } catch (Exception $e) {
             $this->businessImageRollBack($request_data);
 
-    DB::rollBack();
+            DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
@@ -447,32 +447,31 @@ class BusinessController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
 
-                if (!$request->user()->hasPermissionTo('business_create')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
-                $request_data = $request->validated();
+            if (!$request->user()->hasPermissionTo('business_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
 
-           $request_data["business"] = $this->businessImageStore($request_data["business"]);
+            $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
 
             $data = $this->createUserWithBusiness($request_data);
 
 
 
-                DB::commit();
+            DB::commit();
 
-                return response(
-                    [
+            return response(
+                [
                     "user" => $data["user"],
                     "business" => $data["business"]
                 ],
-                 201
-                );
-
+                201
+            );
         } catch (Exception $e) {
             $this->businessImageRollBack($request_data);
             DB::rollBack();
@@ -482,7 +481,7 @@ class BusinessController extends Controller
 
 
 
-      /**
+    /**
      *
      * @OA\Post(
      *      path="/v1.0/client/auth/register-with-business",
@@ -614,19 +613,17 @@ class BusinessController extends Controller
             // $request_data['business']["active_module_ids"] = [];
 
 
-             $data = $this->createUserWithBusiness($request_data);
+            $data = $this->createUserWithBusiness($request_data);
 
-                 DB::commit();
+            DB::commit();
 
-                 return response(
-                     [
-                     "user" => $data["user"],
-                     "business" => $data["business"]
-                 ],
-                  201
-                 );
-
-
+            return response(
+                [
+                    "user" => $data["user"],
+                    "business" => $data["business"]
+                ],
+                201
+            );
         } catch (Exception $e) {
 
 
@@ -745,220 +742,219 @@ class BusinessController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('business_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-                $request_data = $request->validated();
+            $request_data = $request->validated();
 
-                $request_data["business"] = $this->businessImageStore($request_data["business"]);
-
-
-                $business = $this->businessOwnerCheck($request_data['business']["id"]);
-
-                //    user email check
-                $userPrev = User::where([
-                    "id" => $request_data["user"]["id"]
-                ]);
-                if (!$request->user()->hasRole('superadmin')) {
-                    $userPrev  = $userPrev->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id);
-                    });
-                }
-                $userPrev = $userPrev->first();
-
-                if (!$userPrev) {
-                    throw new Exception("no user found with this id",404);
-                }
+            $request_data["business"] = $this->businessImageStore($request_data["business"]);
 
 
+            $business = $this->businessOwnerCheck($request_data['business']["id"]);
+
+            //    user email check
+            $userPrev = User::where([
+                "id" => $request_data["user"]["id"]
+            ]);
+            if (!$request->user()->hasRole('superadmin')) {
+                $userPrev  = $userPrev->where(function ($query) {
+                    return  $query->where('created_by', auth()->user()->id)
+                        ->orWhere('id', auth()->user()->id);
+                });
+            }
+            $userPrev = $userPrev->first();
+
+            if (!$userPrev) {
+                throw new Exception("no user found with this id", 404);
+            }
 
 
-                //  $businessPrev = Business::where([
-                //     "id" => $request_data["business"]["id"]
-                //  ]);
-
-                // $businessPrev = $businessPrev->first();
-                // if(!$businessPrev) {
-                //     return response()->json([
-                //        "message" => "no business found with this id"
-                //     ],404);
-                //   }
-
-                if (!empty($request_data['user']['password'])) {
-                    $request_data['user']['password'] = Hash::make($request_data['user']['password']);
-                } else {
-                    unset($request_data['user']['password']);
-                }
-                $request_data['user']['is_active'] = true;
-                $request_data['user']['remember_token'] = Str::random(10);
-                $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
-                $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
-                $request_data['user']['country'] = $request_data['business']['country'];
-                $request_data['user']['city'] = $request_data['business']['city'];
-                $request_data['user']['postcode'] = $request_data['business']['postcode'];
-                $request_data['user']['lat'] = $request_data['business']['lat'];
-                $request_data['user']['long'] = $request_data['business']['long'];
-                $user  =  tap(User::where([
-                    "id" => $request_data['user']["id"]
-                ]))->update(
-                    collect($request_data['user'])->only([
-                        'first_Name',
-                        'middle_Name',
-                        'last_Name',
-                        'phone',
-                        'image',
-                        'address_line_1',
-                        'address_line_2',
-                        'country',
-                        'city',
-                        'postcode',
-                        'email',
-                        'password',
-                        "lat",
-                        "long",
-                        "gender"
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
-                if (!$user) {
-                        throw new Exception("something went wrong updating user.",500);
-                }
-
-                // $user->syncRoles(["business_owner"]);
 
 
-                if(!empty($request_data["business"]["is_self_registered_businesses"])) {
-                    $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
-                   }
+            //  $businessPrev = Business::where([
+            //     "id" => $request_data["business"]["id"]
+            //  ]);
 
+            // $businessPrev = $businessPrev->first();
+            // if(!$businessPrev) {
+            //     return response()->json([
+            //        "message" => "no business found with this id"
+            //     ],404);
+            //   }
 
-                $business->fill(collect($request_data['business'])->only([
-                    "name",
-                    "start_date",
-                    "trail_end_date",
-                    "about",
-                    "web_page",
-                    "phone",
-                    "email",
-                    "additional_information",
-                    "address_line_1",
-                    "address_line_2",
+            if (!empty($request_data['user']['password'])) {
+                $request_data['user']['password'] = Hash::make($request_data['user']['password']);
+            } else {
+                unset($request_data['user']['password']);
+            }
+            $request_data['user']['is_active'] = true;
+            $request_data['user']['remember_token'] = Str::random(10);
+            $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+            $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
+            $request_data['user']['country'] = $request_data['business']['country'];
+            $request_data['user']['city'] = $request_data['business']['city'];
+            $request_data['user']['postcode'] = $request_data['business']['postcode'];
+            $request_data['user']['lat'] = $request_data['business']['lat'];
+            $request_data['user']['long'] = $request_data['business']['long'];
+            $user  =  tap(User::where([
+                "id" => $request_data['user']["id"]
+            ]))->update(
+                collect($request_data['user'])->only([
+                    'first_Name',
+                    'middle_Name',
+                    'last_Name',
+                    'phone',
+                    'image',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    'email',
+                    'password',
                     "lat",
                     "long",
-                    "country",
-                    "city",
-                    "currency",
-                    "postcode",
-                    "logo",
-                    "image",
-                    "background_image",
-                    "status",
-                    "is_active",
-                    "is_self_registered_businesses",
+                    "gender"
+                ])->toArray()
+            )
+                // ->with("somthing")
 
-                    "service_plan_id",
-                    "service_plan_discount_code",
-                    "service_plan_discount_amount",
+                ->first();
+            if (!$user) {
+                throw new Exception("something went wrong updating user.", 500);
+            }
+
+            // $user->syncRoles(["business_owner"]);
 
 
-                    "pension_scheme_registered",
-                    "pension_scheme_name",
-                    "pension_scheme_letters",
-                    "number_of_employees_allowed",
+            if (!empty($request_data["business"]["is_self_registered_businesses"])) {
+                $request_data['business']['service_plan_discount_amount'] = $this->getDiscountAmount($request_data['business']);
+            }
 
 
-                    "owner_id",
-                    'created_by'
-                ])->toArray());
+            $business->fill(collect($request_data['business'])->only([
+                "name",
+                "start_date",
+                "trail_end_date",
+                "about",
+                "web_page",
+                "phone",
+                "email",
+                "additional_information",
+                "address_line_1",
+                "address_line_2",
+                "lat",
+                "long",
+                "country",
+                "city",
+                "currency",
+                "postcode",
+                "logo",
+                "image",
+                "background_image",
+                "status",
+                "is_active",
+                "is_self_registered_businesses",
 
-                $business->save();
-
-
-                if (empty($business)) {
-                    return response()->json([
-                        "massage" => "something went wrong"
-                    ], 500);
-                }
-
-
-                // end business info ##############
-
-                if (!empty($request_data["times"])) {
-
-                    $timesArray = collect($request_data["times"])->unique("day");
-
-
-                    $conflicted_work_shift_ids = collect();
-
-                    foreach ($timesArray as $business_time) {
-                        $work_shift_ids = WorkShift::where([
-                            "business_id" => auth()->user()->business_id
-                        ])
-                            ->whereHas('details', function ($query) use ($business_time) {
-                                $query->where('work_shift_details.day', ($business_time["day"]))
-                                    ->when(!empty($time["is_weekend"]), function ($query) {
-                                        $query->where('work_shift_details.is_weekend', 1);
-                                    })
-                                    ->where(function ($query) use ($business_time) {
-                                        $query->whereTime('work_shift_details.start_at', '<=', ($business_time["start_at"]))
-                                            ->orWhereTime('work_shift_details.end_at', '>=', ($business_time["end_at"]));
-                                    });
-                            })
-                            ->pluck("id");
-                        $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
-                    }
-                    $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
-
-                    if (!empty($conflicted_work_shift_ids)) {
-                        WorkShift::whereIn("id", $conflicted_work_shift_ids)->update([
-                            "is_active" => 0
-                        ]);
-
-                        WorkShiftHistory::where([
-                            "to_date" => NULL
-                        ])
-                            ->whereIn("work_shift_id", $conflicted_work_shift_ids)
-                            ->update([
-                                "to_date" => now()
-                            ]);
-                    }
+                "service_plan_id",
+                "service_plan_discount_code",
+                "service_plan_discount_amount",
 
 
+                "pension_scheme_registered",
+                "pension_scheme_name",
+                "pension_scheme_letters",
+                "number_of_employees_allowed",
 
 
+                "owner_id",
+                'created_by'
+            ])->toArray());
 
-                    BusinessTime::where([
-                        "business_id" => $business->id
+            $business->save();
+
+
+            if (empty($business)) {
+                return response()->json([
+                    "massage" => "something went wrong"
+                ], 500);
+            }
+
+
+            // end business info ##############
+
+            if (!empty($request_data["times"])) {
+
+                $timesArray = collect($request_data["times"])->unique("day");
+
+
+                $conflicted_work_shift_ids = collect();
+
+                foreach ($timesArray as $business_time) {
+                    $work_shift_ids = WorkShift::where([
+                        "business_id" => auth()->user()->business_id
                     ])
-                        ->delete();
+                        ->whereHas('details', function ($query) use ($business_time) {
+                            $query->where('work_shift_details.day', ($business_time["day"]))
+                                ->when(!empty($time["is_weekend"]), function ($query) {
+                                    $query->where('work_shift_details.is_weekend', 1);
+                                })
+                                ->where(function ($query) use ($business_time) {
+                                    $query->whereTime('work_shift_details.start_at', '<=', ($business_time["start_at"]))
+                                        ->orWhereTime('work_shift_details.end_at', '>=', ($business_time["end_at"]));
+                                });
+                        })
+                        ->pluck("id");
+                    $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
+                }
+                $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
 
-                    $timesArray = collect($request_data["times"])->unique("day");
-                    foreach ($timesArray as $business_time) {
-                        BusinessTime::create([
-                            "business_id" => $business->id,
-                            "day" => $business_time["day"],
-                            "start_at" => $business_time["start_at"],
-                            "end_at" => $business_time["end_at"],
-                            "is_weekend" => $business_time["is_weekend"],
+                if (!empty($conflicted_work_shift_ids)) {
+                    WorkShift::whereIn("id", $conflicted_work_shift_ids)->update([
+                        "is_active" => 0
+                    ]);
+
+                    WorkShiftHistory::where([
+                        "to_date" => NULL
+                    ])
+                        ->whereIn("work_shift_id", $conflicted_work_shift_ids)
+                        ->update([
+                            "to_date" => now()
                         ]);
-                    }
                 }
 
-$business->service_plan = $business->service_plan;
 
-                DB::commit();
 
-                return response([
-                    "user" => $user,
-                    "business" => $business
-                ], 201);
 
+
+                BusinessTime::where([
+                    "business_id" => $business->id
+                ])
+                    ->delete();
+
+                $timesArray = collect($request_data["times"])->unique("day");
+                foreach ($timesArray as $business_time) {
+                    BusinessTime::create([
+                        "business_id" => $business->id,
+                        "day" => $business_time["day"],
+                        "start_at" => $business_time["start_at"],
+                        "end_at" => $business_time["end_at"],
+                        "is_weekend" => $business_time["is_weekend"],
+                    ]);
+                }
+            }
+
+            $business->service_plan = $business->service_plan;
+
+            DB::commit();
+
+            return response([
+                "user" => $user,
+                "business" => $business
+            ], 201);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -968,7 +964,7 @@ $business->service_plan = $business->service_plan;
 
 
 
-     /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/businesses-part-1",
@@ -1049,97 +1045,94 @@ $business->service_plan = $business->service_plan;
 
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('business_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $business = $this->businessOwnerCheck(auth()->user()->business_id);
+            $business = $this->businessOwnerCheck(auth()->user()->business_id);
 
-                $request_data = $request->validated();
-                //    user email check
-                $userPrev = User::where([
-                    "id" => $request_data["user"]["id"]
-                ]);
-                if (!$request->user()->hasRole('superadmin')) {
-                    $userPrev  = $userPrev->where(function ($query) {
-                        return  $query->where('created_by', auth()->user()->id)
-                            ->orWhere('id', auth()->user()->id);
-                    });
-                }
-                $userPrev = $userPrev->first();
+            $request_data = $request->validated();
+            //    user email check
+            $userPrev = User::where([
+                "id" => $request_data["user"]["id"]
+            ]);
+            if (!$request->user()->hasRole('superadmin')) {
+                $userPrev  = $userPrev->where(function ($query) {
+                    return  $query->where('created_by', auth()->user()->id)
+                        ->orWhere('id', auth()->user()->id);
+                });
+            }
+            $userPrev = $userPrev->first();
 
-                if (!$userPrev) {
-                        throw new Exception("no user found with this id",404);
-
-                }
-
+            if (!$userPrev) {
+                throw new Exception("no user found with this id", 404);
+            }
 
 
 
-                //  $businessPrev = Business::where([
-                //     "id" => $request_data["business"]["id"]
-                //  ]);
 
-                // $businessPrev = $businessPrev->first();
-                // if(!$businessPrev) {
-                //     return response()->json([
-                //        "message" => "no business found with this id"
-                //     ],404);
-                //   }
+            //  $businessPrev = Business::where([
+            //     "id" => $request_data["business"]["id"]
+            //  ]);
 
-
-                if (!empty($request_data['user']['password'])) {
-                    $request_data['user']['password'] = Hash::make($request_data['user']['password']);
-                } else {
-                    unset($request_data['user']['password']);
-                }
-                $request_data['user']['is_active'] = true;
-                $request_data['user']['remember_token'] = Str::random(10);
-                $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
-                $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
-                $request_data['user']['country'] = $request_data['business']['country'];
-                $request_data['user']['city'] = $request_data['business']['city'];
-                $request_data['user']['postcode'] = $request_data['business']['postcode'];
-                $request_data['user']['lat'] = $request_data['business']['lat'];
-                $request_data['user']['long'] = $request_data['business']['long'];
-                $user  =  tap(User::where([
-                    "id" => $request_data['user']["id"]
-                ]))->update(
-                    collect($request_data['user'])->only([
-                        'first_Name',
-                        'middle_Name',
-                        'last_Name',
-                        'phone',
-                        'image',
-                        'address_line_1',
-                        'address_line_2',
-                        'country',
-                        'city',
-                        'postcode',
-                        'email',
-                        'password',
-                        "lat",
-                        "long",
-                        "gender"
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
-                if (!$user) {
-                    throw new Exception("something went wrong updating user.",500);
-
-                }
+            // $businessPrev = $businessPrev->first();
+            // if(!$businessPrev) {
+            //     return response()->json([
+            //        "message" => "no business found with this id"
+            //     ],404);
+            //   }
 
 
-                DB::commit();
-                return response([
-                    "user" => $user,
+            if (!empty($request_data['user']['password'])) {
+                $request_data['user']['password'] = Hash::make($request_data['user']['password']);
+            } else {
+                unset($request_data['user']['password']);
+            }
+            $request_data['user']['is_active'] = true;
+            $request_data['user']['remember_token'] = Str::random(10);
+            $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+            $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
+            $request_data['user']['country'] = $request_data['business']['country'];
+            $request_data['user']['city'] = $request_data['business']['city'];
+            $request_data['user']['postcode'] = $request_data['business']['postcode'];
+            $request_data['user']['lat'] = $request_data['business']['lat'];
+            $request_data['user']['long'] = $request_data['business']['long'];
+            $user  =  tap(User::where([
+                "id" => $request_data['user']["id"]
+            ]))->update(
+                collect($request_data['user'])->only([
+                    'first_Name',
+                    'middle_Name',
+                    'last_Name',
+                    'phone',
+                    'image',
+                    'address_line_1',
+                    'address_line_2',
+                    'country',
+                    'city',
+                    'postcode',
+                    'email',
+                    'password',
+                    "lat",
+                    "long",
+                    "gender"
+                ])->toArray()
+            )
+                // ->with("somthing")
 
-                ], 201);
+                ->first();
+            if (!$user) {
+                throw new Exception("something went wrong updating user.", 500);
+            }
 
+
+            DB::commit();
+            return response([
+                "user" => $user,
+
+            ], 201);
         } catch (Exception $e) {
 
             DB::rollBack();
@@ -1148,7 +1141,7 @@ $business->service_plan = $business->service_plan;
         }
     }
 
-        /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/businesses-part-2",
@@ -1240,79 +1233,77 @@ $business->service_plan = $business->service_plan;
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('business_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
 
-                $request_data = $request->validated();
-                if (!empty($request_data["business"]["images"])) {
-                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
-                    $this->makeFilePermanent($request_data["business"]["images"],"");
-                }
-                if (!empty($request_data["business"]["image"])) {
-                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
-                }
-                if (!empty($request_data["business"]["logo"])) {
-                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
-                }
-                if (!empty($request_data["business"]["background_image"])) {
-                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
-                }
+            $request_data = $request->validated();
+            if (!empty($request_data["business"]["images"])) {
+                $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"], "", "business_images");
+                $this->makeFilePermanent($request_data["business"]["images"], "");
+            }
+            if (!empty($request_data["business"]["image"])) {
+                $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]], "", "business_images")[0];
+                $this->makeFilePermanent([$request_data["business"]["image"]], "");
+            }
+            if (!empty($request_data["business"]["logo"])) {
+                $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]], "", "business_images")[0];
+                $this->makeFilePermanent([$request_data["business"]["logo"]], "");
+            }
+            if (!empty($request_data["business"]["background_image"])) {
+                $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]], "", "business_images")[0];
+                $this->makeFilePermanent([$request_data["business"]["background_image"]], "");
+            }
 
 
-                $business = $this->businessOwnerCheck($request_data['business']["id"]);
+            $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
 
-                $business->fill(collect($request_data['business'])->only([
-                    "name",
-                    "start_date",
-                    "about",
-                    "web_page",
-                    "phone",
-                    "email",
-                    "additional_information",
-                    "address_line_1",
-                    "address_line_2",
-                    "lat",
-                    "long",
-                    "country",
-                    "city",
-                    "postcode",
-                    "logo",
-                    "image",
-                    "status",
-                    "background_image",
-                    "currency",
-                    "number_of_employees_allowed"
-                ])->toArray());
+            $business->fill(collect($request_data['business'])->only([
+                "name",
+                "start_date",
+                "about",
+                "web_page",
+                "phone",
+                "email",
+                "additional_information",
+                "address_line_1",
+                "address_line_2",
+                "lat",
+                "long",
+                "country",
+                "city",
+                "postcode",
+                "logo",
+                "image",
+                "status",
+                "background_image",
+                "currency",
+                "number_of_employees_allowed"
+            ])->toArray());
 
-                $business->save();
-
-
-
-
-                if (empty($business)) {
-                    return response()->json([
-                        "massage" => "something went wrong"
-                    ], 500);
-                }
+            $business->save();
 
 
 
 
-                DB::commit();
-                return response([
-                    "business" => $business
-                ], 201);
+            if (empty($business)) {
+                return response()->json([
+                    "massage" => "something went wrong"
+                ], 500);
+            }
 
 
+
+
+            DB::commit();
+            return response([
+                "business" => $business
+            ], 201);
         } catch (Exception $e) {
 
             DB::rollBack();
@@ -1321,7 +1312,7 @@ $business->service_plan = $business->service_plan;
         }
     }
 
-          /**
+    /**
      *
      * @OA\Put(
      *      path="/v2.0/businesses-part-2",
@@ -1412,60 +1403,66 @@ $business->service_plan = $business->service_plan;
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('business_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
 
-                $request_data = $request->validated();
-                if (!empty($request_data["business"]["images"])) {
-                    $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"],"","business_images");
-                    $this->makeFilePermanent($request_data["business"]["images"],"");
-                }
-                if (!empty($request_data["business"]["image"])) {
-                    $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["image"]],"");
-                }
-                if (!empty($request_data["business"]["logo"])) {
-                    $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["logo"]],"");
-                }
-                if (!empty($request_data["business"]["background_image"])) {
-                    $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]],"","business_images")[0];
-                    $this->makeFilePermanent([$request_data["business"]["background_image"]],"");
-                }
+            $request_data = $request->validated();
+            if (!empty($request_data["business"]["images"])) {
+                $request_data["business"]["images"] = $this->storeUploadedFiles($request_data["business"]["images"], "", "business_images");
+                $this->makeFilePermanent($request_data["business"]["images"], "");
+            }
+            if (!empty($request_data["business"]["image"])) {
+                $request_data["business"]["image"] = $this->storeUploadedFiles([$request_data["business"]["image"]], "", "business_images")[0];
+                $this->makeFilePermanent([$request_data["business"]["image"]], "");
+            }
+            if (!empty($request_data["business"]["logo"])) {
+                $request_data["business"]["logo"] = $this->storeUploadedFiles([$request_data["business"]["logo"]], "", "business_images")[0];
+                $this->makeFilePermanent([$request_data["business"]["logo"]], "");
+            }
+            if (!empty($request_data["business"]["background_image"])) {
+                $request_data["business"]["background_image"] = $this->storeUploadedFiles([$request_data["business"]["background_image"]], "", "business_images")[0];
+                $this->makeFilePermanent([$request_data["business"]["background_image"]], "");
+            }
 
 
-                $business = $this->businessOwnerCheck($request_data['business']["id"]);
+            $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
 
-                $business->fill(collect($request_data['business'])->only([
-                    "name","email","phone","address_line_1","city","country","postcode","start_date","web_page"
-                ])->toArray());
+            $business->fill(collect($request_data['business'])->only([
+                "name",
+                "email",
+                "phone",
+                "address_line_1",
+                "city",
+                "country",
+                "postcode",
+                "start_date",
+                "web_page"
+            ])->toArray());
 
-                $business->save();
-
-
-
-
-                if (empty($business)) {
-                    return response()->json([
-                        "massage" => "something went wrong"
-                    ], 500);
-                }
-
+            $business->save();
 
 
 
-                DB::commit();
-                return response([
-                    "business" => $business
-                ], 201);
+
+            if (empty($business)) {
+                return response()->json([
+                    "massage" => "something went wrong"
+                ], 500);
+            }
 
 
+
+
+            DB::commit();
+            return response([
+                "business" => $business
+            ], 201);
         } catch (Exception $e) {
 
             DB::rollBack();
@@ -1579,95 +1576,94 @@ $business->service_plan = $business->service_plan;
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('business_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-                $business = $this->businessOwnerCheck(auth()->user()->business_id);
-
-
-
-
-                $request_data = $request->validated();
-
-                $business  =  Business::where([
-                    "id" => auth()->user()->business_id
-                ])
-                    // ->with("somthing")
-                    ->first();
-
-                if (!empty($request_data["times"])) {
-
-                    $timesArray = collect($request_data["times"])->unique("day");
-
-
-                    $conflicted_work_shift_ids = collect();
-
-                    foreach ($timesArray as $business_time) {
-                        $work_shift_ids = WorkShift::where([
-                            "business_id" => auth()->user()->business_id
-                        ])
-                            ->whereHas('details', function ($query) use ($business_time) {
-                                $query->where('work_shift_details.day', ($business_time["day"]))
-                                    ->when(!empty($time["is_weekend"]), function ($query) {
-                                        $query->where('work_shift_details.is_weekend', 1);
-                                    })
-                                    ->where(function ($query) use ($business_time) {
-                                        $query->whereTime('work_shift_details.start_at', '<=', ($business_time["start_at"]))
-                                            ->orWhereTime('work_shift_details.end_at', '>=', ($business_time["end_at"]));
-                                    });
-                            })
-                            ->pluck("id");
-                        $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
-                    }
-                    $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
-
-                    if (!empty($conflicted_work_shift_ids)) {
-                        WorkShift::whereIn("id", $conflicted_work_shift_ids)->update([
-                            "is_active" => 0
-                        ]);
-
-                        WorkShiftHistory::where([
-                            "to_date" => NULL
-                        ])
-                            ->whereIn("work_shift_id", $conflicted_work_shift_ids)
-                            ->update([
-                                "to_date" => now()
-                            ]);
-                    }
+            $business = $this->businessOwnerCheck(auth()->user()->business_id);
 
 
 
 
+            $request_data = $request->validated();
 
-                    BusinessTime::where([
-                        "business_id" => $business->id
+            $business  =  Business::where([
+                "id" => auth()->user()->business_id
+            ])
+                // ->with("somthing")
+                ->first();
+
+            if (!empty($request_data["times"])) {
+
+                $timesArray = collect($request_data["times"])->unique("day");
+
+
+                $conflicted_work_shift_ids = collect();
+
+                foreach ($timesArray as $business_time) {
+                    $work_shift_ids = WorkShift::where([
+                        "business_id" => auth()->user()->business_id
                     ])
-                        ->delete();
+                        ->whereHas('details', function ($query) use ($business_time) {
+                            $query->where('work_shift_details.day', ($business_time["day"]))
+                                ->when(!empty($time["is_weekend"]), function ($query) {
+                                    $query->where('work_shift_details.is_weekend', 1);
+                                })
+                                ->where(function ($query) use ($business_time) {
+                                    $query->whereTime('work_shift_details.start_at', '<=', ($business_time["start_at"]))
+                                        ->orWhereTime('work_shift_details.end_at', '>=', ($business_time["end_at"]));
+                                });
+                        })
+                        ->pluck("id");
+                    $conflicted_work_shift_ids = $conflicted_work_shift_ids->merge($work_shift_ids);
+                }
+                $conflicted_work_shift_ids = $conflicted_work_shift_ids->unique()->values()->all();
 
-                    $timesArray = collect($request_data["times"])->unique("day");
-                    foreach ($timesArray as $business_time) {
-                        BusinessTime::create([
-                            "business_id" => $business->id,
-                            "day" => $business_time["day"],
-                            "start_at" => $business_time["start_at"],
-                            "end_at" => $business_time["end_at"],
-                            "is_weekend" => $business_time["is_weekend"],
+                if (!empty($conflicted_work_shift_ids)) {
+                    WorkShift::whereIn("id", $conflicted_work_shift_ids)->update([
+                        "is_active" => 0
+                    ]);
+
+                    WorkShiftHistory::where([
+                        "to_date" => NULL
+                    ])
+                        ->whereIn("work_shift_id", $conflicted_work_shift_ids)
+                        ->update([
+                            "to_date" => now()
                         ]);
-                    }
                 }
 
 
 
 
-                DB::commit();
-                return response([
 
-                    "business" => $business
-                ], 201);
+                BusinessTime::where([
+                    "business_id" => $business->id
+                ])
+                    ->delete();
 
+                $timesArray = collect($request_data["times"])->unique("day");
+                foreach ($timesArray as $business_time) {
+                    BusinessTime::create([
+                        "business_id" => $business->id,
+                        "day" => $business_time["day"],
+                        "start_at" => $business_time["start_at"],
+                        "end_at" => $business_time["end_at"],
+                        "is_weekend" => $business_time["is_weekend"],
+                    ]);
+                }
+            }
+
+
+
+
+            DB::commit();
+            return response([
+
+                "business" => $business
+            ], 201);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -1748,65 +1744,63 @@ $business->service_plan = $business->service_plan;
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('business_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
-                $request_data = $request->validated();
-                $business = $this->businessOwnerCheck($request_data['business']["id"]);
+            $request_data = $request->validated();
+            $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
-                $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"],"","pension_scheme_letters");
+            $request_data["business"]["pension_scheme_letters"] = $this->storeUploadedFiles($request_data["business"]["pension_scheme_letters"], "", "pension_scheme_letters");
 
-                $this->makeFilePermanent($request_data["business"]["pension_scheme_letters"],"");
+            $this->makeFilePermanent($request_data["business"]["pension_scheme_letters"], "");
 
 
-                $business = Business::where([
-                     "id" =>$request_data['business']["id"]
-                ])
+            $business = Business::where([
+                "id" => $request_data['business']["id"]
+            ])
                 ->first();
 
-                if(empty($business)) {
-                     throw new Exception("something went wrong!");
-                }
-                $pension_scheme_data =  collect($request_data['business'])->only([
-                    "pension_scheme_registered",
-                    "pension_scheme_name",
-                    "pension_scheme_letters",
+            if (empty($business)) {
+                throw new Exception("something went wrong!");
+            }
+            $pension_scheme_data =  collect($request_data['business'])->only([
+                "pension_scheme_registered",
+                "pension_scheme_name",
+                "pension_scheme_letters",
 
-                ])->toArray();
-
-
-                $fields_to_check = [
-                    "pension_scheme_registered",
-                    "pension_scheme_name",
-                    "pension_scheme_letters",
-                    ];
-                    $date_fields = [
-                    ];
+            ])->toArray();
 
 
-                    $fields_changed = $this->fieldsHaveChanged($fields_to_check, $business, $pension_scheme_data, $date_fields);
-
-                    if (
-                        $fields_changed
-                    ) {
-                        BusinessPensionHistory::create(array_merge(["created_by" => auth()->user()->id,"business_id" =>$request_data['business']["id"] ],$pension_scheme_data));
-
-                    }
+            $fields_to_check = [
+                "pension_scheme_registered",
+                "pension_scheme_name",
+                "pension_scheme_letters",
+            ];
+            $date_fields = [];
 
 
-                    $business = Business::where([
-                        'id' => $request_data['business']['id']
-                    ])->first();
+            $fields_changed = $this->fieldsHaveChanged($fields_to_check, $business, $pension_scheme_data, $date_fields);
 
-                    if ($business) {
-                        $business
-                        ->fill($pension_scheme_data)
-                        ->save();
-                    }
+            if (
+                $fields_changed
+            ) {
+                BusinessPensionHistory::create(array_merge(["created_by" => auth()->user()->id, "business_id" => $request_data['business']["id"]], $pension_scheme_data));
+            }
+
+
+            $business = Business::where([
+                'id' => $request_data['business']['id']
+            ])->first();
+
+            if ($business) {
+                $business
+                    ->fill($pension_scheme_data)
+                    ->save();
+            }
 
 
 
@@ -1815,11 +1809,11 @@ $business->service_plan = $business->service_plan;
 
 
 
-                if (empty($business)) {
-                    return response()->json([
-                        "massage" => "something went wrong"
-                    ], 500);
-                }
+            if (empty($business)) {
+                return response()->json([
+                    "massage" => "something went wrong"
+                ], 500);
+            }
 
 
 
@@ -1827,15 +1821,14 @@ $business->service_plan = $business->service_plan;
 
 
 
-                // $this->moveUploadedFiles(collect($request_data["business"]["pension_scheme_letters"])->pluck("file"),"pension_scheme_letters");
+            // $this->moveUploadedFiles(collect($request_data["business"]["pension_scheme_letters"])->pluck("file"),"pension_scheme_letters");
 
 
 
-                DB::commit();
-                return response([
-                    "business" => $business
-                ], 201);
-
+            DB::commit();
+            return response([
+                "business" => $business
+            ], 201);
         } catch (Exception $e) {
 
             DB::rollBack();
@@ -1915,18 +1908,19 @@ $business->service_plan = $business->service_plan;
             if (!auth()->user()->hasRole('superadmin')) {
                 $businessQuery = $businessQuery->where(function ($query) {
                     return   $query
-                       ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
-                        $query->where('id', auth()->user()->business_id)
-                        ->orWhere('created_by', auth()->user()->id)
-                        ->orWhere('owner_id', auth()->user()->id);
-                       },
-                       function($query) {
-                        $query->where('is_self_registered_businesses', 1)
-                        ->orWhere('created_by', auth()->user()->id);
-                       }
+                        ->when(
+                            !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
+                            function ($query) {
+                                $query->where('id', auth()->user()->business_id)
+                                    ->orWhere('created_by', auth()->user()->id)
+                                    ->orWhere('owner_id', auth()->user()->id);
+                            },
+                            function ($query) {
+                                $query->where('is_self_registered_businesses', 1)
+                                    ->orWhere('created_by', auth()->user()->id);
+                            }
 
-                    );
-
+                        );
                 });
             }
 
@@ -1934,8 +1928,7 @@ $business->service_plan = $business->service_plan;
 
 
             if (empty($business)) {
-                throw new Exception("no business found",404);
-
+                throw new Exception("no business found", 404);
             }
 
 
@@ -2043,65 +2036,64 @@ $business->service_plan = $business->service_plan;
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('business_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('business_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
 
-                $request_data = $request->validated();
-                $business = $this->businessOwnerCheck($request_data['business']["id"]);
+            $request_data = $request->validated();
+            $business = $this->businessOwnerCheck($request_data['business']["id"]);
 
-                //  business info ##############
-                // $request_data['business']['status'] = "pending";
-                $business->fill(collect($request_data['business'])->only([
-                    "name",
-                    "start_date",
-                    "about",
-                    "web_page",
-                    "phone",
-                    "email",
-                    "additional_information",
-                    "address_line_1",
-                    "address_line_2",
-                    "lat",
-                    "long",
-                    "country",
-                    "city",
-                    "postcode",
-                    "logo",
-                    "image",
-                    "status",
-                    "background_image",
-                    "currency",
+            //  business info ##############
+            // $request_data['business']['status'] = "pending";
+            $business->fill(collect($request_data['business'])->only([
+                "name",
+                "start_date",
+                "about",
+                "web_page",
+                "phone",
+                "email",
+                "additional_information",
+                "address_line_1",
+                "address_line_2",
+                "lat",
+                "long",
+                "country",
+                "city",
+                "postcode",
+                "logo",
+                "image",
+                "status",
+                "background_image",
+                "currency",
 
-                    "number_of_employees_allowed"
-                ])->toArray());
+                "number_of_employees_allowed"
+            ])->toArray());
 
-                $business->save();
-
-
-                if (empty($business)) {
-
-                    return response()->json([
-                        "massage" => "no business found"
-                    ], 404);
-                }
+            $business->save();
 
 
+            if (empty($business)) {
 
-
+                return response()->json([
+                    "massage" => "no business found"
+                ], 404);
+            }
 
 
 
 
-                DB::commit();
-                return response([
-                    "business" => $business
-                ], 201);
 
+
+
+
+            DB::commit();
+            return response([
+                "business" => $business
+            ], 201);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -2254,29 +2246,36 @@ $business->service_plan = $business->service_plan;
                 ], 401);
             }
 
-            $businesses = Business::
-            with([
-                "owner" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
-                },
-                "creator" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name', "users.email");
-                },
+            $businesses = Business::with([
+                    "owner" => function ($query) {
+                        $query->select(
+                            'users.id',
+                            'users.first_Name',
+                            'users.middle_Name',
+                            'users.last_Name'
+                        );
+                    },
+                    "creator" => function ($query) {
+                        $query->select(
+                            'users.id',
+                            'users.first_Name',
+                            'users.middle_Name',
+                            'users.last_Name',
+                            "users.email"
+                        );
+                    },
 
-            ])
-            ->withCount('users')
-                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                       $query->where(function ($query) {
-                           $query->where('id', auth()->user()->business_id)
-                           ->orWhere('created_by', auth()->user()->id)
-                           ->orWhere('owner_id', auth()->user()->id);
-
-
-
-                    });
-                },
+                ])
+                ->withCount('users')
+                ->when(
+                    !$request->user()->hasRole('superadmin'),
+                    function ($query) use ($request) {
+                        $query->where(function ($query) {
+                            $query->where('id', auth()->user()->business_id)
+                                ->orWhere('created_by', auth()->user()->id)
+                                ->orWhere('owner_id', auth()->user()->id);
+                        });
+                    },
                 )
 
                 ->when(!empty($request->search_key), function ($query) use ($request) {
@@ -2324,7 +2323,7 @@ $business->service_plan = $business->service_plan;
 
 
                 ->when(!empty($request->created_by), function ($query) use ($request) {
-                    return $query->where("created_by",$request->created_by);
+                    return $query->where("created_by", $request->created_by);
                 })
 
 
@@ -2340,7 +2339,6 @@ $business->service_plan = $business->service_plan;
                 });
 
             return response()->json($businesses, 200);
-
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);
@@ -2414,7 +2412,7 @@ $business->service_plan = $business->service_plan;
 
             $business = $this->businessOwnerCheck($id);
 
-            $business->load('owner', 'times','service_plan');
+            $business->load('owner', 'times', 'service_plan');
 
 
 
@@ -2427,7 +2425,7 @@ $business->service_plan = $business->service_plan;
         }
     }
 
-   /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/business-subscriptions/{id}",
@@ -2488,76 +2486,94 @@ $business->service_plan = $business->service_plan;
      *     )
      */
 
-     public function getSubscriptionsByBusinessId($id, Request $request)
-     {
+    public function getSubscriptionsByBusinessId($id, Request $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('business_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('business_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $business = $this->businessOwnerCheck($id);
+            $business = $this->businessOwnerCheck($id);
 
-             $subscriptionsQuery = BusinessSubscription::with("service_plan")
-             ->where([
-                "business_id" => $business->id
-             ]);
-
-
-             $subscriptions = $this->retrieveData($subscriptionsQuery,"business_subscriptions.id");
-             $upcoming_subscription = [];
+            $businessSubscriptionsQuery = BusinessSubscription::with("service_plan")
+                ->where([
+                    "business_id" => $business->id
+                ]);
 
 
-             $last_subscription = $subscriptionsQuery->latest()->first();
-
-             if(!empty($last_subscription)) {
-
-                $subscription_end_date = Carbon::parse($last_subscription->end_date);
-
-                $upcoming_subscription_start_date = Carbon::parse($subscription_end_date->addDays($last_subscription->service_plan->duration_months));
+            $business_subscriptions = $this->retrieveData($businessSubscriptionsQuery, "business_subscriptions.id");
+            $upcoming_business_subscription = [];
 
 
-                $upcoming_service_plan = $last_subscription->service_plan;
+            $last_business_subscription = $businessSubscriptionsQuery->latest()->first();
 
-                $upcoming_subscription = [
-                   'service_plan_id' => $upcoming_service_plan->id,
-                   'start_date' => $upcoming_subscription_start_date,  // Start date of the subscription
-                   'end_date' => $upcoming_subscription_start_date->addDays($last_subscription->service_plan->duration_months),  // End date based on plan duration
-                   'amount' => $upcoming_service_plan->price,
-                   "service_plan" => $upcoming_service_plan
+            if (!empty($last_business_subscription)) {
+
+                $business_subscription_end_date = Carbon::parse($last_business_subscription->end_date);
+
+                // $upcoming_business_subscription_start_date = Carbon::parse($business_subscription_end_date->addDays($last_subscription->service_plan->duration_months));
+
+                $upcoming_business_subscription_start_date = $business_subscription_end_date;
+
+                $upcoming_service_plan = $last_business_subscription->service_plan;
+
+                $upcoming_business_subscription = [
+                    'service_plan_id' => $upcoming_service_plan->id,
+                    'start_date' => $upcoming_business_subscription_start_date,  // Start date of the subscription
+                    'end_date' => Carbon::parse($upcoming_business_subscription_start_date)->addDays($last_business_subscription->service_plan->duration_months),  // End date based on plan duration
+                    'amount' => $upcoming_service_plan->price,
+                    "service_plan" => $upcoming_service_plan
                 ];
-
-             }
-
-
+            } else {
+                $service_plan =    ServicePlan::where("id", $business->service_plan_id)->first();
 
 
+                if ($service_plan) {
 
-             $responseData = [
-                "subscriptions" => $subscriptions,
-                "upcoming_subscription" => $upcoming_subscription
-             ];
-
-
-
-
-
-
-             return response()->json($responseData, 200);
-         } catch (Exception $e) {
-
-             return $this->sendError($e, 500, $request);
-         }
-     }
-
-
-
+                    // Check if trail_end_date is empty or a past date
+                    if (empty($business->trail_end_date) || Carbon::parse($business->trail_end_date)->isPast()) {
+                        $start_date = today();
+                    } else {
+                        // If trail_end_date is a future date
+                        $start_date = Carbon::parse($business->trail_end_date);
+                    }
+                    $upcoming_business_subscription = [
+                        'service_plan_id' => $service_plan->id,
+                        'start_date' => $start_date,
+                        'end_date' => Carbon::parse($start_date)->addDays($service_plan->duration_months),
+                        'amount' => $service_plan->price,
+                        "service_plan" => $service_plan
+                    ];
+                }
+            }
 
 
-       /**
+            $responseData = [
+                "subscriptions" => $business_subscriptions,
+                "upcoming_subscription" => $upcoming_business_subscription
+            ];
+
+
+
+
+
+
+            return response()->json($responseData, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+
+
+
+    /**
      *
      * @OA\Get(
      *      path="/v2.0/businesses/{id}",
@@ -2611,59 +2627,57 @@ $business->service_plan = $business->service_plan;
      *     )
      */
 
-     public function getBusinessByIdV2($id, Request $request)
-     {
+    public function getBusinessByIdV2($id, Request $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('business_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('business_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-             $businessQuery  = Business::where(["id" => $id]);
-             if (!auth()->user()->hasRole('superadmin')) {
-                 $businessQuery = $businessQuery->where(function ($query) {
+            $businessQuery  = Business::where(["id" => $id]);
+            if (!auth()->user()->hasRole('superadmin')) {
+                $businessQuery = $businessQuery->where(function ($query) {
 
-                     $query->where(function ($query) {
-                         return   $query
-                            ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
-                             $query->where('id', auth()->user()->business_id)
-                             ->orWhere('created_by', auth()->user()->id)
-                             ->orWhere('owner_id', auth()->user()->id);
-                            },
-                            function($query) {
-                             $query->where('is_self_registered_businesses', 1)
-                             ->orWhere('created_by', auth()->user()->id);
-                            }
+                    $query->where(function ($query) {
+                        return   $query
+                            ->when(
+                                !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
+                                function ($query) {
+                                    $query->where('id', auth()->user()->business_id)
+                                        ->orWhere('created_by', auth()->user()->id)
+                                        ->orWhere('owner_id', auth()->user()->id);
+                                },
+                                function ($query) {
+                                    $query->where('is_self_registered_businesses', 1)
+                                        ->orWhere('created_by', auth()->user()->id);
+                                }
 
-                         );
+                            );
+                    });
+                });
+            }
 
-                     });
-
-
-
-                 });
-             }
-
-             $business =  $businessQuery
-             ->select("id","name","email","phone","address_line_1","city","country","postcode","start_date","web_page")
-             ->first();
-             if (empty($business)) {
-                throw new Exception("you are not the owner of the business or the requested business does not exist.",401);
-             }
-             return $business;
+            $business =  $businessQuery
+                ->select("id", "name", "email", "phone", "address_line_1", "city", "country", "postcode", "start_date", "web_page")
+                ->first();
+            if (empty($business)) {
+                throw new Exception("you are not the owner of the business or the requested business does not exist.", 401);
+            }
+            return $business;
 
 
 
-             return response()->json($business, 200);
-         } catch (Exception $e) {
+            return response()->json($business, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
-     /**
+            return $this->sendError($e, 500, $request);
+        }
+    }
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/businesses-pension-information/{id}",
@@ -2724,44 +2738,42 @@ $business->service_plan = $business->service_plan;
      *     )
      */
 
-     public function getBusinessPensionInformationById($id, Request $request)
-     {
+    public function getBusinessPensionInformationById($id, Request $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('business_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business = $this->businessOwnerCheck($id);
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('business_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business = $this->businessOwnerCheck($id);
 
-             if (!is_array($business->pension_scheme_letters) || empty($business->pension_scheme_letters)) {
+            if (!is_array($business->pension_scheme_letters) || empty($business->pension_scheme_letters)) {
                 $business->pension_scheme_letters = [];
             } else {
 
-                    if (!is_string($business->pension_scheme_letters[0])) {
-                        $business->pension_scheme_letters = [];
-
-                    }
-
+                if (!is_string($business->pension_scheme_letters[0])) {
+                    $business->pension_scheme_letters = [];
+                }
             }
 
-             $businessData = [
+            $businessData = [
                 'pension_scheme_registered' => $business->pension_scheme_registered,
                 'pension_scheme_name' => $business->pension_scheme_name,
                 'pension_scheme_letters' => $business->pension_scheme_letters,
             ];
 
 
-             return response()->json($businessData, 200);
-         } catch (Exception $e) {
+            return response()->json($businessData, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
-         /**
+    /**
      *
      * @OA\Get(
      *      path="/v1.0/businesses-pension-information-history/{id}",
@@ -2815,63 +2827,58 @@ $business->service_plan = $business->service_plan;
      *     )
      */
 
-     public function getBusinessPensionInformationHistoryByBusinessId($id, Request $request)
-     {
+    public function getBusinessPensionInformationHistoryByBusinessId($id, Request $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('business_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business = $this->businessOwnerCheck($id);
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('business_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business = $this->businessOwnerCheck($id);
 
-        $businessPensionHistoriesQuery =  BusinessPensionHistory::where([
-            "business_id" => $id
-        ])
-        ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
-
-
-            $query->whereHas("business",function ($query) {
-                $query
-                ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
-                 $query->where('businesses.id', auth()->user()->business_id)
-                 ->orWhere('businesses.created_by', auth()->user()->id)
-                 ->orWhere('businesses.owner_id', auth()->user()->id);
-                },
-                function($query) {
-                 $query->where('businesses.is_self_registered_businesses', 1)
-                 ->orWhere('businesses.created_by', auth()->user()->id);
-                }
-
-             );
-
-         });
+            $businessPensionHistoriesQuery =  BusinessPensionHistory::where([
+                "business_id" => $id
+            ])
+                ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
 
 
+                    $query->whereHas("business", function ($query) {
+                        $query
+                            ->when(
+                                !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
+                                function ($query) {
+                                    $query->where('businesses.id', auth()->user()->business_id)
+                                        ->orWhere('businesses.created_by', auth()->user()->id)
+                                        ->orWhere('businesses.owner_id', auth()->user()->id);
+                                },
+                                function ($query) {
+                                    $query->where('businesses.is_self_registered_businesses', 1)
+                                        ->orWhere('businesses.created_by', auth()->user()->id);
+                                }
+
+                            );
+                    });
+                });
 
 
-
-     })
-        ;
-
-
-    $businessPensionHistories = $this->retrieveData($businessPensionHistoriesQuery,"business_pension_histories.id");
+            $businessPensionHistories = $this->retrieveData($businessPensionHistoriesQuery, "business_pension_histories.id");
 
 
 
 
 
-             return response()->json($businessPensionHistories, 200);
-         } catch (Exception $e) {
+            return response()->json($businessPensionHistories, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
-      /**
+    /**
      *
      * @OA\Delete(
      *      path="/v1.0/businesses-pension-information-history/{ids}",
@@ -2939,30 +2946,26 @@ $business->service_plan = $business->service_plan;
             $idsArray = explode(',', $ids);
             $existingIds = BusinessPensionHistory::whereIn('business_pension_histories.id', $idsArray)
 
-            ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
+                ->when(!auth()->user()->hasRole('superadmin'), function ($query) use ($request) {
 
 
-                $query->whereHas("business",function ($query) {
-                    $query
-                    ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
-                     $query->where('businesses.id', auth()->user()->business_id)
-                     ->orWhere('businesses.created_by', auth()->user()->id)
-                     ->orWhere('businesses.owner_id', auth()->user()->id);
-                    },
-                    function($query) {
-                     $query->where('businesses.is_self_registered_businesses', 1)
-                     ->orWhere('businesses.created_by', auth()->user()->id);
-                    }
+                    $query->whereHas("business", function ($query) {
+                        $query
+                            ->when(
+                                !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
+                                function ($query) {
+                                    $query->where('businesses.id', auth()->user()->business_id)
+                                        ->orWhere('businesses.created_by', auth()->user()->id)
+                                        ->orWhere('businesses.owner_id', auth()->user()->id);
+                                },
+                                function ($query) {
+                                    $query->where('businesses.is_self_registered_businesses', 1)
+                                        ->orWhere('businesses.created_by', auth()->user()->id);
+                                }
 
-                 );
-
-             });
-
-
-
-
-
-         })
+                            );
+                    });
+                })
 
                 ->select('business_pension_histories.id')
                 ->get()
@@ -3055,24 +3058,27 @@ $business->service_plan = $business->service_plan;
             $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
             $existingIds = Business::whereIn('id', $idsArray)
-            ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request) {
-                $query->where(function ($query) {
-                    $query
-                    ->when(!auth()->user()->hasPermissionTo("handle_self_registered_businesses"),function($query) {
-                     $query->where('id', auth()->user()->business_id)
-                     ->orWhere('created_by', auth()->user()->id)
-                     ->orWhere('owner_id', auth()->user()->id);
+                ->when(
+                    !$request->user()->hasRole('superadmin'),
+                    function ($query) use ($request) {
+                        $query->where(function ($query) {
+                            $query
+                                ->when(
+                                    !auth()->user()->hasPermissionTo("handle_self_registered_businesses"),
+                                    function ($query) {
+                                        $query->where('id', auth()->user()->business_id)
+                                            ->orWhere('created_by', auth()->user()->id)
+                                            ->orWhere('owner_id', auth()->user()->id);
+                                    },
+                                    function ($query) {
+                                        $query->where('is_self_registered_businesses', 1)
+                                            ->orWhere('created_by', auth()->user()->id);
+                                    }
+
+                                );
+                        });
                     },
-                    function($query) {
-                     $query->where('is_self_registered_businesses', 1)
-                     ->orWhere('created_by', auth()->user()->id);
-                    }
-
-                 );
-
-             });
-         },
-         )
+                )
                 ->select('id')
                 ->get()
                 ->pluck('id')
@@ -3087,11 +3093,11 @@ $business->service_plan = $business->service_plan;
                 ], 404);
             }
 
-           // Disable foreign key checks
-// DB::statement('SET FOREIGN_KEY_CHECKS=0');
+            // Disable foreign key checks
+            // DB::statement('SET FOREIGN_KEY_CHECKS=0');
             Business::whereIn('id', $existingIds)->delete();
             // Re-enable foreign key checks
-// DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            // DB::statement('SET FOREIGN_KEY_CHECKS=1');
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
