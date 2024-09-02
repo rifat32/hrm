@@ -3609,7 +3609,7 @@ class DashboardManagementControllerV2 extends Controller
     /**
      *
      * @OA\Get(
-     *      path="/v2.0/business-manager-dashboard",
+     *      path="/v1.0/reseller-dashboard",
      *      operationId="getResellerDashboardData",
      *      tags={"dashboard_management.reseller"},
      *       security={
