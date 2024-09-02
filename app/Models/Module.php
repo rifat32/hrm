@@ -16,6 +16,10 @@ class Module extends Model
         'created_by'
     ];
 
+    public function reseller_modules(){
+        return $this->hasMany(ResellerModule::class,"module_id","id");
+    }
+
 
 
 

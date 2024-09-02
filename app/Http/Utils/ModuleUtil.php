@@ -104,6 +104,11 @@ trait ModuleUtil
 
 
          $modules = Module::where('modules.is_enabled', 1)
+         ->when(!auth()->user()->hasRole('superadmin'), function ($query) {
+            $query->whereHas("reseller_modules", function($query) {
+                   $query->where("reseller_modules.is_enabled", 1);
+            });
+         })
              ->orderBy("modules.name", "ASC")
 
              ->select("id","name")
@@ -117,10 +122,7 @@ trait ModuleUtil
                 });
 
                 if(!empty($service_plan_module)) {
-
                         $item->is_enabled = $service_plan_module->is_enabled;
-
-
                 }
 
 
