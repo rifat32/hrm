@@ -587,6 +587,8 @@ class ServicePlanController extends Controller
 
                 ->when(!empty($request->reseller_id), function ($query) use ($request) {
                     return $query->where('service_plans.created_by', $request->reseller_id);
+                }, function ($query) use ($request) {
+                    return $query->where('service_plans.created_by', 1);
                 })
 
                 ->when(!empty($request->start_date), function ($query) use ($request) {

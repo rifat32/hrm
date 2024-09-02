@@ -8749,30 +8749,6 @@ class UserManagementController extends Controller
             $user->work_shift = $user->work_shifts()->first();
 
 
-            $modules = Module::where('modules.is_enabled', 1)
-                ->orderBy("modules.name", "ASC")
-
-                ->select("id", "name")
-                ->get()
-
-                ->map(function ($item) use ($user) {
-                    $item->is_enabled = 0;
-
-                    $resellerModule =    ResellerModule::where([
-                        "reseller_id" => $user->id,
-                        "module_id" => $item->id
-                    ])
-                        ->first();
-
-                    if (!empty($resellerModule)) {
-                        if ($resellerModule->is_enabled) {
-                            $item->is_enabled = 1;
-                        }
-                    }
-                    return $item;
-                });
-
-            $user->modules = $modules;
 
 
 
@@ -9237,6 +9213,33 @@ class UserManagementController extends Controller
 
 
             $user->handle_self_registered_businesses = $user->hasAllPermissions(['handle_self_registered_businesses', 'system_setting_update', 'system_setting_view']) ? 1 : 0;
+
+
+            $modules = Module::where('modules.is_enabled', 1)
+            ->orderBy("modules.name", "ASC")
+
+            ->select("id", "name")
+            ->get()
+
+            ->map(function ($item) use ($user) {
+                $item->is_enabled = 0;
+
+                $resellerModule =    ResellerModule::where([
+                    "reseller_id" => $user->id,
+                    "module_id" => $item->id
+                ])
+                    ->first();
+
+                if (!empty($resellerModule)) {
+                    if ($resellerModule->is_enabled) {
+                        $item->is_enabled = 1;
+                    }
+                }
+                return $item;
+            });
+
+        $user->modules = $modules;
+
 
 
 

@@ -898,8 +898,8 @@ trait BusinessUtil
 
         if (empty($created_by_user)) {
 
-            if(!empty($request_data['reseller_id'])){
-              $created_by_user = $request_data['reseller_id'];
+            if(!empty($request_data['business']['reseller_id'])){
+              $created_by_user = $request_data['business']['reseller_id'];
             } else {
 
               $created_by_user = User::permission(['handle_self_registered_businesses'])->first();
@@ -908,8 +908,8 @@ trait BusinessUtil
 
             $request_data["business"]["number_of_employees_allowed"] = 0;
         }
-        if(!empty($request_data['reseller_id'])){
-            $request_data['reseller_id'] = $created_by_user->id;
+        if(empty($request_data['business']['reseller_id'])){
+            $request_data['business']['reseller_id'] = $created_by_user->id;
         }
 
 

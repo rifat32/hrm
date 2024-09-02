@@ -426,12 +426,16 @@ class ModuleController extends Controller
                  ], 401);
              }
 
-             $modules = Module::when(!$request->user()->hasPermissionTo('module_update'), function ($query) use ($request) {
+             $modules = Module::
+             when(!$request->user()->hasPermissionTo('module_update'), function ($query) use ($request) {
                 return $query->where('modules.is_enabled', 1);
             })
             ->when(!auth()->user()->hasRole('superadmin'), function ($query) {
-                $query->whereHas("reseller_modules", function($query) {
-                       $query->where("reseller_modules.is_enabled", 1);
+
+              return $query->whereHas("reseller_modules", function($query) {
+                    return   $query
+                    ->where("reseller_modules.reseller_id", auth()->user()->id)
+                    ->where("reseller_modules.is_enabled", 1);
                 });
              })
             //  ->when(!empty($request->business_tier_id), function ($query) use ($request) {

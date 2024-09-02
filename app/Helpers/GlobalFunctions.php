@@ -11,7 +11,7 @@ if (!function_exists('debugHalt')) {
         $response = response()->json([
             'error' => 'Error',
             'message' => $message
-        ], 500);
+        ], 409);
 
         // Send the response
         $response->send();

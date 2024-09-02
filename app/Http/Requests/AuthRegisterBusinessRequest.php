@@ -183,7 +183,7 @@ class AuthRegisterBusinessRequest extends BaseFormRequest
 
             'business.service_plan_id' => 'required|numeric|exists:service_plans,id',
 
-            'reseller_id'=> "nullable|numeric|exists:users,id"
+            'business.reseller_id'=> "nullable|numeric|exists:users,id"
 
 
 

@@ -1714,6 +1714,7 @@ Route::get('/v1.0/client/job-listings/{id}', [JobListingController::class, "getJ
 Route::post('/v1.0/client/candidates', [CandidateController::class, "createCandidateClient"]);
 
 Route::post('/v1.0/client/auth/register-with-business', [BusinessController::class, "registerUserWithBusinessClient"]);
+
 Route::get('/v1.0/client/service-plans', [ServicePlanController::class, "getServicePlanClient"]);
 
 Route::post('/v1.0/client/check-discount', [ServicePlanController::class, "checkDiscountClient"]);
