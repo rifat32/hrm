@@ -1111,19 +1111,10 @@ class BusinessController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *            required={"user","business"},
+     *            required={"user","id"},
 
      *
-     *  @OA\Property(property="business", type="string", format="array",example={
-     *   *  * "id":1,
-     *      * "trail_end_date" : "",
-     * "is_self_registered_businesses":1,
-     * "service_plan_id" : 0,
-     * "service_plan_discount_code" : 0,
-
-     * "number_of_employees_allowed":20
-     *
-     * }),
+     *  @OA\Property(property="id", type="string", format="array",example="1"),
      *
 
      *

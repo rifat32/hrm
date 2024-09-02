@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\WorkShift;
 use App\Rules\ValidateDesignation;
 use App\Rules\ValidateDesignationName;
+use App\Rules\ValidateModuleIds;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -120,8 +121,14 @@ class UserCreateRequest extends BaseFormRequest
         'weekly_contractual_hours' => 'nullable|numeric',
         "minimum_working_days_per_week" => 'nullable|numeric|max:7',
         "overtime_rate" => 'nullable|numeric',
-        "handle_self_registered_businesses" => "required|boolean"
+        "handle_self_registered_businesses" => "required|boolean",
 
+
+        "active_module_ids" => "present|array",
+        "active_module_ids.*" => [
+            "numeric",
+            new ValidateModuleIds()
+        ],
 
 
     ];

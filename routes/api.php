@@ -399,6 +399,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
 
 
     Route::post('/v1.0/users', [UserManagementController::class, "createUser"]);
+
     Route::get('/v1.0/users/{id}', [UserManagementController::class, "getUserById"]);
     Route::put('/v1.0/users', [UserManagementController::class, "updateUser"]);
 

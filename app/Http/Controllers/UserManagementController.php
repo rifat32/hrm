@@ -58,8 +58,11 @@ use App\Models\EmployeeAddressHistory;
 use App\Models\EmployeeUserWorkShiftHistory;
 use App\Models\ExitInterview;
 use App\Models\LeaveRecord;
+use App\Models\Module;
 use App\Models\Payroll;
+use App\Models\ResellerModule;
 use App\Models\Role;
+
 use App\Models\Termination;
 use App\Models\User;
 use App\Models\UserAssetHistory;
@@ -275,6 +278,29 @@ class UserManagementController extends Controller
                     $permissions = Permission::whereIn('name', ["handle_self_registered_businesses", "system_setting_update", "system_setting_view"])->get();
                     $user->givePermissionTo($permissions);
                 }
+
+
+
+
+ $active_module_ids = $request_data['active_module_ids'];
+ $all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
+
+
+ $reseller_modules = [];
+ foreach ($all_module_ids as $module_id) {
+     $reseller_modules[] = [
+         'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+         'reseller_id' => $user->id,
+         'module_id' => $module_id,
+         'created_by' => auth()->user()->id,
+         'created_at' => now(),
+         'updated_at' => now(),
+     ];
+ }
+
+ // Bulk insert ServicePlanModule records
+ ResellerModule::insert($reseller_modules);
+
 
 
                 return response($user, 201);
@@ -2540,6 +2566,29 @@ class UserManagementController extends Controller
 
 
 
+ // Step 1: Clear existing ServicePlanModule records
+ ResellerModule::where('reseller_id', $user->id)->delete();
+
+ // Step 2: Determine active and disabled module IDs
+ $active_module_ids = $request_data['active_module_ids'];
+ $all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
+
+
+ // Step 3: Prepare ServicePlanModule data for bulk insertion
+ $reseller_modules = [];
+ foreach ($all_module_ids as $module_id) {
+     $reseller_modules[] = [
+         'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+         'reseller_id' => $user->id,
+         'module_id' => $module_id,
+         'created_by' => auth()->user()->id,
+         'created_at' => now(),
+         'updated_at' => now(),
+     ];
+ }
+
+ // Bulk insert ServicePlanModule records
+ ResellerModule::insert($reseller_modules);
 
 
 
@@ -8679,6 +8728,34 @@ class UserManagementController extends Controller
             // });
             $user->work_shift = $user->work_shifts()->first();
 
+
+            $modules = Module::where('modules.is_enabled', 1)
+            ->orderBy("modules.name", "ASC")
+
+            ->select("id","name")
+           ->get()
+
+           ->map(function($item) use($user) {
+               $item->is_enabled = 0;
+
+           $resellerModule =    ResellerModule::where([
+               "reseller_id" => $user->id,
+               "module_id" => $item->id
+           ])
+           ->first();
+
+           if(!empty($resellerModule)) {
+               if($resellerModule->is_enabled) {
+                   $item->is_enabled = 1;
+               }
+           }
+               return $item;
+           });
+
+           $user->modules = $modules;
+
+
+
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
                 if (strtoupper($request->response_type) == 'PDF') {
                     $pdf = PDF::loadView('pdf.user', ["user" => $user, "request" => $request]);
@@ -8690,6 +8767,8 @@ class UserManagementController extends Controller
             } else {
                 return response()->json($user, 200);
             }
+
+
 
             return response()->json($user, 200);
         } catch (Exception $e) {

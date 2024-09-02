@@ -115,27 +115,26 @@ class ServicePlanController extends Controller
 
 
 
-            foreach($request_data["active_module_ids"] as $active_module_id){
-                ServicePlanModule::create([
-                "is_enabled" => 1,
-                "service_plan_id" => $service_plan->id,
-                "module_id" => $active_module_id,
-                'created_by' => auth()->user()->id
-               ]);
-            }
+          // Step 2: Determine active and disabled module IDs
+$active_module_ids = $request_data['active_module_ids'];
+$all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
 
-            $disabled_modules = Module::where('modules.is_enabled', 1)
-            ->whereNotIn("id",$request_data["active_module_ids"])
-            ->pluck("id")->toArray();
 
-            foreach($disabled_modules as $inactive_module_id) {
-                ServicePlanModule::create([
-                    "is_enabled" => 0,
-                    "service_plan_id" => $service_plan->id,
-                    "module_id" => $inactive_module_id,
-                    'created_by' => auth()->user()->id
-                   ]);
-          }
+// Step 3: Prepare ServicePlanModule data for bulk insertion
+$service_plan_modules = [];
+foreach ($all_module_ids as $module_id) {
+    $service_plan_modules[] = [
+        'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+        'service_plan_id' => $service_plan->id,
+        'module_id' => $module_id,
+        'created_by' => auth()->user()->id,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+}
+
+// Bulk insert ServicePlanModule records
+ServicePlanModule::insert($service_plan_modules);
 
 
 
