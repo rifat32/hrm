@@ -782,6 +782,9 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::put('/v1.0/businesses/toggle-active', [BusinessController::class, "toggleActiveBusiness"]);
     Route::put('/v1.0/businesses', [BusinessController::class, "updateBusiness"]);
 
+    Route::put('/v1.0/businesses-take-over', [BusinessController::class, "takeOverBusiness"]);
+
+
     Route::put('/v1.0/businesses-part-4', [BusinessController::class, "updateBusinessPart4"]);
 
     Route::put('/v1.0/businesses-part-1', [BusinessController::class, "updateBusinessPart1"]);
