@@ -51,6 +51,7 @@ use App\Models\AccessRevocation;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\Business;
+use App\Models\BusinessModule;
 use App\Models\BusinessTime;
 use App\Models\Department;
 use App\Models\DepartmentUser;
@@ -62,7 +63,8 @@ use App\Models\Module;
 use App\Models\Payroll;
 use App\Models\ResellerModule;
 use App\Models\Role;
-
+use App\Models\ServicePlan;
+use App\Models\ServicePlanModule;
 use App\Models\Termination;
 use App\Models\User;
 use App\Models\UserAssetHistory;
@@ -282,24 +284,24 @@ class UserManagementController extends Controller
 
 
 
- $active_module_ids = $request_data['active_module_ids'];
- $all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
+                $active_module_ids = $request_data['active_module_ids'];
+                $all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
 
 
- $reseller_modules = [];
- foreach ($all_module_ids as $module_id) {
-     $reseller_modules[] = [
-         'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
-         'reseller_id' => $user->id,
-         'module_id' => $module_id,
-         'created_by' => auth()->user()->id,
-         'created_at' => now(),
-         'updated_at' => now(),
-     ];
- }
+                $reseller_modules = [];
+                foreach ($all_module_ids as $module_id) {
+                    $reseller_modules[] = [
+                        'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+                        'reseller_id' => $user->id,
+                        'module_id' => $module_id,
+                        'created_by' => auth()->user()->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
 
- // Bulk insert ServicePlanModule records
- ResellerModule::insert($reseller_modules);
+                // Bulk insert ServicePlanModule records
+                ResellerModule::insert($reseller_modules);
 
 
 
@@ -2118,7 +2120,7 @@ class UserManagementController extends Controller
             if (!empty($errors)) {
                 foreach ($errors as $error) {
                     // Log the error or handle it as needed
-                     Log::info($error . "\n"); // Example: printing the error
+                    Log::info($error . "\n"); // Example: printing the error
                 }
             }
 
@@ -2215,7 +2217,6 @@ class UserManagementController extends Controller
                 if ($validator->fails()) {
                     // Store errors and mark row as bad
                     $errors[$index] = $validator->errors()->getMessages();
-
                 }
                 $usersData->push($employeeData);
             }
@@ -2348,8 +2349,6 @@ class UserManagementController extends Controller
                 }
 
                 $createdUsers->push($user);
-
-
             });
 
 
@@ -2566,32 +2565,53 @@ class UserManagementController extends Controller
 
 
 
- // Step 1: Clear existing ServicePlanModule records
- ResellerModule::where('reseller_id', $user->id)->delete();
+            // Step 1: Clear existing ServicePlanModule records
+            ResellerModule::where('reseller_id', $user->id)->delete();
 
- // Step 2: Determine active and disabled module IDs
- $active_module_ids = $request_data['active_module_ids'];
- $all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
-
-
- // Step 3: Prepare ServicePlanModule data for bulk insertion
- $reseller_modules = [];
- foreach ($all_module_ids as $module_id) {
-     $reseller_modules[] = [
-         'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
-         'reseller_id' => $user->id,
-         'module_id' => $module_id,
-         'created_by' => auth()->user()->id,
-         'created_at' => now(),
-         'updated_at' => now(),
-     ];
- }
-
- // Bulk insert ServicePlanModule records
- ResellerModule::insert($reseller_modules);
+            // Step 2: Determine active and disabled module IDs
+            $active_module_ids = $request_data['active_module_ids'];
+            $all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
 
 
+            // Step 3: Prepare ServicePlanModule data for bulk insertion
+            $reseller_modules = [];
+            foreach ($all_module_ids as $module_id) {
+                $reseller_modules[] = [
+                    'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+                    'reseller_id' => $user->id,
+                    'module_id' => $module_id,
+                    'created_by' => auth()->user()->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
 
+            // Bulk insert ServicePlanModule records
+            ResellerModule::insert($reseller_modules);
+
+
+
+            $reseller_service_plan_ids = ServicePlan::where('created_by', $user->id)->pluck('id')->toArray();
+
+            ServicePlanModule::whereIn("service_plan_id", $reseller_service_plan_ids)
+                ->whereNotIn("module_id", $active_module_ids)
+                ->where([
+                    "is_enabled" => 1
+                ])
+                ->update([
+                    "is_enabled" => 0
+                ]);
+
+            BusinessModule::whereHas("business", function ($query) use ($reseller_service_plan_ids) {
+                    $query->whereIn("businesses.service_plan_id", $reseller_service_plan_ids);
+                })
+                ->whereNotIn("module_id", $active_module_ids)
+                ->where([
+                    "business_modules.is_enabled" => 1
+                ])
+                ->update([
+                    "business_modules.is_enabled" => 0
+                ]);
 
 
 
@@ -2884,7 +2904,7 @@ class UserManagementController extends Controller
             }
 
 
-            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination,$request_data["exit_interview"]["assets_returned"]);
+            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination, $request_data["exit_interview"]["assets_returned"]);
 
 
             DB::commit();
@@ -3089,7 +3109,7 @@ class UserManagementController extends Controller
             }
 
 
-            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination,$request_data["exit_interview"]["assets_returned"]);
+            $this->checkInformationsBasedOnExitDate($user->id, $date_of_termination, $request_data["exit_interview"]["assets_returned"]);
 
 
             DB::commit();
@@ -3215,20 +3235,21 @@ class UserManagementController extends Controller
 
             $user_exits = Termination::with(
                 [
-                "terminationType",
-                "terminationReason",
-                "user",
-                "user.exitInterviews",
-                "user.accessRevocation"
-                ])
-            ->where(function ($query) use ($all_manager_department_ids) {
-                $query->whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
-                    $query->whereIn("departments.id", $all_manager_department_ids);
-                });
-                //  ->orWhereHas("mentions", function($query) {
-                //     $query->where("user_note_mentions.user_id",auth()->user()->id);
-                //  });
-            })
+                    "terminationType",
+                    "terminationReason",
+                    "user",
+                    "user.exitInterviews",
+                    "user.accessRevocation"
+                ]
+            )
+                ->where(function ($query) use ($all_manager_department_ids) {
+                    $query->whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
+                        $query->whereIn("departments.id", $all_manager_department_ids);
+                    });
+                    //  ->orWhereHas("mentions", function($query) {
+                    //     $query->where("user_note_mentions.user_id",auth()->user()->id);
+                    //  });
+                })
 
                 // ->when(!empty($request->search_key), function ($query) use ($request) {
                 //         return $query->where(function ($query) use ($request) {
@@ -6112,7 +6133,6 @@ class UserManagementController extends Controller
 
             return $this->sendError($e, 500, $request);
         }
-
     }
 
 
@@ -8730,29 +8750,29 @@ class UserManagementController extends Controller
 
 
             $modules = Module::where('modules.is_enabled', 1)
-            ->orderBy("modules.name", "ASC")
+                ->orderBy("modules.name", "ASC")
 
-            ->select("id","name")
-           ->get()
+                ->select("id", "name")
+                ->get()
 
-           ->map(function($item) use($user) {
-               $item->is_enabled = 0;
+                ->map(function ($item) use ($user) {
+                    $item->is_enabled = 0;
 
-           $resellerModule =    ResellerModule::where([
-               "reseller_id" => $user->id,
-               "module_id" => $item->id
-           ])
-           ->first();
+                    $resellerModule =    ResellerModule::where([
+                        "reseller_id" => $user->id,
+                        "module_id" => $item->id
+                    ])
+                        ->first();
 
-           if(!empty($resellerModule)) {
-               if($resellerModule->is_enabled) {
-                   $item->is_enabled = 1;
-               }
-           }
-               return $item;
-           });
+                    if (!empty($resellerModule)) {
+                        if ($resellerModule->is_enabled) {
+                            $item->is_enabled = 1;
+                        }
+                    }
+                    return $item;
+                });
 
-           $user->modules = $modules;
+            $user->modules = $modules;
 
 
 
@@ -9228,7 +9248,7 @@ class UserManagementController extends Controller
     }
 
 
-     /**
+    /**
      *
      * @OA\Get(
      *      path="/v5.0/users/{id}",
@@ -9283,75 +9303,75 @@ class UserManagementController extends Controller
      *     )
      */
 
-     public function getUserByIdV5($id, Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
-             $user = User::with(
-               [
-                       "sponsorship_detail",
-                       "pension_detail",
-                       "passport_detail",
-                       "visa_detail",
-                       "right_to_work"
+    public function getUserByIdV5($id, Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $user = User::with(
+                [
+                    "sponsorship_detail",
+                    "pension_detail",
+                    "passport_detail",
+                    "visa_detail",
+                    "right_to_work"
 
-               ]
+                ]
 
-             )
+            )
 
-                 ->where([
-                     "id" => $id
-                 ])
-                 ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
-                     return $query->where(function ($query) use ($all_manager_department_ids) {
-                         return $query->where('created_by', auth()->user()->id)
-                             ->orWhere('id', auth()->user()->id)
-                             ->orWhere('business_id', auth()->user()->business_id)
-                             ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
-                                 $query->whereIn("departments.id", $all_manager_department_ids);
-                             });
-                     });
-                 })
-                 ->select(
-                     "users.id",
-                     "users.first_Name",
-                     "users.middle_Name",
-                     "users.last_Name",
-                     "users.email",
+                ->where([
+                    "id" => $id
+                ])
+                ->when(!$request->user()->hasRole('superadmin'), function ($query) use ($request, $all_manager_department_ids) {
+                    return $query->where(function ($query) use ($all_manager_department_ids) {
+                        return $query->where('created_by', auth()->user()->id)
+                            ->orWhere('id', auth()->user()->id)
+                            ->orWhere('business_id', auth()->user()->business_id)
+                            ->orWhereHas("department_user.department", function ($query) use ($all_manager_department_ids) {
+                                $query->whereIn("departments.id", $all_manager_department_ids);
+                            });
+                    });
+                })
+                ->select(
+                    "users.id",
+                    "users.first_Name",
+                    "users.middle_Name",
+                    "users.last_Name",
+                    "users.email",
 
-                     'users.address_line_1',
-                     'users.address_line_2',
-                     'users.country',
-                     'users.city',
-                     'users.postcode',
-                     'users.gender',
-                     'users.phone',
-                 )
-                 ->first();
-             if (!$user) {
+                    'users.address_line_1',
+                    'users.address_line_2',
+                    'users.country',
+                    'users.city',
+                    'users.postcode',
+                    'users.gender',
+                    'users.phone',
+                )
+                ->first();
+            if (!$user) {
 
-                 return response()->json([
-                     "message" => "no user found"
-                 ], 404);
-             }
-
-
+                return response()->json([
+                    "message" => "no user found"
+                ], 404);
+            }
 
 
 
 
-             return response()->json($user, 200);
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+            return response()->json($user, 200);
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
 
@@ -9419,7 +9439,7 @@ class UserManagementController extends Controller
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            $user_id = intval(!empty($id)?$id :0);
+            $user_id = intval(!empty($id) ? $id : 0);
             $auth_user_id = auth()->user()->id;
             if (!$request->user()->hasPermissionTo('user_view') && ($auth_user_id !== $user_id)) {
                 return response()->json([
@@ -9876,7 +9896,7 @@ class UserManagementController extends Controller
         // }
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            $user_id = intval(!empty($id)?$id :0);
+            $user_id = intval(!empty($id) ? $id : 0);
             $auth_user_id = auth()->user()->id;
             if (!$request->user()->hasPermissionTo('user_view') && ($auth_user_id !== $user_id)) {
                 return response()->json([
@@ -10625,14 +10645,14 @@ class UserManagementController extends Controller
 
 
             // Fetch users with the "business_owner" role
-$businessOwners = User::whereIn('id', $existingIds)->whereHas('roles', function ($query) {
-    $query->where('name', 'business_owner');
-})->get();
+            $businessOwners = User::whereIn('id', $existingIds)->whereHas('roles', function ($query) {
+                $query->where('name', 'business_owner');
+            })->get();
 
-// Delete associated businesses for users with the "business_owner" role
-foreach ($businessOwners as $owner) {
-    Business::where('owner_id', $owner->id)->delete();
-}
+            // Delete associated businesses for users with the "business_owner" role
+            foreach ($businessOwners as $owner) {
+                Business::where('owner_id', $owner->id)->delete();
+            }
 
             User::whereIn('id', $existingIds)->delete();
 
@@ -10978,8 +10998,7 @@ foreach ($businessOwners as $owner) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
                     return $query->get();
-                });
-            ;
+                });;
 
             return response()->json($activity, 200);
         } catch (Exception $e) {
