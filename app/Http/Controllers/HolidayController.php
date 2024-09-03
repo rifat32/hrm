@@ -465,8 +465,8 @@ class HolidayController extends Controller
                         'name',
                         'description',
                         'start_date',
-                        'end_date', '
-                        repeats_annually',
+                        'end_date',
+                        'repeats_annually',
                         // 'business_id',
                         // 'is_active',
 
