@@ -2139,7 +2139,7 @@ class BusinessController extends Controller
             }
             $request_data = $request->validated();
 
-            $business = $this->businessOwnerCheck($request_data['business']["id"],TRUE);
+            $business = $this->businessOwnerCheck($request_data["id"],TRUE);
 
 
             if (empty($business)) {
