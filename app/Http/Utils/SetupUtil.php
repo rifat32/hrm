@@ -458,7 +458,30 @@ trait SetupUtil
         SettingLeaveType::class,
     ];
 
-    public function defaultDataSetupForBusiness($businesses, $service_plan)
+    public function defaultDataSetupForBusiness($businesses)
+    {
+
+        foreach ($businesses as $business) {
+            Log::info("business loop->" . $business->id);
+
+            foreach ($this->defaultModels as $model) {
+                $defaultData = $this->getDefaultData($model);
+
+                $this->loadDefaultData($business, $defaultData, $model);
+
+            }
+
+
+
+
+
+
+        }
+
+
+
+    }
+    public function defaultDataSetupForBusinessV2($businesses, $service_plan)
     {
 
         foreach ($businesses as $business) {
@@ -482,7 +505,7 @@ trait SetupUtil
                 $business->reseller_id = $business->created_by;
             }
 
-
+            $business->save();
 
 
         }

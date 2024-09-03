@@ -320,7 +320,7 @@ class UpdateDatabaseController extends Controller
                 $businesses = Business::whereHas("owner")
                 ->get(["id","owner_id","service_plan_id", "reseller_id","created_by"]);
 
-                $this->defaultDataSetupForBusiness($businesses, $service_plan);
+                $this->defaultDataSetupForBusinessV2($businesses, $service_plan);
 
 
             }

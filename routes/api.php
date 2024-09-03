@@ -143,6 +143,7 @@ Route::post('/v2.0/forgetpassword', [AuthController::class, "storeTokenV2"]);
 Route::post('/resend-email-verify-mail', [AuthController::class, "resendEmailVerifyToken"]);
 
 Route::patch('/forgetpassword/reset/{token}', [AuthController::class, "changePasswordByToken"]);
+
 Route::post('/auth/check/email', [AuthController::class, "checkEmail"]);
 
 Route::post('/auth/check/business/email', [AuthController::class, "checkBusinessEmail"]);
