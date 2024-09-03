@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EnableBusinessModuleRequest;
 use App\Http\Requests\EnableServicePlanModuleRequest;
 use App\Http\Requests\GetIdRequest;
+use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
@@ -18,7 +19,7 @@ use Illuminate\Http\Request;
 
 class ModuleController extends Controller
 {
-    use ErrorUtil, UserActivityUtil, ModuleUtil;
+    use ErrorUtil, UserActivityUtil, ModuleUtil, BusinessUtil;
    /**
      *
      * @OA\Put(
@@ -173,48 +174,47 @@ class ModuleController extends Controller
 
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('module_update')) {
+
+             if (!$request->user()->hasPermissionTo('business_update')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);
              }
              $request_data = $request->validated();
-
-
+             $business = $this->businessOwnerCheck($request_data["business_id"], TRUE);
 
              BusinessModule::where([
                 "business_id" => $request_data["business_id"]
              ])
              ->delete();
+              // Step 2: Determine active and disabled module IDs
+              $active_module_ids = $request_data['active_module_ids'];
+              $all_module_ids = Module::where('is_enabled', 1)->pluck('id')->toArray();
 
-        foreach($request_data["active_module_ids"] as $active_module_id){
-           BusinessModule::create([
-            "is_enabled" => 1,
-            "business_id" => $request_data["business_id"],
-            "module_id" => $active_module_id,
-            'created_by' => auth()->user()->id
-           ]);
-        }
 
-        $disabled_modules = Module::where('modules.is_enabled', 1)
-        ->whereNotIn("id",$request_data["active_module_ids"])
-        ->pluck("id")
-        ->toArray();
+              // Step 3: Prepare ServicePlanModule data for bulk insertion
+              $business_modules = [];
+              foreach ($all_module_ids as $module_id) {
+                  $business_modules[] = [
+                      'is_enabled' => in_array($module_id, $active_module_ids) ? 1 : 0,
+                      'business_id' => $business->id,
+                      'module_id' => $module_id,
+                      'created_by' => auth()->user()->id,
+                      'created_at' => now(),
+                      'updated_at' => now(),
+                  ];
+              }
 
-        foreach($disabled_modules as $inactive_module_id) {
-            BusinessModule::create([
-                "is_enabled" => 0,
-                "business_id" => $request_data["business_id"],
-                "module_id" => $inactive_module_id,
-                'created_by' => auth()->user()->id
-               ]);
-      }
+              // Bulk insert ServicePlanModule records
+              BusinessModule::insert($business_modules);
+
+
 
 
 
              return response()->json([
                 'message' => 'Module status updated successfully',
-                'disabled_modules' => $disabled_modules
+
             ], 200);
 
 
@@ -542,7 +542,7 @@ class ModuleController extends Controller
      {
          try {
              $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('business_create')) {
+             if (!$request->user()->hasPermissionTo('business_update')) {
                  return response()->json([
                      "message" => "You can not perform this action"
                  ], 401);

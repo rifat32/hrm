@@ -458,23 +458,36 @@ trait SetupUtil
         SettingLeaveType::class,
     ];
 
-    public function defaultDataSetupForBusiness($businesses)
+    public function defaultDataSetupForBusiness($businesses, $service_plan)
     {
 
-        foreach ($this->defaultModels as $model) {
-            $defaultData = $this->getDefaultData($model);
+        foreach ($businesses as $business) {
+            Log::info("business loop->" . $business->id);
 
+            foreach ($this->defaultModels as $model) {
+                $defaultData = $this->getDefaultData($model);
 
-            foreach ($businesses as $business) {
-
-                Log::info("business loop->" . $business->id);
                 $this->loadDefaultData($business, $defaultData, $model);
 
                 // Handle updates for each model
                 $this->updateModelData($business, $defaultData, $model);
             }
 
+
+
+            if(empty($business->service_plan_id)) {
+                $business->service_plan_id = $service_plan->id;
+            }
+            if($business->reseller_id){
+                $business->reseller_id = $business->created_by;
+            }
+
+
+
+
         }
+
+
 
     }
 

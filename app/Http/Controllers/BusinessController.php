@@ -1172,7 +1172,7 @@ class BusinessController extends Controller
             $request_data = $request->validated();
 
 
-            $business = $this->businessOwnerCheck($request_data["id"],TRUE);
+            $business = $this->businessOwnerCheck($request_data["id"]);
 
 
             $business->reseller_id = auth()->user()->id;
@@ -3241,8 +3241,8 @@ class BusinessController extends Controller
                 $query
                 // ->where('id', auth()->user()->business_id)
                     // ->orWhere('created_by', auth()->user()->id)
-                    ->orWhere('owner_id', auth()->user()->id)
-                    ->orWhere('reseller_id', auth()->user()->id)
+                    // ->where('owner_id', auth()->user()->id)
+                    ->where('reseller_id', auth()->user()->id)
                     ;
      })
                 ->select('id')

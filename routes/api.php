@@ -8,7 +8,6 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardManagementController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\EmailTemplateWrapperController;
-
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessEmailSettingController;
 use App\Http\Controllers\BusinessTierController;

@@ -10,6 +10,7 @@ use App\Models\Module;
 use App\Models\RecruitmentProcess;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -145,37 +146,6 @@ class UpdateDatabaseController extends Controller
 ");
             }
 
-            if ($i == 5) {
-                $modules = Module::where('is_enabled', 1)->pluck('id');
-
-                $service_plan = ServicePlan::first(); // Retrieve the first service plan
-
-                if ($service_plan) {
-                    $service_plan->update([
-                        'name' => 'Standard Plan',
-                        'description' => '',
-                        'set_up_amount' => 100,
-                        'number_of_employees_allowed' => 100,
-                        'duration_months' => 1,
-                        'price' => 20,
-                        'business_tier_id' => 1,
-                        'created_by' => 1,
-                    ]);
-
-                    $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
-                        return [
-                            'is_enabled' => 1,
-                            'service_plan_id' => $service_plan->id,
-                            'module_id' => $module_id,
-                            'created_by' => 1,
-                        ];
-                    })->toArray();
-
-                    ServicePlanModule::insert($service_plan_modules);
-                } else {
-                    $this->setupServicePlan();
-                }
-            }
 
             // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
             if ($i == 6) {
@@ -293,22 +263,12 @@ class UpdateDatabaseController extends Controller
                     }
                 }
             }
-            if ($i == 12) {
 
-                $businesses = Business::whereHas("owner")
-                ->get(["id","owner_id"]);
-
-
-
-                $this->defaultDataSetupForBusiness($businesses);
-            }
             if ($i == 13) {
                 if (Schema::hasColumn('notifications', 'entity_name')) {
                     // Modify the column type to VARCHAR in MySQL
                     DB::statement('ALTER TABLE notifications MODIFY entity_name VARCHAR(255) NULL');
                 }
-            }
-            if ($i == 13) {
                 DB::statement("
                 ALTER Table tasks
                 MODIFY COLUMN task_category_id BIGINT UNSIGNED NULL;
@@ -317,6 +277,53 @@ class UpdateDatabaseController extends Controller
 
 
 
+
+
+
+            if ($i == 12) {
+                $modules = Module::where('is_enabled', 1)->pluck('id');
+
+                $service_plan = ServicePlan::first(); // Retrieve the first service plan
+
+                if ($service_plan) {
+                    $service_plan->update([
+                        'name' => 'Standard Plan',
+                        'description' => '',
+                        'set_up_amount' => 100,
+                        'number_of_employees_allowed' => 100,
+                        'duration_months' => 1,
+                        'price' => 20,
+                        'business_tier_id' => 1,
+                        'created_by' => 1,
+                    ]);
+
+                    $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
+                        return [
+                            'is_enabled' => 1,
+                            'service_plan_id' => $service_plan->id,
+                            'module_id' => $module_id,
+                            'created_by' => 1,
+                        ];
+                    })->toArray();
+
+                    ServicePlanModule::insert($service_plan_modules);
+                } else {
+                    $this->setupServicePlan();
+                    $service_plan = ServicePlan::first(); // Retrieve the first service plan
+                    if (empty($service_plan)) {
+                         throw new Exception("service plan issues");
+                    }
+
+                }
+
+
+                $businesses = Business::whereHas("owner")
+                ->get(["id","owner_id","service_plan_id", "reseller_id","created_by"]);
+
+                $this->defaultDataSetupForBusiness($businesses, $service_plan);
+
+
+            }
 
 
         }
