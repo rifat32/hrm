@@ -37,9 +37,7 @@ class CreateBusinessesTable extends Migration
             $table->string("currency")->nullable();
 
 
-            $table->string("logo")->nullable();
-            $table->string("image")->nullable();
-            $table->string("background_image")->nullable();
+
 
 
             $table->unsignedBigInteger("service_plan_id")->nullable();
@@ -64,7 +62,7 @@ class CreateBusinessesTable extends Migration
 
 
 
-           
+
             $table->integer("number_of_employees_allowed")->nullable()->default(0);
 
 
@@ -72,9 +70,14 @@ class CreateBusinessesTable extends Migration
 
             $table->unsignedBigInteger("owner_id");
             $table->unsignedBigInteger("created_by");
+
+
+
+            $table->string("logo")->nullable();
+            $table->string("image")->nullable();
+            $table->string("background_image")->nullable();
+
             $table->softDeletes();
-
-
             $table->timestamps();
         });
     }

@@ -282,7 +282,7 @@ class CandidateController extends Controller
                 }
 
 
-                 $request_data["business_id"] = $request_data["business_id"];
+                 $request_data["business_id"];
                  $request_data["is_active"] = true;
 
 

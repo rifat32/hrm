@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Utils\BasicEmailUtil;
 use App\Http\Utils\SetupUtil;
 use App\Models\Business;
+use App\Models\BusinessPensionHistory;
+use App\Models\Candidate;
+use App\Models\CandidateRecruitmentProcess;
 use App\Models\EmailTemplate;
 use App\Models\Module;
 use App\Models\RecruitmentProcess;
@@ -56,17 +59,16 @@ class UpdateDatabaseController extends Controller
             $email_templates->toArray(),
             ['type', 'business_id'], // Columns that determine uniqueness
             [
-            "name",
-            // "type",
-            "template",
-            "is_active",
-            "is_default",
-            // "business_id",
-            'wrapper_id',
-            "template_variables"
+                "name",
+                // "type",
+                "template",
+                "is_active",
+                "is_default",
+                // "business_id",
+                'wrapper_id',
+                "template_variables"
             ] // Columns to update if a match is found
         );
-
     }
 
     public function updateDatabase()
@@ -78,22 +80,20 @@ class UpdateDatabaseController extends Controller
             if ($i == 1) {
                 $modules = config("setup-config.system_modules");
                 foreach ($modules as $module) {
-                 $module_exists = Module::where([
-                      "name" => $module
+                    $module_exists = Module::where([
+                        "name" => $module
                     ])
-                    ->exists();
+                        ->exists();
 
-                    if(!$module_exists) {
-                      Module::create([
-                          "name"=> $module,
-                          "is_enabled" => 1,
-                          'created_by' => 1,
-                      ]);
+                    if (!$module_exists) {
+                        Module::create([
+                            "name" => $module,
+                            "is_enabled" => 1,
+                            'created_by' => 1,
+                        ]);
                     }
-
                 }
-
-              }
+            }
 
 
             // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
@@ -242,9 +242,7 @@ class UpdateDatabaseController extends Controller
 
                         if (!empty($foreignKeyExists)) {
                             DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
-
                         } else {
-
                         }
                     } catch (\Exception $e) {
                         // Log the error or handle it as needed
@@ -256,7 +254,6 @@ class UpdateDatabaseController extends Controller
                 foreach ($foreignKeys as $table => $foreignKey) {
                     try {
                         DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
-
                     } catch (\Exception $e) {
                         // Log the error or handle it as needed
                         echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
@@ -311,97 +308,177 @@ class UpdateDatabaseController extends Controller
                     $this->setupServicePlan();
                     $service_plan = ServicePlan::first(); // Retrieve the first service plan
                     if (empty($service_plan)) {
-                         throw new Exception("service plan issues");
+                        throw new Exception("service plan issues");
                     }
-
                 }
 
 
                 $businesses = Business::whereHas("owner")
-                ->get(["id","owner_id","service_plan_id", "reseller_id","created_by"]);
+                    ->get(["id", "owner_id", "service_plan_id", "reseller_id", "created_by"]);
 
                 $this->defaultDataSetupForBusinessV2($businesses, $service_plan);
-
-
             }
-
-
         }
 
 
 
 
-    return "ok";
+        return "ok";
     }
 
 
     public function moveFilesToBusinessFolder(array $fileNames, $businessId)
-{
-    // Define the base directory for files
-    $baseDirectory = public_path();
+    {
+        // Define the base directory for files
+        $baseDirectory = public_path();
 
-    // Construct the new base directory path with the business ID
-    $newBaseDirectory = public_path("{$businessId}");
+        // Construct the new base directory path with the business ID
+        $newBaseDirectory = public_path("{$businessId}");
 
-    // Ensure the new base directory exists
-    if (!File::exists($newBaseDirectory)) {
-        File::makeDirectory($newBaseDirectory, 0755, true);
-    }
+        // Ensure the new base directory exists
+        if (!File::exists($newBaseDirectory)) {
+            File::makeDirectory($newBaseDirectory, 0755, true);
+        }
 
-    foreach ($fileNames as $fileName) {
-        // Construct the old file path
-        $oldFilePath = $baseDirectory . DIRECTORY_SEPARATOR . $fileName;
+        foreach ($fileNames as $fileName) {
+            // Construct the old file path
+            $oldFilePath = $baseDirectory . DIRECTORY_SEPARATOR . $fileName;
 
-        // Check if the file exists at the old path
-        if (File::exists($oldFilePath)) {
-            // Construct the new file path
-            $relativeFilePath = $fileName; // The relative path to the file within the base directory
-            $newFilePath = $newBaseDirectory . DIRECTORY_SEPARATOR . $relativeFilePath;
+            // Check if the file exists at the old path
+            if (File::exists($oldFilePath)) {
+                // Construct the new file path
+                $relativeFilePath = $fileName; // The relative path to the file within the base directory
+                $newFilePath = $newBaseDirectory . DIRECTORY_SEPARATOR . $relativeFilePath;
 
-            // Ensure the new directory exists
-            $newDirectory = dirname($newFilePath);
-            if (!File::exists($newDirectory)) {
-                File::makeDirectory($newDirectory, 0755, true);
+                // Ensure the new directory exists
+                $newDirectory = dirname($newFilePath);
+                if (!File::exists($newDirectory)) {
+                    File::makeDirectory($newDirectory, 0755, true);
+                }
+
+                // Move the file to the new location
+                try {
+                    File::move($oldFilePath, $newFilePath);
+                    Log::info("File moved successfully from {$oldFilePath} to {$newFilePath}");
+                } catch (Exception $e) {
+                    // Log any exceptions that occur during the file move
+                    Log::error("Failed to move file from {$oldFilePath} to {$newFilePath}: " . $e->getMessage());
+                }
+            } else {
+                // Log an error if the file does not exist
+                Log::error("File does not exist: {$oldFilePath}");
             }
-
-            // Move the file to the new location
-            try {
-                File::move($oldFilePath, $newFilePath);
-                Log::info("File moved successfully from {$oldFilePath} to {$newFilePath}");
-            } catch (Exception $e) {
-                // Log any exceptions that occur during the file move
-                Log::error("Failed to move file from {$oldFilePath} to {$newFilePath}: " . $e->getMessage());
-            }
-        } else {
-            // Log an error if the file does not exist
-            Log::error("File does not exist: {$oldFilePath}");
         }
     }
-}
 
-public function moveFilesAndUpdateDatabase($businessId)
-{
-    // Retrieve file names from the UserAsset model
-    $userAssets = UserAsset::where('business_id', $businessId)->get();
-    $fileNames = $userAssets->pluck('file_name')->toArray();
+    public function moveFilesAndUpdateDatabaseForBusiness($businessId)
+    {
+        $modelData = Business::where("id", $businessId)->get(["id", "logo", "image", "background_image"]);
 
-    // Move the files to the business folder
-    $this->moveFilesToBusinessFolder($fileNames, $businessId);
+        // Collect all file paths that need to be moved
+        $filePaths = $modelData->flatMap(function ($data) {
+            return [
+                $data->logo,
+                $data->image,
+                $data->background_image
+            ];
+        })->filter()->toArray(); // Filter out any null or empty paths
 
-    // Update the UserAsset model to reflect new file names
-    foreach ($userAssets as $userAsset) {
-        $newFileName = $businessId . DIRECTORY_SEPARATOR . $userAsset->file_name;
+        // Move all files to the business folder
+        $this->moveFilesToBusinessFolder($filePaths, $businessId);
 
-        // Update the file record with the new path
-        $userAsset->update([
-            'file_name' => $newFileName
-        ]);
+        // Update the Business model with new file paths
+        $modelData->each(function ($data) use ($businessId) {
+            $data->update([
+                'logo' => $businessId . DIRECTORY_SEPARATOR . $data->logo,
+                'image' => $businessId . DIRECTORY_SEPARATOR . $data->image,
+                'background_image' => $businessId . DIRECTORY_SEPARATOR . $data->background_image,
+            ]);
+        });
     }
+
+    public function moveFilesAndUpdateDatabaseForBusinessPensionHistory($businessId)
+{
+    $modelData = BusinessPensionHistory::where("business_id", $businessId)->get(["id", "pension_scheme_letters"]);
+
+    $modelData->each(function ($data) use ($businessId) {
+        // Convert pension_scheme_letters to an array if it's not already one
+        $pensionSchemeLetters = is_array($data->pension_scheme_letters) ? $data->pension_scheme_letters : json_decode($data->pension_scheme_letters, true);
+
+        if (is_array($pensionSchemeLetters)) {
+            // Move files to the business folder
+            $this->moveFilesToBusinessFolder($pensionSchemeLetters, $businessId);
+
+            // Update the paths in the database
+            $updatedLetters = collect($pensionSchemeLetters)->map(function ($letter) use ($businessId) {
+                return $businessId . DIRECTORY_SEPARATOR . $letter;
+            })->toArray();
+
+            $data->update([
+                'pension_scheme_letters' => json_encode($updatedLetters)
+            ]);
+        }
+    });
 }
 
-public function updateDatabaseFiles() {
+public function moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($businessId)
+{
+    $modelData = CandidateRecruitmentProcess::whereHas("candidate", function($query) use ($businessId) {
+        $query->where("business_id", $businessId);
+    })->get(["id", "attachments"]);
 
+    $modelData->each(function ($data) use ($businessId) {
+        // Ensure attachments are handled as an array
+        $attachments = $data->attachments;
+
+        if (is_array($attachments)) {
+            // Move files to the business folder
+            $this->moveFilesToBusinessFolder($attachments, $businessId);
+
+            // Update the paths in the database
+            $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
+                return $businessId . DIRECTORY_SEPARATOR . $attachment;
+            })->toArray();
+
+            $data->update([
+                'attachments' => $updatedAttachments // Attachments should remain an array after update
+            ]);
+        }
+    });
+}
+public function moveFilesAndUpdateDatabaseForCandidate($businessId)
+{
+    $modelData = Candidate::where("business_id", $businessId)->get(["id", "attachments"]);
+
+    $modelData->each(function ($data) use ($businessId) {
+        // Ensure attachments are handled as an array
+        $attachments = $data->attachments;
+
+        if (is_array($attachments)) {
+            // Move files to the business folder
+            $this->moveFilesToBusinessFolder($attachments, $businessId);
+
+            // Update the paths in the database
+            $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
+                return $businessId . DIRECTORY_SEPARATOR . $attachment;
+            })->toArray();
+
+            $data->update([
+                'attachments' => $updatedAttachments // Attachments should remain an array after update
+            ]);
+        }
+    });
 }
 
+    public function updateDatabaseFilesForBusiness()
+    {
+        $businesses = Business::get(["id", "logo", "image", "background_image"]);
 
+        $businesses->each(function ($business) {
+            $this->moveFilesAndUpdateDatabaseForBusiness($business->id);
+            $this->moveFilesAndUpdateDatabaseForBusinessPensionHistory($business->id);
+            $this->moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($business->id);
+
+        });
+    }
 }

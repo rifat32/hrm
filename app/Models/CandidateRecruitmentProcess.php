@@ -15,16 +15,17 @@ class CandidateRecruitmentProcess extends Model
         'description',
         'attachments',
     ];
+    protected $casts = [
+        'attachments' => 'array',
+
+    ];
 
     public function candidate()
     {
         return $this->belongsTo(Candidate::class, 'candidate_id','id');
     }
 
-    protected $casts = [
-        'attachments' => 'array',
 
-    ];
 
     public function recruitment_process()
     {

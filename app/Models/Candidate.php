@@ -24,6 +24,7 @@ class Candidate extends Model
         'feedback',
         'status',
         'job_listing_id',
+
         'attachments',
 
         "is_active",
