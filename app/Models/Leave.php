@@ -29,6 +29,11 @@ class Leave extends Model
         "created_by",
     ];
 
+    protected $casts = [
+        'attachments' => 'array',
+
+    ];
+
     public function getIApprovedAttribute($value)
     {
         $leave_approval = LeaveApproval::where([
@@ -123,10 +128,6 @@ class Leave extends Model
     {
         return $this->belongsTo(SettingLeaveType::class, "leave_type_id", "id");
     }
-    protected $casts = [
-        'attachments' => 'array',
-
-    ];
 
 
 

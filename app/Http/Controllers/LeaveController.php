@@ -144,6 +144,7 @@ class LeaveController extends Controller
             $request_data["user_id"] = auth()->user()->id;
 
             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"], "", "leave_attachments");
+            
             $this->makeFilePermanent($request_data["attachments"], "");
 
 

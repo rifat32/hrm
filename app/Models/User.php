@@ -490,7 +490,6 @@ class User extends Authenticatable
     public function right_to_works()
     {
 
-
         $issue_date_column = 'right_to_work_check_date';
         $expiry_date_column = 'right_to_work_expiry_date';
 

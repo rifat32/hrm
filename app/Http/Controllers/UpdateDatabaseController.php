@@ -9,11 +9,18 @@ use App\Models\BusinessPensionHistory;
 use App\Models\Candidate;
 use App\Models\CandidateRecruitmentProcess;
 use App\Models\EmailTemplate;
+use App\Models\EmployeeRightToWorkHistory;
+use App\Models\EmployeeVisaDetailHistory;
+use App\Models\Leave;
 use App\Models\Module;
 use App\Models\RecruitmentProcess;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
+use App\Models\SettingPayslip;
 use App\Models\UserAsset;
+use App\Models\UserDocument;
+use App\Models\UserEducationHistory;
+use App\Models\UserRecruitmentProcess;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -398,77 +405,276 @@ class UpdateDatabaseController extends Controller
     }
 
     public function moveFilesAndUpdateDatabaseForBusinessPensionHistory($businessId)
-{
-    $modelData = BusinessPensionHistory::where("business_id", $businessId)->get(["id", "pension_scheme_letters"]);
+    {
+        $modelData = BusinessPensionHistory::where("business_id", $businessId)->get(["id", "pension_scheme_letters"]);
 
-    $modelData->each(function ($data) use ($businessId) {
-        // Convert pension_scheme_letters to an array if it's not already one
-        $pensionSchemeLetters = is_array($data->pension_scheme_letters) ? $data->pension_scheme_letters : json_decode($data->pension_scheme_letters, true);
+        $modelData->each(function ($data) use ($businessId) {
+            // Convert pension_scheme_letters to an array if it's not already one
+            $pensionSchemeLetters = is_array($data->pension_scheme_letters) ? $data->pension_scheme_letters : json_decode($data->pension_scheme_letters, true);
 
-        if (is_array($pensionSchemeLetters)) {
-            // Move files to the business folder
-            $this->moveFilesToBusinessFolder($pensionSchemeLetters, $businessId);
+            if (is_array($pensionSchemeLetters)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($pensionSchemeLetters, $businessId);
 
-            // Update the paths in the database
-            $updatedLetters = collect($pensionSchemeLetters)->map(function ($letter) use ($businessId) {
-                return $businessId . DIRECTORY_SEPARATOR . $letter;
-            })->toArray();
+                // Update the paths in the database
+                $updatedLetters = collect($pensionSchemeLetters)->map(function ($letter) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $letter;
+                })->toArray();
 
+                $data->update([
+                    'pension_scheme_letters' => json_encode($updatedLetters)
+                ]);
+            }
+        });
+    }
+
+    public function moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($businessId)
+    {
+        $modelData = CandidateRecruitmentProcess::whereHas("candidate", function ($query) use ($businessId) {
+            $query->where("business_id", $businessId);
+        })->get(["id", "attachments"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $attachments = $data->attachments;
+
+            if (is_array($attachments)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($attachments, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'attachments' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+    public function moveFilesAndUpdateDatabaseForCandidate($businessId)
+    {
+        $modelData = Candidate::where("business_id", $businessId)->get(["id", "attachments"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $attachments = $data->attachments;
+
+            if (is_array($attachments)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($attachments, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'attachments' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+
+    public function moveFilesAndUpdateDatabaseForLeave($businessId)
+    {
+        $modelData = Leave::where("business_id", $businessId)->get(["id", "attachments"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $attachments = $data->attachments;
+
+            if (is_array($attachments)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($attachments, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'attachments' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+    public function moveFilesAndUpdateDatabaseForSettingPayslip($businessId)
+    {
+        $modelData = SettingPayslip::where("business_id", $businessId)->get(["id", "logo"]);
+
+        // Collect all file paths that need to be moved
+        $filePaths = $modelData->flatMap(function ($data) {
+            return [
+                $data->logo
+            ];
+        })->filter()->toArray(); // Filter out any null or empty paths
+
+        // Move all files to the business folder
+        $this->moveFilesToBusinessFolder($filePaths, $businessId);
+
+        // Update the Business model with new file paths
+        $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'pension_scheme_letters' => json_encode($updatedLetters)
+                'logo' => $businessId . DIRECTORY_SEPARATOR . $data->logo
             ]);
-        }
-    });
-}
+        });
+    }
 
-public function moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($businessId)
-{
-    $modelData = CandidateRecruitmentProcess::whereHas("candidate", function($query) use ($businessId) {
-        $query->where("business_id", $businessId);
-    })->get(["id", "attachments"]);
+    public function moveFilesAndUpdateDatabaseForUserAsset($businessId)
+    {
+        $modelData = UserAsset::where("business_id", $businessId)->get(["id", "image"]);
 
-    $modelData->each(function ($data) use ($businessId) {
-        // Ensure attachments are handled as an array
-        $attachments = $data->attachments;
+        // Collect all file paths that need to be moved
+        $filePaths = $modelData->flatMap(function ($data) {
+            return [
+                $data->image
+            ];
+        })->filter()->toArray(); // Filter out any null or empty paths
 
-        if (is_array($attachments)) {
-            // Move files to the business folder
-            $this->moveFilesToBusinessFolder($attachments, $businessId);
+        // Move all files to the business folder
+        $this->moveFilesToBusinessFolder($filePaths, $businessId);
 
-            // Update the paths in the database
-            $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
-                return $businessId . DIRECTORY_SEPARATOR . $attachment;
-            })->toArray();
-
+        // Update the Business model with new file paths
+        $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'attachments' => $updatedAttachments // Attachments should remain an array after update
+                'image' => $businessId . DIRECTORY_SEPARATOR . $data->image
             ]);
-        }
-    });
-}
-public function moveFilesAndUpdateDatabaseForCandidate($businessId)
-{
-    $modelData = Candidate::where("business_id", $businessId)->get(["id", "attachments"]);
+        });
+    }
+    public function moveFilesAndUpdateDatabaseForUserDocument($businessId)
+    {
+        $modelData = UserDocument::whereHas('user', function ($query) use ($businessId) {
+                $query->where("business_id", $businessId);
+            })
 
-    $modelData->each(function ($data) use ($businessId) {
-        // Ensure attachments are handled as an array
-        $attachments = $data->attachments;
+            ->get(["id", "file_name"]);
 
-        if (is_array($attachments)) {
-            // Move files to the business folder
-            $this->moveFilesToBusinessFolder($attachments, $businessId);
+        // Collect all file paths that need to be moved
+        $filePaths = $modelData->flatMap(function ($data) {
+            return [
+                $data->file_name
+            ];
+        })->filter()->toArray(); // Filter out any null or empty paths
 
-            // Update the paths in the database
-            $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
-                return $businessId . DIRECTORY_SEPARATOR . $attachment;
-            })->toArray();
+        // Move all files to the business folder
+        $this->moveFilesToBusinessFolder($filePaths, $businessId);
 
+        // Update the Business model with new file paths
+        $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'attachments' => $updatedAttachments // Attachments should remain an array after update
+                'logo' => $businessId . DIRECTORY_SEPARATOR . $data->file_name
             ]);
-        }
-    });
-}
+        });
+    }
+    public function moveFilesAndUpdateDatabaseForUserEducationHistory($businessId)
+    {
+        $modelData = UserEducationHistory::whereHas('user', function ($query) use ($businessId) {
+                $query->where("business_id", $businessId);
+            })
+            ->get(["id", "attachments"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $attachments = $data->attachments;
+
+            if (is_array($attachments)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($attachments, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'attachments' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+
+    public function moveFilesAndUpdateDatabaseForUserRecruitmentProcess($businessId)
+    {
+        $modelData = UserRecruitmentProcess::whereHas("user", function ($query) use ($businessId) {
+            $query->where("business_id", $businessId);
+        })->get(["id", "attachments"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $attachments = $data->attachments;
+
+            if (is_array($attachments)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($attachments, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'attachments' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+
+
+    public function moveFilesAndUpdateDatabaseForEmployeeRightToWorkHistory($businessId)
+    {
+        $modelData = EmployeeRightToWorkHistory::whereHas("employee", function ($query) use ($businessId) {
+            $query->where("business_id", $businessId);
+        })->get(["id", "right_to_work_docs"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $right_to_work_docs = $data->right_to_work_docs;
+
+            if (is_array($right_to_work_docs)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($right_to_work_docs, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($right_to_work_docs)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'right_to_work_docs' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+
+    public function moveFilesAndUpdateDatabaseForEmployeeVisaDetailHistory($businessId)
+    {
+        $modelData = EmployeeVisaDetailHistory::whereHas("employee", function ($query) use ($businessId) {
+            $query->where("business_id", $businessId);
+        })->get(["id", "visa_docs"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $visa_docs = $data->visa_docs;
+
+            if (is_array($visa_docs)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($visa_docs, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($visa_docs)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'visa_docs' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+
+
 
     public function updateDatabaseFilesForBusiness()
     {
@@ -478,7 +684,18 @@ public function moveFilesAndUpdateDatabaseForCandidate($businessId)
             $this->moveFilesAndUpdateDatabaseForBusiness($business->id);
             $this->moveFilesAndUpdateDatabaseForBusinessPensionHistory($business->id);
             $this->moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($business->id);
+            $this->moveFilesAndUpdateDatabaseForCandidate($business->id);
+            $this->moveFilesAndUpdateDatabaseForLeave($business->id);
+            $this->moveFilesAndUpdateDatabaseForSettingPayslip($business->id);
+            $this->moveFilesAndUpdateDatabaseForUserAsset($business->id);
+            $this->moveFilesAndUpdateDatabaseForUserDocument($business->id);
+            $this->moveFilesAndUpdateDatabaseForUserEducationHistory($business->id);
+            $this->moveFilesAndUpdateDatabaseForUserRecruitmentProcess($business->id);
+            $this->moveFilesAndUpdateDatabaseForEmployeeRightToWorkHistory($business->id);
+            $this->moveFilesAndUpdateDatabaseForEmployeeVisaDetailHistory($business->id);
 
+
+            $this->moveFilesAndUpdateDatabaseForEmployeeVisaDetailHistory($business->id);
         });
     }
 }

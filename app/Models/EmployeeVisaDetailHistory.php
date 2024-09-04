@@ -19,13 +19,16 @@ class EmployeeVisaDetailHistory extends Model
         "place_of_issue",
         "visa_docs",
 
-
-
         "is_manual",
         'user_id',
         "from_date",
         "to_date",
         'created_by'
+    ];
+
+    protected $casts = [
+        'visa_docs' => 'array',
+
     ];
 
     protected $appends = ['is_current'];
@@ -49,10 +52,7 @@ class EmployeeVisaDetailHistory extends Model
         return $this->hasOne(User::class,'id', 'user_id');
     }
 
-    protected $casts = [
-        'visa_docs' => 'array',
 
-    ];
 
 
 
