@@ -879,10 +879,11 @@ class UserAssetController extends Controller
                 ->when(!empty($request->serial_number), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->serial_number;
-                        $query->where("user_assets.serial_no", "like", "%" . $term . "%");
+                        $query->where("user_assets.serial_number", "like", "%" . $term . "%");
 
                     });
                 })
+
 
                 ->when(isset($request->is_working), function ($query) use ($request) {
                     return $query->where('user_assets.is_working', intval($request->is_working));
@@ -896,8 +897,9 @@ class UserAssetController extends Controller
 
 
 
-                  ->when(!empty($request->user_id), function ($query) use ($request) {
-                      return $query->where('user_assets.user_id', $request->user_id);
+                  ->when(request()->filled("user_id"), function ($query) {
+                    $idsArray = explode(',', request()->input("user_id"));
+                      return $query->whereIn('user_assets.user_id', $idsArray);
                   })
 
                   ->when(!empty($request->not_in_user_id), function ($query) use ($request) {

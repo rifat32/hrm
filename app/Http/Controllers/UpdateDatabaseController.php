@@ -10,9 +10,12 @@ use App\Models\Module;
 use App\Models\RecruitmentProcess;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
+use App\Models\UserAsset;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class UpdateDatabaseController extends Controller
@@ -68,9 +71,6 @@ class UpdateDatabaseController extends Controller
 
     public function updateDatabase()
     {
-
-
-
 
         $i = 1;
         for ($i; $i <= 20; $i++) {
@@ -333,4 +333,75 @@ class UpdateDatabaseController extends Controller
 
     return "ok";
     }
+
+
+    public function moveFilesToBusinessFolder(array $fileNames, $businessId)
+{
+    // Define the base directory for files
+    $baseDirectory = public_path();
+
+    // Construct the new base directory path with the business ID
+    $newBaseDirectory = public_path("{$businessId}");
+
+    // Ensure the new base directory exists
+    if (!File::exists($newBaseDirectory)) {
+        File::makeDirectory($newBaseDirectory, 0755, true);
+    }
+
+    foreach ($fileNames as $fileName) {
+        // Construct the old file path
+        $oldFilePath = $baseDirectory . DIRECTORY_SEPARATOR . $fileName;
+
+        // Check if the file exists at the old path
+        if (File::exists($oldFilePath)) {
+            // Construct the new file path
+            $relativeFilePath = $fileName; // The relative path to the file within the base directory
+            $newFilePath = $newBaseDirectory . DIRECTORY_SEPARATOR . $relativeFilePath;
+
+            // Ensure the new directory exists
+            $newDirectory = dirname($newFilePath);
+            if (!File::exists($newDirectory)) {
+                File::makeDirectory($newDirectory, 0755, true);
+            }
+
+            // Move the file to the new location
+            try {
+                File::move($oldFilePath, $newFilePath);
+                Log::info("File moved successfully from {$oldFilePath} to {$newFilePath}");
+            } catch (Exception $e) {
+                // Log any exceptions that occur during the file move
+                Log::error("Failed to move file from {$oldFilePath} to {$newFilePath}: " . $e->getMessage());
+            }
+        } else {
+            // Log an error if the file does not exist
+            Log::error("File does not exist: {$oldFilePath}");
+        }
+    }
+}
+
+public function moveFilesAndUpdateDatabase($businessId)
+{
+    // Retrieve file names from the UserAsset model
+    $userAssets = UserAsset::where('business_id', $businessId)->get();
+    $fileNames = $userAssets->pluck('file_name')->toArray();
+
+    // Move the files to the business folder
+    $this->moveFilesToBusinessFolder($fileNames, $businessId);
+
+    // Update the UserAsset model to reflect new file names
+    foreach ($userAssets as $userAsset) {
+        $newFileName = $businessId . DIRECTORY_SEPARATOR . $userAsset->file_name;
+
+        // Update the file record with the new path
+        $userAsset->update([
+            'file_name' => $newFileName
+        ]);
+    }
+}
+
+public function updateDatabaseFiles() {
+
+}
+
+
 }

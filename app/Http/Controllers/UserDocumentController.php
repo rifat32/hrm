@@ -104,21 +104,11 @@ class UserDocumentController extends Controller
                 }
 
 
-
-
                 $request_data["created_by"] = $request->user()->id;
 
                 $user_document =  UserDocument::create($request_data);
 
-
-
-
-
                 // $this->moveUploadedFiles($request_data["file_name"],"documents");
-
-
-
-
 
 
                 DB::commit();
