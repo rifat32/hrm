@@ -80,263 +80,229 @@ class UpdateDatabaseController extends Controller
         );
     }
 
-    public function updateDatabase()
+    public function updateModule()
     {
+        $modules = config("setup-config.system_modules");
+        foreach ($modules as $module) {
+            $module_exists = Module::where([
+                "name" => $module
+            ])
+                ->exists();
 
-        $i = 1;
-        for ($i; $i <= 20; $i++) {
-
-            if ($i == 1) {
-                $modules = config("setup-config.system_modules");
-                foreach ($modules as $module) {
-                    $module_exists = Module::where([
-                        "name" => $module
-                    ])
-                        ->exists();
-
-                    if (!$module_exists) {
-                        Module::create([
-                            "name" => $module,
-                            "is_enabled" => 1,
-                            'created_by' => 1,
-                        ]);
-                    }
-                }
+            if (!$module_exists) {
+                Module::create([
+                    "name" => $module,
+                    "is_enabled" => 1,
+                    'created_by' => 1,
+                ]);
             }
+        }
+    }
 
+    public function updateFields()
+    {
+        // Check and add the 'number_of_employees_allowed' column if it doesn't exist
+        if (!Schema::hasColumn('businesses', 'number_of_employees_allowed')) {
+            DB::statement("ALTER TABLE businesses ADD COLUMN number_of_employees_allowed INTEGER DEFAULT 0");
+        }
 
-            // @@@@@@@@@@@@@@@@@@@@  number - 1 @@@@@@@@@@@@@@@@@@@@@
-
-
-            if ($i == 1) {
-                $this->storeEmailTemplates();
-            }
-            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-            if ($i == 2) {
-                // Check and add the 'number_of_employees_allowed' column if it doesn't exist
-                if (!Schema::hasColumn('businesses', 'number_of_employees_allowed')) {
-                    DB::statement("ALTER TABLE businesses ADD COLUMN number_of_employees_allowed INTEGER DEFAULT 0");
-                }
-            }
-
-
-
-            if ($i == 4) {
-
-                // Define the table and foreign key
-                $table = 'letter_templates';
-                $foreignKey = 'letter_templates_business_id_foreign';
-
-                // Check if the foreign key exists before trying to drop it
-                $foreignKeyExists = DB::select(DB::raw("
+        // Check if the foreign key exists before trying to drop it
+        $letterTemplateForeignKeyExists = DB::select(DB::raw("
     SELECT CONSTRAINT_NAME
     FROM information_schema.KEY_COLUMN_USAGE
-    WHERE TABLE_NAME = '{$table}'
-    AND CONSTRAINT_NAME = '{$foreignKey}'
+    WHERE TABLE_NAME = 'letter_templates'
+    AND CONSTRAINT_NAME = 'letter_templates_business_id_foreign'
 "));
 
-                if (!empty($foreignKeyExists)) {
-                    // Drop the existing foreign key constraint
-                    DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
-                }
+        if (!empty($letterTemplateForeignKeyExists)) {
+            // Drop the existing foreign key constraint
+            DB::statement("ALTER TABLE letter_templates DROP FOREIGN KEY letter_templates_business_id_foreign");
+        }
 
-                // Modify the column to be nullable
-                DB::statement("
-    ALTER TABLE {$table}
+        // Modify the column to be nullable
+        DB::statement("
+    ALTER TABLE letter_templates
     MODIFY COLUMN business_id BIGINT UNSIGNED NULL;
 ");
 
-                // Re-add the foreign key constraint
-                DB::statement("
-    ALTER TABLE {$table}
-    ADD CONSTRAINT {$foreignKey}
+        // Re-add the foreign key constraint
+        DB::statement("
+    ALTER TABLE letter_templates
+    ADD CONSTRAINT letter_templates_business_id_foreign
     FOREIGN KEY (business_id) REFERENCES businesses(id)
     ON DELETE CASCADE;
 ");
-            }
+
+        // Check and add the 'in_geolocation' column if it doesn't exist
+        if (!Schema::hasColumn('attendance_histories', 'in_geolocation')) {
+            DB::statement("ALTER TABLE attendance_histories ADD COLUMN in_geolocation VARCHAR(255) NULL");
+        }
+
+        // Check and add the 'out_geolocation' column if it doesn't exist
+        if (!Schema::hasColumn('attendance_histories', 'out_geolocation')) {
+            DB::statement("ALTER TABLE attendance_histories ADD COLUMN out_geolocation VARCHAR(255) NULL");
+        }
 
 
-            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-            if ($i == 6) {
-                // Check and add the 'in_geolocation' column if it doesn't exist
-                if (!Schema::hasColumn('attendance_histories', 'in_geolocation')) {
-                    DB::statement("ALTER TABLE attendance_histories ADD COLUMN in_geolocation VARCHAR(255) NULL");
-                }
 
-                // Check and add the 'out_geolocation' column if it doesn't exist
-                if (!Schema::hasColumn('attendance_histories', 'out_geolocation')) {
-                    DB::statement("ALTER TABLE attendance_histories ADD COLUMN out_geolocation VARCHAR(255) NULL");
-                }
-            }
+        // Check if the 'feedback' column exists
+        if (Schema::hasColumn('candidates', 'feedback')) {
+            // Make the 'feedback' column nullable
+            DB::statement('ALTER TABLE candidates MODIFY feedback VARCHAR(255) NULL');
+        }
 
-            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-            if ($i == 7) {
-                // Check if the 'feedback' column exists
-                if (Schema::hasColumn('candidates', 'feedback')) {
-                    // Make the 'feedback' column nullable
-                    DB::statement('ALTER TABLE candidates MODIFY feedback VARCHAR(255) NULL');
-                }
-            }
-            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-            if ($i == 8) {
-                // // Check if the 'is_default' column exists
-                // if (!Schema::hasColumn('asset_types', 'is_default')) {
-                //     // Add the 'is_default' column as a boolean with a default value of 1
-                //     DB::statement("ALTER TABLE asset_types ADD COLUMN is_default TINYINT(1) NOT NULL DEFAULT 1");
-                // }
+        // Make the 'feedback' column nullable
+        DB::statement('ALTER TABLE asset_types MODIFY business_id BIGINT(20) UNSIGNED NULL');
 
-                // Make the 'feedback' column nullable
-                DB::statement('ALTER TABLE asset_types MODIFY business_id BIGINT(20) UNSIGNED NULL');
+        if (Schema::hasColumn('comments', 'description')) {
+            DB::statement('ALTER TABLE comments MODIFY description LONGTEXT NULL');
+        }
 
 
-                $this->setupAssetTypes();
-            }
-            // @@@@@@@@@@@@@@@@@@@@  number - 2 @@@@@@@@@@@@@@@@@@@@@
-            if ($i == 9) {
-                if (Schema::hasColumn('comments', 'description')) {
-                    DB::statement('ALTER TABLE comments MODIFY description LONGTEXT NULL');
-                }
-            }
+        $foreignKeys = [
+            'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
+            'disabled_task_categories' => 'disabled_task_categories_business_id_foreign',
+            'disabled_letter_templates' => 'disabled_letter_templates_business_id_foreign',
+            'disabled_asset_types' => 'disabled_asset_types_business_id_foreign',
+            'disabled_designations' => 'disabled_designations_business_id_foreign',
+            'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
+            'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
+            'disabled_job_types' => 'disabled_job_types_business_id_foreign',
+            'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
+            'disabled_recruitment_processes' => 'disabled_recruitment_processes_business_id_foreign',
+            'disabled_banks' => 'disabled_banks_business_id_foreign',
+            'disabled_termination_types' => 'disabled_termination_types_business_id_foreign',
+            'disabled_termination_reasons' => 'disabled_termination_reasons_business_id_foreign',
+        ];
 
-            if ($i == 10) {
-                EmailTemplate::where("type", "send_password_mail")->delete();
-            }
+        // Disable foreign key checks to avoid errors during deletion
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-            // @@@@@@@@@@@@@@@@@@@@  number - 3 @@@@@@@@@@@@@@@@@@@@@
-
-
-            if ($i == 11) {
-                $foreignKeys = [
-                    'disabled_setting_leave_types' => 'disabled_setting_leave_types_business_id_foreign',
-                    'disabled_task_categories' => 'disabled_task_categories_business_id_foreign',
-                    'disabled_letter_templates' => 'disabled_letter_templates_business_id_foreign',
-                    'disabled_asset_types' => 'disabled_asset_types_business_id_foreign',
-                    'disabled_designations' => 'disabled_designations_business_id_foreign',
-                    'disabled_employment_statuses' => 'disabled_employment_statuses_business_id_foreign',
-                    'disabled_job_platforms' => 'disabled_job_platforms_business_id_foreign',
-                    'disabled_job_types' => 'disabled_job_types_business_id_foreign',
-                    'disabled_work_locations' => 'disabled_work_locations_business_id_foreign',
-                    'disabled_recruitment_processes' => 'disabled_recruitment_processes_business_id_foreign',
-                    'disabled_banks' => 'disabled_banks_business_id_foreign',
-                    'disabled_termination_types' => 'disabled_termination_types_business_id_foreign',
-                    'disabled_termination_reasons' => 'disabled_termination_reasons_business_id_foreign',
-                ];
-
-                // Disable foreign key checks to avoid errors during deletion
-                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-                // Delete invalid records from tables
-                foreach ($foreignKeys as $table => $foreignKey) {
-                    // Delete records with invalid business_id
-                    DB::statement("
+        // Delete invalid records from tables
+        foreach ($foreignKeys as $table => $foreignKey) {
+            // Delete records with invalid business_id
+            DB::statement("
               DELETE FROM {$table}
               WHERE business_id IS NOT NULL
               AND business_id NOT IN (SELECT id FROM businesses);
           ");
-                }
+        }
 
-                // Enable foreign key checks
-                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // Enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-                // Drop foreign key constraints if they exist
-                foreach ($foreignKeys as $table => $foreignKey) {
-                    try {
-                        // Check if the foreign key exists before attempting to drop it
-                        $foreignKeyExists = DB::select(DB::raw("
+        // Drop foreign key constraints if they exist
+        foreach ($foreignKeys as $table => $foreignKey) {
+            try {
+                // Check if the foreign key exists before attempting to drop it
+                $foreignKeyExists = DB::select(DB::raw("
                   SELECT CONSTRAINT_NAME
                   FROM information_schema.KEY_COLUMN_USAGE
                   WHERE TABLE_NAME = '{$table}'
                   AND CONSTRAINT_NAME = '{$foreignKey}'
               "));
 
-                        if (!empty($foreignKeyExists)) {
-                            DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
-                        } else {
-                        }
-                    } catch (\Exception $e) {
-                        // Log the error or handle it as needed
-                        echo "Failed to drop foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
-                    }
-                }
-
-                // Re-add foreign key constraints
-                foreach ($foreignKeys as $table => $foreignKey) {
-                    try {
-                        DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
-                    } catch (\Exception $e) {
-                        // Log the error or handle it as needed
-                        echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
-                    }
-                }
-            }
-
-            if ($i == 13) {
-                if (Schema::hasColumn('notifications', 'entity_name')) {
-                    // Modify the column type to VARCHAR in MySQL
-                    DB::statement('ALTER TABLE notifications MODIFY entity_name VARCHAR(255) NULL');
-                }
-                DB::statement("
-                ALTER Table tasks
-                MODIFY COLUMN task_category_id BIGINT UNSIGNED NULL;
-            ");
-            }
-
-
-
-
-
-
-            if ($i == 12) {
-                $modules = Module::where('is_enabled', 1)->pluck('id');
-
-                $service_plan = ServicePlan::first(); // Retrieve the first service plan
-
-                if ($service_plan) {
-                    $service_plan->update([
-                        'name' => 'Standard Plan',
-                        'description' => '',
-                        'set_up_amount' => 100,
-                        'number_of_employees_allowed' => 100,
-                        'duration_months' => 1,
-                        'price' => 20,
-                        'business_tier_id' => 1,
-                        'created_by' => 1,
-                    ]);
-
-                    $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
-                        return [
-                            'is_enabled' => 1,
-                            'service_plan_id' => $service_plan->id,
-                            'module_id' => $module_id,
-                            'created_by' => 1,
-                        ];
-                    })->toArray();
-
-                    ServicePlanModule::insert($service_plan_modules);
+                if (!empty($foreignKeyExists)) {
+                    DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
                 } else {
-                    $this->setupServicePlan();
-                    $service_plan = ServicePlan::first(); // Retrieve the first service plan
-                    if (empty($service_plan)) {
-                        throw new Exception("service plan issues");
-                    }
                 }
+            } catch (Exception $e) {
+                // Log the error or handle it as needed
+                echo "Failed to drop foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
+            }
+        }
 
-
-                $businesses = Business::whereHas("owner")
-                    ->get(["id", "owner_id", "service_plan_id", "reseller_id", "created_by"]);
-
-                $this->defaultDataSetupForBusinessV2($businesses, $service_plan);
+        // Re-add foreign key constraints
+        foreach ($foreignKeys as $table => $foreignKey) {
+            try {
+                DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$foreignKey} FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE");
+            } catch (Exception $e) {
+                // Log the error or handle it as needed
+                echo "Failed to add foreign key '{$foreignKey}' on table '{$table}': " . $e->getMessage();
             }
         }
 
 
+        if (Schema::hasColumn('notifications', 'entity_name')) {
+            // Modify the column type to VARCHAR in MySQL
+            DB::statement('ALTER TABLE notifications MODIFY entity_name VARCHAR(255) NULL');
+        }
+        DB::statement("
+                ALTER Table tasks
+                MODIFY COLUMN task_category_id BIGINT UNSIGNED NULL;
+            ");
+    }
 
+    public function updateAndGetServicePlan()
+    {
 
-        return "ok";
+        $modules = Module::where('is_enabled', 1)->pluck('id');
+
+        $service_plan = ServicePlan::first(); // Retrieve the first service plan
+
+        if ($service_plan) {
+            $service_plan->update([
+                'name' => 'Standard Plan',
+                'description' => '',
+                'set_up_amount' => 100,
+                'number_of_employees_allowed' => 100,
+                'duration_months' => 1,
+                'price' => 20,
+                'business_tier_id' => 1,
+                'created_by' => 1,
+            ]);
+
+            $service_plan_modules = $modules->map(function ($module_id) use ($service_plan) {
+                return [
+                    'is_enabled' => 1,
+                    'service_plan_id' => $service_plan->id,
+                    'module_id' => $module_id,
+                    'created_by' => 1,
+                ];
+            })->toArray();
+
+            ServicePlanModule::insert($service_plan_modules);
+        } else {
+            $this->setupServicePlan();
+            $service_plan = ServicePlan::first(); // Retrieve the first service plan
+            if (empty($service_plan)) {
+                throw new Exception("service plan issues");
+            }
+        }
+
+        return $service_plan;
+    }
+
+    public function updateDatabase()
+    {
+        try {
+            $this->updateFields();
+            EmailTemplate::where("type", "send_password_mail")->delete();
+
+            $this->updateModule();
+            $this->storeEmailTemplates();
+            $this->setupAssetTypes();
+
+            $businesses = Business::whereHas("owner")
+                ->get(["id", "owner_id", "service_plan_id", "reseller_id", "created_by"]);
+
+            $service_plan = $this->updateAndGetServicePlan();
+
+            $this->defaultDataSetupForBusinessV2($businesses, $service_plan);
+
+            return "ok";
+        } catch (Exception $e) {
+            return [
+                "message" => $e->getMessage(),
+                "line" => $e->getLine(),
+            ];
+        }
     }
 
 
-    public function moveFilesToBusinessFolder(array $fileNames, $businessId)
+
+
+    public function moveFilesToBusinessFolder(array $fileNames, $businessId, $fileKey = "")
     {
         // Define the base directory for files
         $baseDirectory = public_path();
@@ -350,6 +316,12 @@ class UpdateDatabaseController extends Controller
         }
 
         foreach ($fileNames as $fileName) {
+
+            if (!empty($fileKey)) {
+                $fileName = $fileName[$fileKey];
+            }
+
+
             // Construct the old file path
             $oldFilePath = $baseDirectory . DIRECTORY_SEPARATOR . $fileName;
 
@@ -399,9 +371,9 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'logo' => $businessId . DIRECTORY_SEPARATOR . $data->logo,
-                'image' => $businessId . DIRECTORY_SEPARATOR . $data->image,
-                'background_image' => $businessId . DIRECTORY_SEPARATOR . $data->background_image,
+                'logo' =>   DIRECTORY_SEPARATOR . $businessId . $data->logo,
+                'image' =>  DIRECTORY_SEPARATOR . $businessId . $data->image,
+                'background_image' => DIRECTORY_SEPARATOR . $businessId . $data->background_image,
             ]);
         });
     }
@@ -420,7 +392,7 @@ class UpdateDatabaseController extends Controller
 
                 // Update the paths in the database
                 $updatedLetters = collect($pensionSchemeLetters)->map(function ($letter) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $letter;
+                    return DIRECTORY_SEPARATOR . $businessId . $letter;
                 })->toArray();
 
                 $data->update([
@@ -446,7 +418,7 @@ class UpdateDatabaseController extends Controller
 
                 // Update the paths in the database
                 $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    return DIRECTORY_SEPARATOR . $businessId . $attachment;
                 })->toArray();
 
                 $data->update([
@@ -469,7 +441,7 @@ class UpdateDatabaseController extends Controller
 
                 // Update the paths in the database
                 $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    return DIRECTORY_SEPARATOR . $businessId . $attachment;
                 })->toArray();
 
                 $data->update([
@@ -493,7 +465,7 @@ class UpdateDatabaseController extends Controller
 
                 // Update the paths in the database
                 $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    return DIRECTORY_SEPARATOR . $businessId . $attachment;
                 })->toArray();
 
                 $data->update([
@@ -519,7 +491,7 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'logo' => $businessId . DIRECTORY_SEPARATOR . $data->logo
+                'logo' => DIRECTORY_SEPARATOR . $businessId . $data->logo
             ]);
         });
     }
@@ -541,15 +513,15 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'image' => $businessId . DIRECTORY_SEPARATOR . $data->image
+                'image' => DIRECTORY_SEPARATOR . $businessId . $data->image
             ]);
         });
     }
     public function moveFilesAndUpdateDatabaseForUserDocument($businessId)
     {
         $modelData = UserDocument::whereHas('user', function ($query) use ($businessId) {
-                $query->where("business_id", $businessId);
-            })
+            $query->where("business_id", $businessId);
+        })
 
             ->get(["id", "file_name"]);
 
@@ -566,15 +538,15 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'logo' => $businessId . DIRECTORY_SEPARATOR . $data->file_name
+                'logo' => DIRECTORY_SEPARATOR . $businessId . $data->file_name
             ]);
         });
     }
     public function moveFilesAndUpdateDatabaseForUserEducationHistory($businessId)
     {
         $modelData = UserEducationHistory::whereHas('user', function ($query) use ($businessId) {
-                $query->where("business_id", $businessId);
-            })
+            $query->where("business_id", $businessId);
+        })
             ->get(["id", "attachments"]);
 
         $modelData->each(function ($data) use ($businessId) {
@@ -587,7 +559,7 @@ class UpdateDatabaseController extends Controller
 
                 // Update the paths in the database
                 $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    return DIRECTORY_SEPARATOR . $businessId . $attachment;
                 })->toArray();
 
                 $data->update([
@@ -613,7 +585,7 @@ class UpdateDatabaseController extends Controller
 
                 // Update the paths in the database
                 $updatedAttachments = collect($attachments)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    return DIRECTORY_SEPARATOR . $businessId . $attachment;
                 })->toArray();
 
                 $data->update([
@@ -636,12 +608,14 @@ class UpdateDatabaseController extends Controller
 
             if (is_array($right_to_work_docs)) {
                 // Move files to the business folder
-                $this->moveFilesToBusinessFolder($right_to_work_docs, $businessId);
+                $this->moveFilesToBusinessFolder($right_to_work_docs, $businessId, "file_name");
 
                 // Update the paths in the database
                 $updatedAttachments = collect($right_to_work_docs)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    $attachment["file_name"] = DIRECTORY_SEPARATOR . $businessId . $attachment["file_name"];
+                    return $attachment;
                 })->toArray();
+
 
                 $data->update([
                     'right_to_work_docs' => $updatedAttachments // Attachments should remain an array after update
@@ -662,11 +636,12 @@ class UpdateDatabaseController extends Controller
 
             if (is_array($visa_docs)) {
                 // Move files to the business folder
-                $this->moveFilesToBusinessFolder($visa_docs, $businessId);
+                $this->moveFilesToBusinessFolder($visa_docs, $businessId, "file_name");
 
                 // Update the paths in the database
                 $updatedAttachments = collect($visa_docs)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    $attachment["file_name"] = DIRECTORY_SEPARATOR . $businessId . $attachment["file_name"];
+                    return $attachment;
                 })->toArray();
 
                 $data->update([
@@ -678,10 +653,10 @@ class UpdateDatabaseController extends Controller
 
     public function moveFilesAndUpdateDatabaseForPayslip($businessId)
     {
-        $modelData = Payslip::whereHas("employee", function ($query) use ($businessId) {
+        $modelData = Payslip::whereHas("user", function ($query) use ($businessId) {
             $query->where("business_id", $businessId);
         })
-        ->get(["id", "payslip_file", "payment_record_file"]);
+            ->get(["id", "payslip_file", "payment_record_file"]);
 
 
         // Collect all file paths that need to be moved
@@ -696,28 +671,27 @@ class UpdateDatabaseController extends Controller
 
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
-              // Ensure attachments are handled as an array
-              $payment_record_file = $data->payment_record_file;
+            // Ensure attachments are handled as an array
+            $payment_record_file = $data->payment_record_file;
 
-              if (is_array($payment_record_file)) {
-                  // Move files to the business folder
-                  $this->moveFilesToBusinessFolder($payment_record_file, $businessId);
+            if (is_array($payment_record_file)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($payment_record_file, $businessId);
 
-                  // Update the paths in the database
-                  $updatedAttachments = collect($payment_record_file)->map(function ($attachment) use ($businessId) {
-                      return $businessId . DIRECTORY_SEPARATOR . $attachment;
-                  })->toArray();
+                // Update the paths in the database
+                $updatedAttachments = collect($payment_record_file)->map(function ($attachment) use ($businessId) {
+                    return DIRECTORY_SEPARATOR . $businessId . $attachment;
+                })->toArray();
 
-                  $data->update([
-                      'payment_record_file' => $updatedAttachments // Attachments should remain an array after update
-                  ]);
-              }
+                $data->update([
+                    'payment_record_file' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
 
 
             $data->update([
-                'payslip_file' => $businessId . DIRECTORY_SEPARATOR . $data->payslip_file,
+                'payslip_file' => DIRECTORY_SEPARATOR . $businessId . $data->payslip_file,
             ]);
-
         });
     }
 
@@ -734,12 +708,15 @@ class UpdateDatabaseController extends Controller
 
             if (is_array($pension_letters)) {
                 // Move files to the business folder
-                $this->moveFilesToBusinessFolder($pension_letters, $businessId);
+
+                $this->moveFilesToBusinessFolder($pension_letters, $businessId, "file_name");
 
                 // Update the paths in the database
                 $updatedAttachments = collect($pension_letters)->map(function ($attachment) use ($businessId) {
-                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                    $attachment["file_name"] = DIRECTORY_SEPARATOR . $businessId . $attachment["file_name"];
+                    return $attachment;
                 })->toArray();
+
 
                 $data->update([
                     'pension_letters' => $updatedAttachments // Attachments should remain an array after update
@@ -753,27 +730,52 @@ class UpdateDatabaseController extends Controller
 
     public function updateDatabaseFilesForBusiness()
     {
-        $businesses = Business::get(["id", "logo", "image", "background_image"]);
+        DB::beginTransaction();
+        try {
+            $businesses = Business::get(["id", "logo", "image", "background_image"]);
 
-        $businesses->each(function ($business) {
-            $this->moveFilesAndUpdateDatabaseForBusiness($business->id);
-            $this->moveFilesAndUpdateDatabaseForBusinessPensionHistory($business->id);
-            $this->moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($business->id);
-            $this->moveFilesAndUpdateDatabaseForCandidate($business->id);
-            $this->moveFilesAndUpdateDatabaseForLeave($business->id);
-            $this->moveFilesAndUpdateDatabaseForSettingPayslip($business->id);
-            $this->moveFilesAndUpdateDatabaseForUserAsset($business->id);
-            $this->moveFilesAndUpdateDatabaseForUserDocument($business->id);
-            $this->moveFilesAndUpdateDatabaseForUserEducationHistory($business->id);
-            $this->moveFilesAndUpdateDatabaseForUserRecruitmentProcess($business->id);
-            $this->moveFilesAndUpdateDatabaseForEmployeeRightToWorkHistory($business->id);
-            $this->moveFilesAndUpdateDatabaseForEmployeeVisaDetailHistory($business->id);
-            $this->moveFilesAndUpdateDatabaseForPayslip($business->id);
-            $this->moveFilesAndUpdateDatabaseForEmployeePensionHistory($business->id);
+            $businesses->each(function ($business) {
+                echo "" . "<br/>";
+                echo "" . "<br/>";
 
-
-
-
-        });
+                echo "1" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForBusiness($business->id);
+                echo "2" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForBusinessPensionHistory($business->id);
+                echo "3" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($business->id);
+                echo "4" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForCandidate($business->id);
+                echo "5" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForLeave($business->id);
+                echo "6" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForSettingPayslip($business->id);
+                echo "7" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForUserAsset($business->id);
+                echo "8" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForUserDocument($business->id);
+                echo "9" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForUserEducationHistory($business->id);
+                echo "10" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForUserRecruitmentProcess($business->id);
+                echo "11" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForEmployeeRightToWorkHistory($business->id);
+                echo "12" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForEmployeeVisaDetailHistory($business->id);
+                echo "13" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForPayslip($business->id);
+                echo "14" . "<br/>";
+                $this->moveFilesAndUpdateDatabaseForEmployeePensionHistory($business->id);
+                echo "15" . "<br/>";
+            });
+            DB::commit();
+            return "ok";
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                "message" => $e->getMessage(),
+                "line" => $e->getLine(),
+            ];
+        }
     }
 }

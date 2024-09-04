@@ -501,7 +501,7 @@ trait SetupUtil
             if(empty($business->service_plan_id)) {
                 $business->service_plan_id = $service_plan->id;
             }
-            if($business->reseller_id){
+            if(empty($business->reseller_id)){
                 $business->reseller_id = $business->created_by;
             }
 
