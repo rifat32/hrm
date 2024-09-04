@@ -10,6 +10,8 @@ class EmployeePensionHistory extends Model
 {
     use HasFactory;
 
+    protected $appends = ['is_current'];
+
     protected $fillable = [
         'business_id',
 
@@ -26,7 +28,11 @@ class EmployeePensionHistory extends Model
         "to_date",
         'created_by'
     ];
-    protected $appends = ['is_current'];
+
+
+    protected $casts = [
+        'pension_letters' => 'array',
+    ];
 
     public function getIsCurrentAttribute() {
         $current_pension_id = Session::get('current_pension_id');
@@ -43,9 +49,7 @@ class EmployeePensionHistory extends Model
 
 
 
-    protected $casts = [
-        'pension_letters' => 'array',
-    ];
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by',"id");

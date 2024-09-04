@@ -18,8 +18,10 @@ class Payslip extends Model
        'payment_amount',
        "payment_notes",
        'payment_date',
+
        'payslip_file',
        'payment_record_file',
+
        "payroll_id",
        'gross_pay',
        'tax',

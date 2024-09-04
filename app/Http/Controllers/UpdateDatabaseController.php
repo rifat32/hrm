@@ -9,10 +9,12 @@ use App\Models\BusinessPensionHistory;
 use App\Models\Candidate;
 use App\Models\CandidateRecruitmentProcess;
 use App\Models\EmailTemplate;
+use App\Models\EmployeePensionHistory;
 use App\Models\EmployeeRightToWorkHistory;
 use App\Models\EmployeeVisaDetailHistory;
 use App\Models\Leave;
 use App\Models\Module;
+use App\Models\Payslip;
 use App\Models\RecruitmentProcess;
 use App\Models\ServicePlan;
 use App\Models\ServicePlanModule;
@@ -674,6 +676,79 @@ class UpdateDatabaseController extends Controller
         });
     }
 
+    public function moveFilesAndUpdateDatabaseForPayslip($businessId)
+    {
+        $modelData = Payslip::whereHas("employee", function ($query) use ($businessId) {
+            $query->where("business_id", $businessId);
+        })
+        ->get(["id", "payslip_file", "payment_record_file"]);
+
+
+        // Collect all file paths that need to be moved
+        $filePaths = $modelData->flatMap(function ($data) {
+            return [
+                $data->payslip_file,
+            ];
+        })->filter()->toArray(); // Filter out any null or empty paths
+
+        // Move all files to the business folder
+        $this->moveFilesToBusinessFolder($filePaths, $businessId);
+
+        // Update the Business model with new file paths
+        $modelData->each(function ($data) use ($businessId) {
+              // Ensure attachments are handled as an array
+              $payment_record_file = $data->payment_record_file;
+
+              if (is_array($payment_record_file)) {
+                  // Move files to the business folder
+                  $this->moveFilesToBusinessFolder($payment_record_file, $businessId);
+
+                  // Update the paths in the database
+                  $updatedAttachments = collect($payment_record_file)->map(function ($attachment) use ($businessId) {
+                      return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                  })->toArray();
+
+                  $data->update([
+                      'payment_record_file' => $updatedAttachments // Attachments should remain an array after update
+                  ]);
+              }
+
+
+            $data->update([
+                'payslip_file' => $businessId . DIRECTORY_SEPARATOR . $data->payslip_file,
+            ]);
+
+        });
+    }
+
+
+    public function moveFilesAndUpdateDatabaseForEmployeePensionHistory($businessId)
+    {
+        $modelData = EmployeePensionHistory::whereHas("employee", function ($query) use ($businessId) {
+            $query->where("business_id", $businessId);
+        })->get(["id", "pension_letters"]);
+
+        $modelData->each(function ($data) use ($businessId) {
+            // Ensure attachments are handled as an array
+            $pension_letters = $data->pension_letters;
+
+            if (is_array($pension_letters)) {
+                // Move files to the business folder
+                $this->moveFilesToBusinessFolder($pension_letters, $businessId);
+
+                // Update the paths in the database
+                $updatedAttachments = collect($pension_letters)->map(function ($attachment) use ($businessId) {
+                    return $businessId . DIRECTORY_SEPARATOR . $attachment;
+                })->toArray();
+
+                $data->update([
+                    'pension_letters' => $updatedAttachments // Attachments should remain an array after update
+                ]);
+            }
+        });
+    }
+
+
 
 
     public function updateDatabaseFilesForBusiness()
@@ -693,9 +768,12 @@ class UpdateDatabaseController extends Controller
             $this->moveFilesAndUpdateDatabaseForUserRecruitmentProcess($business->id);
             $this->moveFilesAndUpdateDatabaseForEmployeeRightToWorkHistory($business->id);
             $this->moveFilesAndUpdateDatabaseForEmployeeVisaDetailHistory($business->id);
+            $this->moveFilesAndUpdateDatabaseForPayslip($business->id);
+            $this->moveFilesAndUpdateDatabaseForEmployeePensionHistory($business->id);
 
 
-            $this->moveFilesAndUpdateDatabaseForEmployeeVisaDetailHistory($business->id);
+
+
         });
     }
 }
