@@ -2011,50 +2011,73 @@ class DashboardManagementControllerV2 extends Controller
                         // For active or subscribed businesses
                         $subQuery->where('is_active', 1)
                             ->where(function ($q) {
-                                $q->where('is_self_registered_businesses', 0) // Automatically subscribed
-                                    ->orWhere(function ($q) {
-                                        $q->where('is_self_registered_businesses', 1)
-                                            ->where(function ($innerQuery) {
-                                                $innerQuery->whereNotNull('trail_end_date')
-                                                    ->where(function ($trailQuery) {
-                                                        $trailQuery->where(function ($trailEndQuery) {
-                                                            $trailEndQuery->where('trail_end_date', '>', now())
-                                                                ->orWhere('trail_end_date', now()->toDateString());
-                                                        })
-                                                        ->orWhereHas('subscriptions', function ($subQuery) {
-                                                            $subQuery->where(function ($subscriptionQuery) {
-                                                                $subscriptionQuery->where('start_date', '<=', now())
-                                                                    ->where(function ($endDateQuery) {
-                                                                        $endDateQuery->whereNull('end_date')
-                                                                            ->orWhere('end_date', '>=', now());
-                                                                    });
-                                                            });
-                                                        });
+                                $q->where(function ($innerQuery) {
+                                    $innerQuery->where('is_self_registered_businesses', 0)
+                                        ->whereNotNull('trail_end_date')
+                                        ->where(function ($trailEndQuery) {
+                                            $trailEndQuery->where('trail_end_date', '>', now())
+                                                ->orWhere('trail_end_date', now()->toDateString());
+                                        });
+                                })
+                                ->orWhere(function ($q) {
+                                    $q->where('is_self_registered_businesses', 1)
+                                        ->where(function ($innerQuery) {
+                                            $innerQuery->where(function ($trailQuery) {
+                                                $trailQuery->whereNotNull('trail_end_date')
+                                                    ->where(function ($trailEndQuery) {
+                                                        $trailEndQuery->where('trail_end_date', '>', now())
+                                                            ->orWhere('trail_end_date', now()->toDateString());
                                                     });
+                                            })
+                                            ->orWhereHas('subscriptions', function ($subQuery) {
+                                                $subQuery->where(function ($subscriptionQuery) {
+                                                    $subscriptionQuery->where('start_date', '<=', now())
+                                                        ->where(function ($endDateQuery) {
+                                                            $endDateQuery->whereNull('end_date')
+                                                                ->orWhere('end_date', '>=', now());
+                                                        });
+                                                });
                                             });
-                                    });
+                                        });
+                                });
                             });
                     } else {
                         // For inactive or unsubscribed businesses
                         $subQuery->where('is_active', 0)
                             ->orWhere(function ($q) {
-                                $q->where('is_self_registered_businesses', 1)
-                                    ->where(function ($innerQuery) {
-                                        $innerQuery->whereNotNull('trail_end_date')
-                                            ->where(function ($trailQuery) {
-                                                $trailQuery->where('trail_end_date', '<', now())
-                                                    ->whereNot('trail_end_date', now()->toDateString())
-                                                    ->whereDoesntHave('subscriptions', function ($subQuery) {
-                                                        $subQuery->where('start_date', '<=', now())
-                                                            ->where(function ($endDateQuery) {
-                                                                $endDateQuery->whereNull('end_date')
-                                                                    ->orWhere('end_date', '>=', now());
-                                                            });
-                                                    });
-                                            });
-                                    });
+                                // Check for automatically subscribed businesses
+                                $q->where(function ($innerQuery) {
+                                    $innerQuery->where('is_self_registered_businesses', 0)
+                                        ->whereNull('trail_end_date') // Check for null or empty trail_end_date
+                                        ->orWhere(function ($trailQuery) {
+                                            $trailQuery->whereNotNull('trail_end_date')
+                                                ->where('trail_end_date', '<', now())
+                                                ->whereNot('trail_end_date', now()->toDateString());
+                                        });
+                                })
+                                ->orWhere(function ($q) {
+                                    // Check for self-registered businesses
+                                    $q->where('is_self_registered_businesses', 1)
+                                        ->where(function ($innerQuery) {
+                                            $innerQuery->whereNull('trail_end_date') // Check for null or empty trail_end_date
+                                                ->orWhere(function ($trailQuery) {
+                                                    $trailQuery->whereNotNull('trail_end_date')
+                                                        ->where('trail_end_date', '<', now())
+                                                        ->whereNot('trail_end_date', now()->toDateString())
+                                                        ->whereDoesntHave('subscriptions', function ($subQuery) {
+                                                            $subQuery->where('start_date', '<=', now())
+                                                                ->where(function ($endDateQuery) {
+                                                                    $endDateQuery->whereNull('end_date')
+                                                                        ->orWhere('end_date', '>=', now());
+                                                                });
+                                                        });
+                                                });
+                                        });
+                                });
                             });
                     }
+
+
                 });
             });
 

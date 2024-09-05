@@ -635,10 +635,7 @@ class AuthController extends Controller
                 $modules = $this->getModulesFunc($business);
             }
 
-            $last_subscription=NULL;
-            if(!empty($business)){
-               $last_subscription = BusinessSubscription::where('business_id', $business->id)->latest()->first();
-            }
+
 
             $last_subscription=NULL;
             if(!empty($business)){
@@ -1448,7 +1445,10 @@ class AuthController extends Controller
             if(!empty($business)) {
                 $modules = $this->getModulesFunc($business);
             }
-
+            $last_subscription=NULL;
+            if(!empty($business)){
+               $last_subscription = BusinessSubscription::where('business_id', $business->id)->latest()->first();
+            }
             // Extracting only the required data
             $responseData = [
                 'id' => $user->id,

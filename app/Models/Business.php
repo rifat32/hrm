@@ -64,56 +64,75 @@ class Business extends Model
         return $this->hasOne(BusinessEmailSetting::class);
     }
 
+
+    private function isValidSubscription($subscription)
+    {
+        if (!$subscription) return false; // No subscription
+
+        // Return false if start_date or end_date is empty
+        if (empty($subscription->start_date) || empty($subscription->end_date)) return false;
+
+        $startDate = Carbon::parse($subscription->start_date);
+        $endDate = Carbon::parse($subscription->end_date);
+
+        // Return false if the subscription hasn't started
+        if ($startDate->isFuture()) return false;
+
+        // Return false if the subscription has expired
+        if ($endDate->isPast() && !$endDate->isToday()) return false;
+
+        return true;
+    }
+
+    private function isTrailDateValid($trail_end_date)
+    {
+        // Return false if trail_end_date is empty or null
+        if (empty($trail_end_date)) {
+            return false;
+        }
+
+        // Parse the date and check validity
+        $parsedDate = Carbon::parse($trail_end_date);
+        return !( $parsedDate->isPast() && !$parsedDate->isToday() );
+    }
+
     public function getIsSubscribedAttribute($value)
     {
         $user = auth()->user();
-        if(empty($user)) {
-return 0;
+        if (empty($user) || empty($user->business)) {
+            return 0;
         }
 
         $business = $user->business;
 
-        if ($user && $user->business) {
-            $business = $user->business;
-            if (!$business->is_active) {
+        // Return 0 if the business is not active
+        if (!$business->is_active) {
+            return 0;
+        }
+
+        // Check for self-registered businesses
+        if ($business->is_self_registered_businesses) {
+            $validTrailDate = $this->isTrailDateValid($business->trail_end_date);
+            $latest_subscription = BusinessSubscription::where('business_id', $business->id)
+                ->where('service_plan_id', $business->service_plan_id)
+                ->latest()
+                ->first();
+
+            // If no valid subscription and no valid trail date, return 0
+            if (!$this->isValidSubscription($latest_subscription) && !$validTrailDate) {
                 return 0;
             }
-            if ($business->is_self_registered_businesses) {
-
-                if(!empty($business->trail_end_date)) {
-                    if(Carbon::parse($business->trail_end_date)->isPast() && !Carbon::parse($business->trail_end_date)->isToday()){
-                        $latest_subscription = BusinessSubscription::where('business_id', $business->id)
-                        ->where('service_plan_id', $business->service_plan_id)
-                        ->latest() // Get the latest subscription
-                        ->first();
-
-
-// Check if there's no subscription
-if (!$latest_subscription) {
-return 0;
-}
-
-// Check if the subscription has not yet started
-if (Carbon::parse($latest_subscription->start_date)->isFuture()) {
-return 0;
-}
-
-
-// Check if the subscription has expired
-if(!empty($latest_subscription->end_date)) {
-if (Carbon::parse($latest_subscription->end_date)->isPast() && !Carbon::parse($business->trail_end_date)->isToday()) {
-    return 0;
-}
-}
-
-                    }
-
-                }
+        } else {
+            // For non-self-registered businesses
+            // If the trail date is empty or invalid, return 0
+            if (!$this->isTrailDateValid($business->trail_end_date)) {
+                return 0;
             }
         }
-        return 1;
 
+        return 1;
     }
+
 
 
 
@@ -134,7 +153,7 @@ if (Carbon::parse($latest_subscription->end_date)->isPast() && !Carbon::parse($b
     public function subscription()
     {
         return $this->hasOne(BusinessSubscription::class, 'business_id', 'id')
-        ->latest();
+            ->latest();
     }
 
 
@@ -144,8 +163,9 @@ if (Carbon::parse($latest_subscription->end_date)->isPast() && !Carbon::parse($b
     }
 
 
-    public function creator() {
-        return $this->belongsTo(User::class, "created_by","id");
+    public function creator()
+    {
+        return $this->belongsTo(User::class, "created_by", "id");
     }
 
 
@@ -164,40 +184,37 @@ if (Carbon::parse($latest_subscription->end_date)->isPast() && !Carbon::parse($b
 
 
 
-        // Define your model properties and relationships here
+    // Define your model properties and relationships here
 
-protected static function boot()
-{
-    parent::boot();
+    protected static function boot()
+    {
+        parent::boot();
 
-    // Listen for the "deleting" event on the Candidate model
-    static::deleting(function($item) {
-        // Call the deleteFiles method to delete associated files
-        $item->deleteFiles();
-    });
-}
+        // Listen for the "deleting" event on the Candidate model
+        static::deleting(function ($item) {
+            // Call the deleteFiles method to delete associated files
+            $item->deleteFiles();
+        });
+    }
 
-/**
- * Delete associated files.
- *
- * @return void
- */
+    /**
+     * Delete associated files.
+     *
+     * @return void
+     */
 
 
 
-public function deleteFiles()
-{
-    // Get the file paths associated with the candidate
-    $filePaths = $this->pension_scheme_letters;
+    public function deleteFiles()
+    {
+        // Get the file paths associated with the candidate
+        $filePaths = $this->pension_scheme_letters;
 
-    // Iterate over each file and delete it
-    foreach ($filePaths as $filePath) {
-        if (File::exists(public_path($filePath->file))) {
-            File::delete(public_path($filePath->file));
+        // Iterate over each file and delete it
+        foreach ($filePaths as $filePath) {
+            if (File::exists(public_path($filePath->file))) {
+                File::delete(public_path($filePath->file));
+            }
         }
     }
-}
-
-
-
 }
