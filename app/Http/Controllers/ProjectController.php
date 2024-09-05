@@ -18,6 +18,7 @@ use App\Models\Department;
 use App\Models\EmployeeProjectHistory;
 use App\Models\Notification;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\User;
 use App\Models\UserProject;
@@ -1315,16 +1316,21 @@ class ProjectController extends Controller
             }
 
             $business_id =  auth()->user()->business_id;
-            $project =  Project::with("departments", "users")
-                ->where([
-                    "id" => $id,
-                    "business_id" => $business_id
-                ])
-
-                ->select(
-                    'projects.*'
-                )
-                ->first();
+            $project =  $project = Project::with(['departments', 'users'])
+            ->where([
+                'id' => $id,
+                'business_id' => $business_id
+            ])
+            ->select([
+                'projects.*', // Select all columns from the projects table
+            ])
+            ->selectSub(
+                Task::selectRaw('COUNT(*)')
+                    ->whereColumn('tasks.project_id', 'projects.id')
+                    ->where('status', 'done'),
+                'tasks_count'
+            )
+            ->first();
 
             if (!$project) {
 

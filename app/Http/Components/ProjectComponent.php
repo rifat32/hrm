@@ -3,6 +3,7 @@
 namespace App\Http\Components;
 
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\WorkLocation;
 use App\Models\WorkShift;
 use App\Models\WorkShiftHistory;
@@ -29,7 +30,7 @@ public function getProjects () {
        ]
 
         )
-        ->leftJoin('tasks', 'projects.id', '=', 'tasks.project_id')
+
     ->where(
         [
             "projects.business_id" => auth()->user()->business_id
@@ -95,8 +96,15 @@ public function getProjects () {
         })
 
 
-        ->select('projects.*', DB::raw('COUNT(tasks.id) as tasks_count'))
-        ->groupBy('projects.id')
+        ->select(
+            'projects.*',
+
+        )
+        ->selectSub(
+        Task::selectRaw('COUNT(*)')
+        ->whereColumn('tasks.project_id', 'projects.id'),
+        'tasks_count'
+            )
 
         ->when(!empty(request()->per_page), function ($query)  {
             return $query->paginate(request()->per_page);
