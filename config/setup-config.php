@@ -765,6 +765,18 @@ return [
 
 
         [
+            "header" => "letter_template",
+            "permissions" => [
+                "letter_template_create",
+                "letter_template_update",
+                "letter_template_activate",
+                "letter_template_view",
+                "letter_template_delete",
+            ],
+        ],
+
+
+        [
             "header" => "system_setting",
             "permissions" => [
                 "system_setting_update",
@@ -792,11 +804,6 @@ return [
             ],
 
         ],
-
-
-
-
-
 
 
 

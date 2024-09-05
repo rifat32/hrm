@@ -25,11 +25,11 @@ return [
     "termination_type_delete",
 
 
-    "task_category_create",
-    "task_category_update",
-    "task_category_activate",
-    "task_category_view",
-    "task_category_delete",
+    // "task_category_create",
+    // "task_category_update",
+    // "task_category_activate",
+    // "task_category_view",
+    // "task_category_delete",
 
 
 
@@ -121,11 +121,11 @@ return [
     "employment_status_view",
     "employment_status_delete",
 
-    "letter_template_create",
-    "letter_template_update",
-    "letter_template_activate",
-    "letter_template_view",
-    "letter_template_delete",
+    // "letter_template_create",
+    // "letter_template_update",
+    // "letter_template_activate",
+    // "letter_template_view",
+    // "letter_template_delete",
 
 
 ]];
