@@ -288,98 +288,13 @@ class TerminationTypeController extends Controller
             }
             $request_data = $request->validated();
 
-            $termination_type =  TerminationType::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$termination_type) {
-
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($termination_type->business_id != NULL)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($termination_type->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
-                        ], 403);
-                    } else if ($termination_type->is_default == 0) {
-
-                        if ($termination_type->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this termination type due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_update = 1;
-                        }
-                    } else {
-                        $should_disable = 1;
-                    }
-                }
-            } else {
-                if ($termination_type->business_id != NULL) {
-                    if (($termination_type->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this termination type due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($termination_type->is_default == 0) {
-                        if ($termination_type->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this termination type due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-                        }
-                    } else {
-                        $should_disable = 1;
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $termination_type->update([
-                    'is_active' => !$termination_type->is_active
-                ]);
-            }
-
-            if ($should_disable) {
-
-                $disabled_termination_type =    DisabledTerminationType::where([
-                    'termination_type_id' => $termination_type->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if (!$disabled_termination_type) {
-                    DisabledTerminationType::create([
-                        'termination_type_id' => $termination_type->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_termination_type->delete();
-                }
-            }
+            $this->toggleActivation(
+                TerminationType::class,
+                DisabledTerminationType::class,
+                'termination_type_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
 
             return response()->json(['message' => 'Termination Type status updated successfully'], 200);

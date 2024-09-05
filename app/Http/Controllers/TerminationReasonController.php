@@ -288,99 +288,13 @@ class TerminationReasonController extends Controller
             }
             $request_data = $request->validated();
 
-            $termination_reason =  TerminationReason::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$termination_reason) {
-
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($termination_reason->business_id != NULL )) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this termination reason due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($termination_reason->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this termination reason due to role restrictions."
-                        ], 403);
-                    } else if ($termination_reason->is_default == 0) {
-
-                        if ($termination_reason->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this termination reason due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_update = 1;
-                        }
-                    } else {
-                        $should_disable = 1;
-                    }
-                }
-            } else {
-                if ($termination_reason->business_id != NULL) {
-                    if (($termination_reason->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this termination reason due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($termination_reason->is_default == 0) {
-                        if ($termination_reason->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this termination reason due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-                        }
-                    } else {
-                        $should_disable = 1;
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $termination_reason->update([
-                    'is_active' => !$termination_reason->is_active
-                ]);
-            }
-
-            if ($should_disable) {
-
-                $disabled_termination_reason =    DisabledTerminationReason::where([
-                    'termination_reason_id' => $termination_reason->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if (!$disabled_termination_reason) {
-                    DisabledTerminationReason::create([
-                        'termination_reason_id' => $termination_reason->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_termination_reason->delete();
-                }
-            }
-
+            $this->toggleActivation(
+                TerminationReason::class,
+                DisabledTerminationReason::class,
+                'termination_reason_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
             return response()->json(['message' => 'termination reason status updated successfully'], 200);
         } catch (Exception $e) {

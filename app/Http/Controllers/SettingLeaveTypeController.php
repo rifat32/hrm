@@ -305,106 +305,13 @@ class SettingLeaveTypeController extends Controller
              }
              $request_data = $request->validated();
 
-             $setting_leave_type =  SettingLeaveType::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$setting_leave_type) {
-
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($setting_leave_type->business_id != NULL)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this leave type due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($setting_leave_type->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this leave type due to role restrictions."
-                        ], 403);
-                    } else if ($setting_leave_type->is_default == 0) {
-
-                        if($setting_leave_type->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this leave type due to role restrictions."
-                            ], 403);
-                        }
-                        else {
-                            $should_update = 1;
-                        }
-
-
-
-                    }
-                    else {
-                     $should_disable = 1;
-
-                    }
-                }
-            } else {
-                if ($setting_leave_type->business_id != NULL) {
-                    if (($setting_leave_type->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this leave type due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($setting_leave_type->is_default == 0) {
-                        if ($setting_leave_type->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this leave type status due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-
-                        }
-                    } else {
-                        $should_disable = 1;
-
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $setting_leave_type->update([
-                    'is_active' => !$setting_leave_type->is_active
-                ]);
-            }
-
-            if($should_disable) {
-
-                $disabled_setting_leave_type =    DisabledSettingLeaveType::where([
-                    'setting_leave_type_id' => $setting_leave_type->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if(!$disabled_setting_leave_type) {
-                    DisabledSettingLeaveType::create([
-                        'setting_leave_type_id' => $setting_leave_type->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_setting_leave_type->delete();
-                }
-            }
+             $this->toggleActivation(
+                SettingLeaveType::class,
+                DisabledSettingLeaveType::class,
+                'setting_leave_type_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
 
             return response()->json(['message' => 'leave type status updated successfully'], 200);

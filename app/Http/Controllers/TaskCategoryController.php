@@ -484,105 +484,13 @@ class TaskCategoryController extends Controller
              }
              $request_data = $request->validated();
 
-             $task_category =  TaskCategory::where([
-                 "id" => $request_data["id"],
-             ])
-                 ->first();
-             if (!$task_category) {
-
-                 return response()->json([
-                     "message" => "no data found"
-                 ], 404);
-             }
-             $should_update = 0;
-             $should_disable = 0;
-             if (empty(auth()->user()->business_id)) {
-
-                 if (auth()->user()->hasRole('superadmin')) {
-                     if (($task_category->business_id != NULL )) {
-
-                         return response()->json([
-                             "message" => "You do not have permission to update this task category due to role restrictions."
-                         ], 403);
-                     } else {
-                         $should_update = 1;
-                     }
-                 } else {
-                     if ($task_category->business_id != NULL) {
-
-                         return response()->json([
-                             "message" => "You do not have permission to update this task category due to role restrictions."
-                         ], 403);
-                     } else if ($task_category->is_default == 0) {
-
-                         if($task_category->created_by != auth()->user()->id) {
-
-                             return response()->json([
-                                 "message" => "You do not have permission to update this task category due to role restrictions."
-                             ], 403);
-                         }
-                         else {
-                             $should_update = 1;
-                         }
-
-
-
-                     }
-                     else {
-                      $should_disable = 1;
-
-                     }
-                 }
-             } else {
-                 if ($task_category->business_id != NULL) {
-                     if (($task_category->business_id != auth()->user()->business_id)) {
-
-                         return response()->json([
-                             "message" => "You do not have permission to update this task category due to role restrictions."
-                         ], 403);
-                     } else {
-                         $should_update = 1;
-                     }
-                 } else {
-                     if ($task_category->is_default == 0) {
-                         if ($task_category->created_by != auth()->user()->created_by) {
-
-                             return response()->json([
-                                 "message" => "You do not have permission to update this task category due to role restrictions."
-                             ], 403);
-                         } else {
-                             $should_disable = 1;
-
-                         }
-                     } else {
-                         $should_disable = 1;
-
-                     }
-                 }
-             }
-
-             if ($should_update) {
-                 $task_category->update([
-                     'is_active' => !$task_category->is_active
-                 ]);
-             }
-
-             if($should_disable) {
-                 $disabled_task_category =    DisabledTaskCategory::where([
-                     'task_category_id' => $task_category->id,
-                     'business_id' => auth()->user()->business_id,
-                     'created_by' => auth()->user()->id,
-                 ])->first();
-                 if(!$disabled_task_category) {
-                    DisabledTaskCategory::create([
-                         'task_category_id' => $task_category->id,
-                         'business_id' => auth()->user()->business_id,
-                         'created_by' => auth()->user()->id,
-                     ]);
-                 } else {
-                     $disabled_task_category->delete();
-                 }
-             }
+             $this->toggleActivation(
+                TaskCategory::class,
+                DisabledTaskCategory::class,
+                'task_category_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
    DB::commit();
              return response()->json(['message' => 'Task Category status updated successfully'], 200);

@@ -577,106 +577,13 @@ $recruitment_process_order = RecruitmentProcessOrder::updateOrCreate(
             }
             $request_data = $request->validated();
 
-            $recruitment_process =  RecruitmentProcess::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$recruitment_process) {
-
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($recruitment_process->business_id != NULL )) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this recruitment process  due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($recruitment_process->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this recruitment process  due to role restrictions."
-                        ], 403);
-                    } else if ($recruitment_process->is_default == 0) {
-
-                        if($recruitment_process->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this recruitment process  due to role restrictions."
-                            ], 403);
-                        }
-                        else {
-                            $should_update = 1;
-                        }
-
-
-
-                    }
-                    else {
-                     $should_disable = 1;
-
-                    }
-                }
-            } else {
-                if ($recruitment_process->business_id != NULL) {
-                    if (($recruitment_process->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this recruitment process  due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($recruitment_process->is_default == 0) {
-                        if ($recruitment_process->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this recruitment process  due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-
-                        }
-                    } else {
-                        $should_disable = 1;
-
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $recruitment_process->update([
-                    'is_active' => !$recruitment_process->is_active
-                ]);
-            }
-
-            if($should_disable) {
-
-                $disabled_recruitment_process =    DisabledRecruitmentProcess::where([
-                    'recruitment_process_id' => $recruitment_process->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if(!$disabled_recruitment_process) {
-                    DisabledRecruitmentProcess::create([
-                        'recruitment_process_id' => $recruitment_process->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_recruitment_process->delete();
-                }
-            }
+            $this->toggleActivation(
+                RecruitmentProcess::class,
+                DisabledRecruitmentProcess::class,
+                'recruitment_process_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
 
             return response()->json(['message' => 'Recruitment Process status updated successfully'], 200);

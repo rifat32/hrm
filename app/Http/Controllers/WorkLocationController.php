@@ -332,107 +332,13 @@ class WorkLocationController extends Controller
             }
             $request_data = $request->validated();
 
-            $work_location =  WorkLocation::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$work_location) {
-
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($work_location->business_id != NULL )) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this work location due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($work_location->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this work location due to role restrictions."
-                        ], 403);
-                    } else if ($work_location->is_default == 0) {
-
-                        if($work_location->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this work location due to role restrictions."
-                            ], 403);
-                        }
-                        else {
-                            $should_update = 1;
-                        }
-
-
-
-                    }
-                    else {
-                     $should_disable = 1;
-
-                    }
-                }
-            } else {
-                if ($work_location->business_id != NULL) {
-                    if (($work_location->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this work location due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($work_location->is_default == 0) {
-                        if ($work_location->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this work location due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-
-                        }
-                    } else {
-                        $should_disable = 1;
-
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $work_location->update([
-                    'is_active' => !$work_location->is_active
-                ]);
-            }
-
-            if($should_disable) {
-
-                $disabled_work_location =    DisabledWorkLocation::where([
-                    'work_location_id' => $work_location->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if(!$disabled_work_location) {
-                    DisabledWorkLocation::create([
-                        'work_location_id' => $work_location->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_work_location->delete();
-                }
-            }
-
+            $this->toggleActivation(
+                WorkLocation::class,
+                DisabledWorkLocation::class,
+                'work_location_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
             return response()->json(['message' => 'WorkLocation status updated successfully'], 200);
         } catch (Exception $e) {

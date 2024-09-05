@@ -327,105 +327,13 @@ class JobPlatformController extends Controller
              }
              $request_data = $request->validated();
 
-             $job_platform =  JobPlatform::where([
-                 "id" => $request_data["id"],
-             ])
-                 ->first();
-             if (!$job_platform) {
-
-                 return response()->json([
-                     "message" => "no data found"
-                 ], 404);
-             }
-             $should_update = 0;
-             $should_disable = 0;
-             if (empty(auth()->user()->business_id)) {
-
-                 if (auth()->user()->hasRole('superadmin')) {
-                     if (($job_platform->business_id != NULL)) {
-
-                         return response()->json([
-                             "message" => "You do not have permission to update this job platform due to role restrictions."
-                         ], 403);
-                     } else {
-                         $should_update = 1;
-                     }
-                 } else {
-                     if ($job_platform->business_id != NULL) {
-
-                         return response()->json([
-                             "message" => "You do not have permission to update this job platform due to role restrictions."
-                         ], 403);
-                     } else if ($job_platform->is_default == 0) {
-
-                         if($job_platform->created_by != auth()->user()->id) {
-
-                             return response()->json([
-                                 "message" => "You do not have permission to update this job platform due to role restrictions."
-                             ], 403);
-                         }
-                         else {
-                             $should_update = 1;
-                         }
-
-
-
-                     }
-                     else {
-                      $should_disable = 1;
-
-                     }
-                 }
-             } else {
-                 if ($job_platform->business_id != NULL) {
-                     if (($job_platform->business_id != auth()->user()->business_id)) {
-
-                         return response()->json([
-                             "message" => "You do not have permission to update this job platform due to role restrictions."
-                         ], 403);
-                     } else {
-                         $should_update = 1;
-                     }
-                 } else {
-                     if ($job_platform->is_default == 0) {
-                         if ($job_platform->created_by != auth()->user()->created_by) {
-
-                             return response()->json([
-                                 "message" => "You do not have permission to update this job platform due to role restrictions."
-                             ], 403);
-                         } else {
-                             $should_disable = 1;
-
-                         }
-                     } else {
-                         $should_disable = 1;
-
-                     }
-                 }
-             }
-
-             if ($should_update) {
-                 $job_platform->update([
-                     'is_active' => !$job_platform->is_active
-                 ]);
-             }
-
-             if($should_disable) {
-                 $disabled_job_platform =    DisabledJobPlatform::where([
-                     'job_platform_id' => $job_platform->id,
-                     'business_id' => auth()->user()->business_id,
-                     'created_by' => auth()->user()->id,
-                 ])->first();
-                 if(!$disabled_job_platform) {
-                    DisabledJobPlatform::create([
-                         'job_platform_id' => $job_platform->id,
-                         'business_id' => auth()->user()->business_id,
-                         'created_by' => auth()->user()->id,
-                     ]);
-                 } else {
-                     $disabled_job_platform->delete();
-                 }
-             }
+             $this->toggleActivation(
+                JobPlatform::class,
+                DisabledJobPlatform::class,
+                'job_platform_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
 
              return response()->json(['message' => 'Job platform status updated successfully'], 200);

@@ -314,115 +314,13 @@ $letter_template->save();
             }
             $request_data = $request->validated();
 
-            $letter_template =  LetterTemplate::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$letter_template) {
-
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-
-
-
-
-
-
-
-
-
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($letter_template->business_id != NULL)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this letter template due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($letter_template->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this letter template due to role restrictions."
-                        ], 403);
-                    } else if ($letter_template->is_default == 0) {
-
-                        if($letter_template->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this letter template due to role restrictions."
-                            ], 403);
-                        }
-                        else {
-                            $should_update = 1;
-                        }
-
-
-
-                    }
-                    else {
-                     $should_disable = 1;
-
-                    }
-                }
-            } else {
-                if ($letter_template->business_id != NULL) {
-                    if (($letter_template->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this letter template due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($letter_template->is_default == 0) {
-                        if ($letter_template->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this letter template due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-
-                        }
-                    } else {
-                        $should_disable = 1;
-
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $letter_template->update([
-                    'is_active' => !$letter_template->is_active
-                ]);
-            }
-
-            if($should_disable) {
-                $disabled_letter_template =    DisabledLetterTemplate::where([
-                    'letter_template_id' => $letter_template->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if(!$disabled_letter_template) {
-                    DisabledLetterTemplate::create([
-                        'letter_template_id' => $letter_template->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_letter_template->delete();
-                }
-            }
-
+            $this->toggleActivation(
+                LetterTemplate::class,
+                DisabledLetterTemplate::class,
+                'letter_template_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
             return response()->json(['message' => 'letter template status updated successfully'], 200);
         } catch (Exception $e) {
