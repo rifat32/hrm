@@ -106,6 +106,7 @@ class UpdateDatabaseController extends Controller
             DB::statement("ALTER TABLE businesses ADD COLUMN number_of_employees_allowed INTEGER DEFAULT 0");
         }
 
+
         // Check if the foreign key exists before trying to drop it
         $letterTemplateForeignKeyExists = DB::select(DB::raw("
     SELECT CONSTRAINT_NAME
@@ -137,6 +138,10 @@ class UpdateDatabaseController extends Controller
         if (!Schema::hasColumn('attendance_histories', 'in_geolocation')) {
             DB::statement("ALTER TABLE attendance_histories ADD COLUMN in_geolocation VARCHAR(255) NULL");
         }
+        if (!Schema::hasColumn('users', 'stripe_id')) {
+            DB::statement("ALTER TABLE users ADD COLUMN stripe_id VARCHAR(255) NULL");
+        }
+
 
         // Check and add the 'out_geolocation' column if it doesn't exist
         if (!Schema::hasColumn('attendance_histories', 'out_geolocation')) {
@@ -150,6 +155,12 @@ class UpdateDatabaseController extends Controller
             // Make the 'feedback' column nullable
             DB::statement('ALTER TABLE candidates MODIFY feedback VARCHAR(255) NULL');
         }
+
+        if (Schema::hasColumn('work_locations', 'address')) {
+            // Make the 'feedback' column nullable
+            DB::statement('ALTER TABLE work_locations MODIFY address VARCHAR(255) NULL');
+        }
+
 
         // Make the 'feedback' column nullable
         DB::statement('ALTER TABLE asset_types MODIFY business_id BIGINT(20) UNSIGNED NULL');
@@ -371,9 +382,9 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'logo' =>   DIRECTORY_SEPARATOR . $businessId . $data->logo,
-                'image' =>  DIRECTORY_SEPARATOR . $businessId . $data->image,
-                'background_image' => DIRECTORY_SEPARATOR . $businessId . $data->background_image,
+                'logo' =>   !empty($data->logo)?DIRECTORY_SEPARATOR . $businessId . $data->logo:"",
+                'image' =>  !empty($data->image)?DIRECTORY_SEPARATOR . $businessId . $data->image:"",
+                'background_image' => !empty($data->background_image)?DIRECTORY_SEPARATOR . $businessId . $data->background_image:"",
             ]);
         });
     }
@@ -392,7 +403,7 @@ class UpdateDatabaseController extends Controller
 
                 // Update the paths in the database
                 $updatedLetters = collect($pensionSchemeLetters)->map(function ($letter) use ($businessId) {
-                    return DIRECTORY_SEPARATOR . $businessId . $letter;
+                    return  DIRECTORY_SEPARATOR . $businessId . $letter;
                 })->toArray();
 
                 $data->update([
@@ -491,7 +502,7 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'logo' => DIRECTORY_SEPARATOR . $businessId . $data->logo
+                'logo' => !empty($data->logo)?DIRECTORY_SEPARATOR . $businessId . $data->logo:""
             ]);
         });
     }
@@ -513,7 +524,7 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'image' => DIRECTORY_SEPARATOR . $businessId . $data->image
+                'image' => !empty($data->image)?DIRECTORY_SEPARATOR . $businessId . $data->image:""
             ]);
         });
     }
@@ -538,7 +549,7 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'logo' => DIRECTORY_SEPARATOR . $businessId . $data->file_name
+                'logo' => !empty($data->logo)?DIRECTORY_SEPARATOR . $businessId . $data->file_name:""
             ]);
         });
     }
@@ -690,7 +701,7 @@ class UpdateDatabaseController extends Controller
 
 
             $data->update([
-                'payslip_file' => DIRECTORY_SEPARATOR . $businessId . $data->payslip_file,
+                'payslip_file' => !empty($data->payslip_file)?DIRECTORY_SEPARATOR . $businessId . $data->payslip_file:"",
             ]);
         });
     }

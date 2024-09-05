@@ -289,106 +289,14 @@ class DesignationController extends Controller
             }
             $request_data = $request->validated();
 
-            $designation =  Designation::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$designation) {
+            $this->toggleActivation(
+                Designation::class,
+                DisabledDesignation::class,
+                'designation_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-
-
-
-
-
-
-
-
-
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($designation->business_id != NULL)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($designation->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
-                        ], 403);
-                    } else if ($designation->is_default == 0) {
-
-                        if ($designation->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this designation due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_update = 1;
-                        }
-                    } else {
-                        $should_disable = 1;
-                    }
-                }
-            } else {
-                if ($designation->business_id != NULL) {
-                    if (($designation->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this designation due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($designation->is_default == 0) {
-                        if ($designation->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this designation due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-                        }
-                    } else {
-                        $should_disable = 1;
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $designation->update([
-                    'is_active' => !$designation->is_active
-                ]);
-            }
-
-            if ($should_disable) {
-                $disabled_designation =    DisabledDesignation::where([
-                    'designation_id' => $designation->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if (!$disabled_designation) {
-                    DisabledDesignation::create([
-                        'designation_id' => $designation->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_designation->delete();
-                }
-            }
 
 
             return response()->json(['message' => 'Designation status updated successfully'], 200);

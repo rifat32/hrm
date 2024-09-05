@@ -19,15 +19,14 @@ class SubscriptionController extends Controller
     public function redirectUserToStripe(Request $request)
     {
         $id = $request->id;
+        $trimmed_id =   base64_decode($id);
 
         // Check if the string is at least 20 characters long to ensure it has enough characters to remove
-        if (strlen($id) >= 20) {
+        if (empty($trimmed_id)) {
             // Remove the first ten characters and the last ten characters
-            $trimmed_id = substr($id, 10, -10);
-            // $trimmedId now contains the string with the first ten and last ten characters removed
-        } else {
             throw new Exception("invalid id");
         }
+
         $business = Business::findOrFail($trimmed_id);
         $user = User::findOrFail($business->owner_id);
         Auth::login($user);

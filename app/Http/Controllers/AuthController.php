@@ -22,6 +22,7 @@ use App\Http\Utils\UserDetailsUtil;
 use App\Mail\ResetPasswordMail;
 use App\Mail\EmailVerificationMail;
 use App\Models\Business;
+use App\Models\BusinessSubscription;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -634,6 +635,16 @@ class AuthController extends Controller
                 $modules = $this->getModulesFunc($business);
             }
 
+            $last_subscription=NULL;
+            if(!empty($business)){
+               $last_subscription = BusinessSubscription::where('business_id', $business->id)->latest()->first();
+            }
+
+            $last_subscription=NULL;
+            if(!empty($business)){
+               $last_subscription = BusinessSubscription::where('business_id', $business->id)->latest()->first();
+            }
+
 
 
             // Extracting only the required data
@@ -659,6 +670,9 @@ class AuthController extends Controller
                     'currency' => $business ? $business->currency : null,
                     'modules' => $modules,
                     'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
+                    'trail_end_date' => $business ? $business->trail_end_date : "",
+                    'last_subscription' => $last_subscription
+
                 ]
             ];
 
@@ -1458,6 +1472,8 @@ class AuthController extends Controller
                     'currency' => $business ? $business->currency : null,
                     'modules' => $modules,
                     'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
+                    'trail_end_date' => $business ? $business->trail_end_date : "",
+                    'last_subscription' => $last_subscription
                 ]
             ];
 
