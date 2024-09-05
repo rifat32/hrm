@@ -289,107 +289,13 @@ class BankController extends Controller
             }
             $request_data = $request->validated();
 
-            $bank =  Bank::where([
-                "id" => $request_data["id"],
-            ])
-                ->first();
-            if (!$bank) {
-
-                return response()->json([
-                    "message" => "no data found"
-                ], 404);
-            }
-            $should_update = 0;
-            $should_disable = 0;
-            if (empty(auth()->user()->business_id)) {
-
-                if (auth()->user()->hasRole('superadmin')) {
-                    if (($bank->business_id != NULL)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this bank due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($bank->business_id != NULL) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this bank due to role restrictions."
-                        ], 403);
-                    } else if ($bank->is_default == 0) {
-
-                        if($bank->created_by != auth()->user()->id) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this bank due to role restrictions."
-                            ], 403);
-                        }
-                        else {
-                            $should_update = 1;
-                        }
-
-
-
-                    }
-                    else {
-                     $should_disable = 1;
-
-                    }
-                }
-            } else {
-                if ($bank->business_id != NULL) {
-                    if (($bank->business_id != auth()->user()->business_id)) {
-
-                        return response()->json([
-                            "message" => "You do not have permission to update this bank due to role restrictions."
-                        ], 403);
-                    } else {
-                        $should_update = 1;
-                    }
-                } else {
-                    if ($bank->is_default == 0) {
-                        if ($bank->created_by != auth()->user()->created_by) {
-
-                            return response()->json([
-                                "message" => "You do not have permission to update this bank due to role restrictions."
-                            ], 403);
-                        } else {
-                            $should_disable = 1;
-
-                        }
-                    } else {
-                        $should_disable = 1;
-
-                    }
-                }
-            }
-
-            if ($should_update) {
-                $bank->update([
-                    'is_active' => !$bank->is_active
-                ]);
-            }
-
-            if($should_disable) {
-
-                $disabled_bank =    DisabledBank::where([
-                    'bank_id' => $bank->id,
-                    'business_id' => auth()->user()->business_id,
-                    'created_by' => auth()->user()->id,
-                ])->first();
-                if(!$disabled_bank) {
-                    DisabledBank::create([
-                        'bank_id' => $bank->id,
-                        'business_id' => auth()->user()->business_id,
-                        'created_by' => auth()->user()->id,
-                    ]);
-                } else {
-                    $disabled_bank->delete();
-                }
-            }
-
+            $this->toggleActivation(
+                Bank::class,
+                DisabledBank::class,
+                'bank_id',
+                $request_data["id"],
+                auth()->user()
+            );
 
             return response()->json(['message' => 'Bank status updated successfully'], 200);
         } catch (Exception $e) {

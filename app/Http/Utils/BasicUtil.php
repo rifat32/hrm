@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\File;
 trait BasicUtil
 {
 
+
+
     function getLast12MonthsDates($year)
     {
         if (empty($year)) {
@@ -474,7 +476,7 @@ trait BasicUtil
     public function storeUploadedFiles($filePaths, $fileKey, $location, $arrayOfString = NULL)
     {
 
-        
+
   // Get the business ID from the authenticated user
   $businessId = auth()->user()->business_id;
 
@@ -872,4 +874,97 @@ trait BasicUtil
 
         return $letterTemplateVariables;
     }
+
+
+
+    function toggleActivation($modelClass, $disabledModelClass, $modelIdName, $modelId, $authUser) {
+        // Fetch the model instance
+        $modelInstance = $modelClass::where('id', $modelId)->first();
+        if (!$modelInstance) {
+            return response()->json([
+                "message" => "No data found"
+            ], 404);
+        }
+
+        $shouldUpdate = 0;
+        $shouldDisable = 0;
+
+        // Handle role-based permission
+        if (empty($authUser->business_id)) {
+            if ($authUser->hasRole('superadmin')) {
+                if ($modelInstance->business_id !== NULL) {
+                    return response()->json([
+                        "message" => "You do not have permission to update this item due to role restrictions."
+                    ], 403);
+                } else {
+                    $shouldUpdate = 1;
+                }
+            } else {
+                if ($modelInstance->business_id !== NULL) {
+                    return response()->json([
+                        "message" => "You do not have permission to update this item due to role restrictions."
+                    ], 403);
+                } else if ($modelInstance->is_default == 0) {
+                    if ($modelInstance->created_by != $authUser->id) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this item due to role restrictions."
+                        ], 403);
+                    } else {
+                        $shouldUpdate = 1;
+                    }
+                } else {
+                    $shouldDisable = 1;
+                }
+            }
+        } else {
+            if ($modelInstance->business_id !== NULL) {
+                if ($modelInstance->business_id != $authUser->business_id) {
+                    return response()->json([
+                        "message" => "You do not have permission to update this item due to role restrictions."
+                    ], 403);
+                } else {
+                    $shouldUpdate = 1;
+                }
+            } else {
+                if ($modelInstance->is_default == 0) {
+                    if ($modelInstance->created_by != $authUser->id) {
+                        return response()->json([
+                            "message" => "You do not have permission to update this item due to role restrictions."
+                        ], 403);
+                    } else {
+                        $shouldDisable = 1;
+                    }
+                } else {
+                    $shouldDisable = 1;
+                }
+            }
+        }
+
+        // Perform the update action
+        if ($shouldUpdate) {
+            $modelInstance->update([
+                'is_active' => !$modelInstance->is_active
+            ]);
+        }
+
+        // Handle disabling the model
+        if ($shouldDisable) {
+            $disabledInstance = $disabledModelClass::where([
+                $modelIdName => $modelInstance->id,
+                'business_id' => $authUser->business_id,
+                'created_by' => $authUser->id,
+            ])->first();
+
+            if (!$disabledInstance) {
+                $disabledModelClass::create([
+                    $modelIdName => $modelInstance->id,
+                    'business_id' => $authUser->business_id,
+                    'created_by' => $authUser->id,
+                ]);
+            } else {
+                $disabledInstance->delete();
+            }
+        }
+    }
+
 }
