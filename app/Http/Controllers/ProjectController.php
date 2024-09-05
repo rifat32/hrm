@@ -1328,6 +1328,12 @@ class ProjectController extends Controller
                 Task::selectRaw('COUNT(*)')
                     ->whereColumn('tasks.project_id', 'projects.id')
                     ->where('status', 'done'),
+                'done_tasks_count'
+            )
+            ->selectSub(
+                Task::selectRaw('COUNT(*)')
+                    ->whereColumn('tasks.project_id', 'projects.id')
+                    ->where('status', 'done'),
                 'tasks_count'
             )
             ->first();

@@ -880,8 +880,18 @@ class TaskCategoryController extends Controller
                           });
                 },
                 'tasks.labels' => function ($query) {
-                    // Optionally, you can add constraints for the labels here if needed
+
+                },
+                'tasks.assigned_by' => function ($query) {
+                    $query->select('users.id', "users.first_Name", "users.middle_Name", "users.last_Name"  ,'tasks.assigned_by');
+                },
+                'tasks.assigned_to' => function ($query) {
+                    $query->select('users.id', "users.first_Name", "users.middle_Name", "users.last_Name"  ,'tasks.assigned_to');
+                },
+                'tasks.assignees' => function ($query) {
+                    $query->select('users.id', "users.first_Name", "users.middle_Name", "users.last_Name", 'task_assignees.task_id', 'task_assignees.assignee_id');
                 }
+
             ])
 
             ->when(empty(auth()->user()->business_id), function ($query) use ($request, $created_by) {
