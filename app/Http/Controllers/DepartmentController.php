@@ -1076,18 +1076,29 @@ class DepartmentController extends Controller
 
 
 
+            $conflicts = [];
+
+            // Check for conflicts in Users with Departments
             $conflictingUsersExists = User::whereHas("departments", function($query) use($existingIds) {
                 $query->whereIn("department_id", $existingIds);
             })->exists();
 
-
-
             if ($conflictingUsersExists) {
+                $conflicts[] = "Employees associated with Departments";
+            }
+
+            // Check for additional conflicts if needed
+            // Add more checks here for other related models
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
 
+            // Proceed with the deletion process if no conflicts are found.
 
 
 

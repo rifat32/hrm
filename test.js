@@ -1,4 +1,5 @@
-course dutation., course title, course detail, corse Fee
+course dutation.,  course detail,  corse Fee, course title,
+
 student doc multiple
 student education history,
 current passport.

@@ -669,6 +669,18 @@ class BusinessController extends Controller
      *
      * }),
      *
+     *    *   *      *    @OA\Property(property="times", type="string", format="array",example={
+     *
+     *{"day":0,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":1,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":2,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":3,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":4,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":5,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true},
+     *{"day":6,"start_at":"10:10:00","end_at":"10:15:00","is_weekend":true}
+     *
+     * }),
+     *
      *  @OA\Property(property="business", type="string", format="array",example={
      *   *  * "id":1,
      * "name":"ABCD businesses",

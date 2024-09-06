@@ -610,13 +610,27 @@ class AssetTypeController extends Controller
             }
 
 
-    $conflictingUsersExists = User::whereIn("designation_id", $existingIds)->exists();
+            $conflicts = [];
 
+            // Check for conflicts in Users
+            $conflictingUsersExists = User::whereIn("designation_id", $existingIds)->exists();
             if ($conflictingUsersExists) {
+                $conflicts[] = "Employees";
+            }
+
+            // Check for additional conflicts if there are other models related to designation_id
+            // Add other checks here as needed
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
+
 
 
             AssetType::destroy($existingIds);

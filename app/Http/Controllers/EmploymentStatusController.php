@@ -724,38 +724,41 @@ class EmploymentStatusController extends Controller
             }
 
 
+            $conflicts = [];
+
+            // Check for conflicts in Users
             $conflictingUsersExists = User::whereIn("employment_status_id", $existingIds)->exists();
-
             if ($conflictingUsersExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Employees";
             }
 
-
-
-            $conflictingPaidEmploymentStatusesExists =  SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            // Check for conflicts in Paid Leave Employment Statuses
+            $conflictingPaidEmploymentStatusesExists = SettingPaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
             if ($conflictingPaidEmploymentStatusesExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Paid Leave Employment Statuses";
             }
 
-
-            $conflictingUnpaidEmploymentStatusesExit =  SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
-            if ($conflictingUnpaidEmploymentStatusesExit) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+            // Check for conflicts in Unpaid Leave Employment Statuses
+            $conflictingUnpaidEmploymentStatusesExists = SettingUnpaidLeaveEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            if ($conflictingUnpaidEmploymentStatusesExists) {
+                $conflicts[] = "Unpaid Leave Employment Statuses";
             }
 
-
-            $conflictingLeaveTypeEmploymentStatusesExists =  LeaveTypeEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
+            // Check for conflicts in Leave Type Employment Statuses
+            $conflictingLeaveTypeEmploymentStatusesExists = LeaveTypeEmploymentStatus::whereIn("employment_status_id", $existingIds)->exists();
             if ($conflictingLeaveTypeEmploymentStatusesExists) {
+                $conflicts[] = "Leave Type Employment Statuses";
+            }
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
 
 
             EmploymentStatus::destroy($existingIds);

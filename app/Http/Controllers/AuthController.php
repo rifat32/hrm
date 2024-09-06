@@ -639,7 +639,10 @@ class AuthController extends Controller
 
             $last_subscription=NULL;
             if(!empty($business)){
-               $last_subscription = BusinessSubscription::where('business_id', $business->id)->latest()->first();
+               $last_subscription = BusinessSubscription::where('business_id', $business->id)
+               ->where('service_plan_id', $business->service_plan_id)
+
+               ->latest()->first();
             }
 
 
@@ -662,6 +665,7 @@ class AuthController extends Controller
                 'business' => [
                     'is_subscribed' => $business ? $business->is_subscribed : null,
                     'name' => $business ? $business->name : null,
+                    'is_active' => $business ? $business->is_active : null,
                     'logo' => $business ? $business->logo : null,
                     'start_date' => $business ? $business->start_date : null,
                     'currency' => $business ? $business->currency : null,
@@ -1447,7 +1451,10 @@ class AuthController extends Controller
             }
             $last_subscription=NULL;
             if(!empty($business)){
-               $last_subscription = BusinessSubscription::where('business_id', $business->id)->latest()->first();
+                $last_subscription = BusinessSubscription::where('business_id', $business->id)
+               ->where('service_plan_id', $business->service_plan_id)
+
+               ->latest()->first();
             }
             // Extracting only the required data
             $responseData = [
@@ -1466,6 +1473,7 @@ class AuthController extends Controller
                 'color_theme_name' => $user->color_theme_name,
                 'business' => [
                     'is_subscribed' => $business ? $business->is_subscribed : null,
+                    'is_active' => $business ? $business->is_active : null,
                     'name' => $business ? $business->name : null,
                     'logo' => $business ? $business->logo : null,
                     'start_date' => $business ? $business->start_date : null,

@@ -681,24 +681,29 @@ class BankController extends Controller
                 ], 404);
             }
 
+            $conflicts = [];
+
+            // Check for conflicts in Users
             $conflictingUsersExists = User::whereIn("bank_id", $existingIds)->exists();
-
-
             if ($conflictingUsersExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Employees";
             }
 
-
+            // Check for conflicts in Payslips
             $conflictingPayslip = Payslip::whereIn("bank_id", $existingIds)->exists();
-
-
             if ($conflictingPayslip) {
+                $conflicts[] = "Payslips";
+            }
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
 
 
 

@@ -797,20 +797,29 @@ class SettingLeaveTypeController extends Controller
                 ], 404);
             }
 
-          $leave_exists =  Leave::whereIn("leave_type_id",$existingIds)->exists();
-          if ($leave_exists) {
-            return response()->json([
-                "message" => config('messages.delete_restricted'),
-            ], 409);
-        }
+            $conflicts = [];
 
+            // Check for conflicts in Leaves with Leave Types
+            $leave_exists = Leave::whereIn("leave_type_id", $existingIds)->exists();
+            if ($leave_exists) {
+                $conflicts[] = "Leaves associated with the specified Leave Types";
+            }
 
-            $leave_history_exists =  LeaveHistory::whereIn("leave_type_id",$existingIds)->exists();
+            // Check for conflicts in Leave History with Leave Types
+            $leave_history_exists = LeaveHistory::whereIn("leave_type_id", $existingIds)->exists();
             if ($leave_history_exists) {
+                $conflicts[] = "Leave History records associated with the specified Leave Types";
+            }
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
 
             // $leave_type_employment_statuses_exists =  LeaveTypeEmploymentStatus::whereIn("setting_leave_type_id",$existingIds)->exists();
             // if($leave_type_employment_statuses_exists) {

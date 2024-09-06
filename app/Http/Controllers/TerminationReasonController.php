@@ -692,17 +692,28 @@ class TerminationReasonController extends Controller
             }
 
 
-            $conflictingUsersExists = User::
-            whereHas("terminations",function($query) use($existingIds) {
-                $query->whereIn("terminations.termination_reason_id", $existingIds);
-            })
-            ->exists();
+            $conflicts = [];
+
+            // Check for conflicts in Users with Terminations
+            $conflictingUsersExists = User::whereHas('terminations', function($query) use($existingIds) {
+                $query->whereIn('termination_reason_id', $existingIds);
+            })->exists();
 
             if ($conflictingUsersExists) {
+                $conflicts[] = "Users associated with Terminations using the specified Termination Reasons";
+            }
+
+            // Add more checks for other related models or conditions as needed
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
 
 
 

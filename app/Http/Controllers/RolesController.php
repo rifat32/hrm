@@ -549,16 +549,28 @@ class RolesController extends Controller
             }
 
 
-// Check if any users have these roles
-$rolesWithUsers = User::whereHas('roles', function ($query) use ($existingIds) {
-    $query->whereIn('id', $existingIds);
-})->exists();
+            $conflicts = [];
 
-if ($rolesWithUsers) {
-    return response()->json([
-        "message" => config('messages.delete_restricted'),
-    ], 409);
-}
+            // Check if any users have these roles
+            $rolesWithUsers = User::whereHas('roles', function ($query) use ($existingIds) {
+                $query->whereIn('id', $existingIds);
+            })->exists();
+
+            if ($rolesWithUsers) {
+                $conflicts[] = "Users associated with these Roles";
+            }
+
+            // Add more checks for other related models or conditions as needed
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
+                return response()->json([
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
+                ], 409);
+            }
+
+            // Proceed with the deletion process if no conflicts are found.
 
 
 

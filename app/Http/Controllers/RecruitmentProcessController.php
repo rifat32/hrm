@@ -1223,28 +1223,36 @@ $recruitment_process_order = RecruitmentProcessOrder::updateOrCreate(
 
 
 
+            $conflicts = [];
+
+            // Check for conflicts in Users with Recruitment Processes
             $conflictingUsersExists = User::whereIn("recruitment_process_id", $existingIds)->exists();
             if ($conflictingUsersExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Users associated with Recruitment Processes";
             }
 
+            // Check for conflicts in User Recruitment Processes
             $conflictingUserRecruitmentProcessesExists = UserRecruitmentProcess::whereIn("recruitment_process_id", $existingIds)->exists();
-
             if ($conflictingUserRecruitmentProcessesExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "User Recruitment Processes";
             }
 
+            // Check for conflicts in Candidate Recruitment Processes
             $conflictingCandidateRecruitmentProcessesExists = CandidateRecruitmentProcess::whereIn("recruitment_process_id", $existingIds)->exists();
-
             if ($conflictingCandidateRecruitmentProcessesExists) {
+                $conflicts[] = "Candidate Recruitment Processes";
+            }
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
+
 
 
             RecruitmentProcess::destroy($existingIds);

@@ -937,19 +937,30 @@ class JobPlatformController extends Controller
                 ], 404);
             }
 
-            $job_post_exists =  JobListingJobPlatforms::whereIn("job_platform_id", $existingIds)->exists();
+            $conflicts = [];
+
+            // Check for conflicts in Job Listings on Job Platforms
+            $job_post_exists = JobListingJobPlatforms::whereIn("job_platform_id", $existingIds)->exists();
             if ($job_post_exists) {
+                $conflicts[] = "Job Listings on Job Platforms";
+            }
+
+            // Check for conflicts in Candidates on Job Platforms
+            $job_candidate_exists = CandidateJobPlatform::whereIn("job_platform_id", $existingIds)->exists();
+            if ($job_candidate_exists) {
+                $conflicts[] = "Candidates on Job Platforms";
+            }
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
 
-            $job_candidate_exists =  CandidateJobPlatform::whereIn("job_platform_id", $existingIds)->exists();
-            if ($job_candidate_exists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
-            }
+            // Proceed with the deletion process if no conflicts are found.
+
 
             JobPlatform::destroy($existingIds);
 

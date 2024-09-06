@@ -684,58 +684,54 @@ class WorkLocationController extends Controller
             }
 
 
+            $conflicts = [];
+
             $conflictingUsersExists = User::whereHas("work_locations", function($query) use($existingIds) {
                 $query->whereIn("work_location_id", $existingIds);
             })->exists();
 
             if ($conflictingUsersExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Employees";
             }
 
-
-
-            $conflictingDepartmentExists = Department::whereIn("work_location_id",$existingIds)->exists();
+            $conflictingDepartmentExists = Department::whereIn("work_location_id", $existingIds)->exists();
 
             if ($conflictingDepartmentExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Departments";
             }
 
-            $conflictingAttendanceExists = Attendance::whereIn("work_location_id",$existingIds)->exists();
+            $conflictingAttendanceExists = Attendance::whereIn("work_location_id", $existingIds)->exists();
 
             if ($conflictingAttendanceExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Attendance records";
             }
 
-
-            $conflictingAttendanceHistoryExists = AttendanceHistory::whereIn("work_location_id",$existingIds)->exists();
+            $conflictingAttendanceHistoryExists = AttendanceHistory::whereIn("work_location_id", $existingIds)->exists();
 
             if ($conflictingAttendanceHistoryExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Attendance history";
             }
 
-            $conflictingJobListingExists = JobListing::whereIn("work_location_id",$existingIds)->exists();
+            $conflictingJobListingExists = JobListing::whereIn("work_location_id", $existingIds)->exists();
 
             if ($conflictingJobListingExists) {
-                return response()->json([
-                    "message" => config('messages.delete_restricted'),
-                ], 409);
+                $conflicts[] = "Job listings";
             }
 
-            $conflictingWorkShiftExists = WorkShiftLocation::whereIn("work_location_id",$existingIds)->exists();
+            $conflictingWorkShiftExists = WorkShiftLocation::whereIn("work_location_id", $existingIds)->exists();
 
             if ($conflictingWorkShiftExists) {
+                $conflicts[] = "Work shifts";
+            }
+
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. First update the records, then try to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
 
 
 

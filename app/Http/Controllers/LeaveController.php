@@ -144,7 +144,7 @@ class LeaveController extends Controller
             $request_data["user_id"] = auth()->user()->id;
 
             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"], "", "leave_attachments");
-            
+
             $this->makeFilePermanent($request_data["attachments"], "");
 
 
@@ -1539,23 +1539,37 @@ class LeaveController extends Controller
 
 
             foreach ($leaves as $leave) {
+
                 $leave->total_leave_hours = $leave->records->sum(function ($record) {
+
+                    if (
+                        (request()->filled('start_date') && Carbon::parse($record->date)->lt(Carbon::parse(request('start_date')))) ||
+                        (request()->filled('end_date') && Carbon::parse($record->date)->gt(Carbon::parse(request('end_date'))))
+                    ) {
+                        return 0;
+                    }
+
                     $startTime = Carbon::parse($record->start_time);
                     $endTime = Carbon::parse($record->end_time);
                     return $startTime->diffInHours($endTime);
                 });
             }
-            $data["data"] = $leaves;
-
-
-            $data["data_highlights"] = [];
-
-            $data["data_highlights"]["employees_on_leave"] = $leaves->count();
+            // Get unique user IDs from leaves
+$uniqueUserIds = $leaves->pluck('user_id')->unique();
+$data["data"] = $leaves;
+$data["data_highlights"] = [];
+$data["data_highlights"]["employees_on_leave"] = $uniqueUserIds->count();
 
             $data["data_highlights"]["total_leave_hours"] = $leaves->reduce(function ($carry, $leave) {
                 return $carry + $leave->records->sum(function ($record) {
-                    $startTime = \Carbon\Carbon::parse($record->start_time);
-                    $endTime = \Carbon\Carbon::parse($record->end_time);
+                    if (
+                        (request()->filled('start_date') && Carbon::parse($record->date)->lt(Carbon::parse(request('start_date')))) ||
+                        (request()->filled('end_date') && Carbon::parse($record->date)->gt(Carbon::parse(request('end_date'))))
+                    ) {
+                        return 0;
+                    }
+                    $startTime = Carbon::parse($record->start_time);
+                    $endTime = Carbon::parse($record->end_time);
 
                     return $startTime->diffInHours($endTime);
                 });
@@ -1563,11 +1577,11 @@ class LeaveController extends Controller
 
             $data["data_highlights"]["single_day_leaves"] = $leaves->filter(function ($leave) {
                 return $leave->leave_duration == "single_day";
-            })->count();
+            })->pluck('user_id')->unique()->count();
 
             $data["data_highlights"]["multiple_day_leaves"] = $leaves->filter(function ($leave) {
                 return $leave->leave_duration == "multiple_day";
-            })->count();
+            })->pluck('user_id')->unique()->count();
 
 
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
@@ -1768,25 +1782,41 @@ class LeaveController extends Controller
 
 
 
-
             foreach ($leaves as $leave) {
                 $leave->total_leave_hours = $leave->records->sum(function ($record) {
+
+                    if (
+                        (request()->filled('start_date') && Carbon::parse($record->date)->lt(Carbon::parse(request('start_date')))) ||
+                        (request()->filled('end_date') && Carbon::parse($record->date)->gt(Carbon::parse(request('end_date'))))
+                    ) {
+                        return 0;
+                    }
+
+
+
                     $startTime = Carbon::parse($record->start_time);
                     $endTime = Carbon::parse($record->end_time);
                     return $startTime->diffInHours($endTime);
                 });
             }
-            $data["data"] = $leaves;
 
 
-            $data["data_highlights"] = [];
-
-            $data["data_highlights"]["employees_on_leave"] = $leaves->count();
+           // Get unique user IDs from leaves
+$uniqueUserIds = $leaves->pluck('user_id')->unique();
+$data["data"] = $leaves;
+$data["data_highlights"] = [];
+$data["data_highlights"]["employees_on_leave"] = $uniqueUserIds->count();
 
             $data["data_highlights"]["total_leave_hours"] = $leaves->reduce(function ($carry, $leave) {
                 return $carry + $leave->records->sum(function ($record) {
-                    $startTime = \Carbon\Carbon::parse($record->start_time);
-                    $endTime = \Carbon\Carbon::parse($record->end_time);
+                    if (
+                        (request()->filled('start_date') && Carbon::parse($record->date)->lt(Carbon::parse(request('start_date')))) ||
+                        (request()->filled('end_date') && Carbon::parse($record->date)->gt(Carbon::parse(request('end_date'))))
+                    ) {
+                        return 0;
+                    }
+                    $startTime = Carbon::parse($record->start_time);
+                    $endTime = Carbon::parse($record->end_time);
 
                     return $startTime->diffInHours($endTime);
                 });
@@ -1794,11 +1824,11 @@ class LeaveController extends Controller
 
             $data["data_highlights"]["single_day_leaves"] = $leaves->filter(function ($leave) {
                 return $leave->leave_duration == "single_day";
-            })->count();
+            })->pluck('user_id')->unique()->count();
 
             $data["data_highlights"]["multiple_day_leaves"] = $leaves->filter(function ($leave) {
                 return $leave->leave_duration == "multiple_day";
-            })->count();
+            })->pluck('user_id')->unique()->count();
 
 
             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {

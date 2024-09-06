@@ -822,15 +822,26 @@ class ServicePlanController extends Controller
                 ], 404);
             }
 
-            $conflictingBusinessesExists = Business::whereIn("service_plan_id", $existingIds)
+            $conflicts = [];
 
-                ->exists();
-
+            // Check for conflicts in Businesses with Service Plans
+            $conflictingBusinessesExists = Business::whereIn("service_plan_id", $existingIds)->exists();
             if ($conflictingBusinessesExists) {
+                $conflicts[] = "Businesses associated with the Service Plans";
+            }
+
+            // Add more checks for other related models or conditions as needed
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
+
 
             ServicePlan::destroy($existingIds);
 

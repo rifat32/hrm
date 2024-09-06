@@ -1442,13 +1442,26 @@ class ProjectController extends Controller
                 ], 404);
             }
 
-            $attendanceExists = AttendanceProject::whereIn("project_id", $idsArray)->exists();
+            $conflicts = [];
 
+            // Check for conflicts in Attendance Projects
+            $attendanceExists = AttendanceProject::whereIn("project_id", $idsArray)->exists();
             if ($attendanceExists) {
+                $conflicts[] = "Attendance records associated with the specified Projects";
+            }
+
+            // Add more checks for other related models as needed
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
+
 
 
             Project::destroy($idsArray);

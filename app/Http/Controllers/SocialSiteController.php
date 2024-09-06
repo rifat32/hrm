@@ -578,12 +578,26 @@ class SocialSiteController extends Controller
                 ], 404);
             }
 
-           $employee_social_site_exists =  UserSocialSite::whereIn("social_site_id", $existingIds)->exists();
-           if ($employee_social_site_exists) {
-            return response()->json([
-                "message" => config('messages.delete_restricted'),
-            ], 409);
-        }
+            $conflicts = [];
+
+            // Check for conflicts in User Social Sites with Social Sites
+            $employee_social_site_exists = UserSocialSite::whereIn("social_site_id", $existingIds)->exists();
+            if ($employee_social_site_exists) {
+                $conflicts[] = "User Social Sites associated with the specified Social Sites";
+            }
+
+            // Add more checks for other related models or conditions as needed
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
+                return response()->json([
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
+                ], 409);
+            }
+
+            // Proceed with the deletion process if no conflicts are found.
+
 
             SocialSite::destroy($existingIds);
 

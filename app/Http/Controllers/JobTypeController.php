@@ -683,12 +683,26 @@ class JobTypeController extends Controller
                 ], 404);
             }
 
-            $job_listing_exists =  JobListing::whereIn("job_type_id", $existingIds)->exists();
+            $conflicts = [];
+
+            // Check for conflicts in Job Listings with Job Types
+            $job_listing_exists = JobListing::whereIn("job_type_id", $existingIds)->exists();
             if ($job_listing_exists) {
+                $conflicts[] = "Job Listings with the specified Job Types";
+            }
+
+            // Add more checks for other related models as needed
+            
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
+
 
             JobType::destroy($existingIds);
 

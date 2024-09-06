@@ -1000,12 +1000,25 @@ class JobListingController extends Controller
                 ], 404);
             }
 
-            $candidate_exists =  Candidate::whereIn("job_listing_id", $existingIds)->exists();
+            $conflicts = [];
+
+            // Check for conflicts in Candidates
+            $candidate_exists = Candidate::whereIn("job_listing_id", $existingIds)->exists();
             if ($candidate_exists) {
+                $conflicts[] = "Candidates associated with Job Listings";
+            }
+
+            // Add more checks for other related models as needed
+
+            // Return combined error message if conflicts exist
+            if (!empty($conflicts)) {
+                $conflictList = implode(', ', $conflicts);
                 return response()->json([
-                    "message" => config('messages.delete_restricted'),
+                    "message" => "Cannot delete this data as there are records associated with it in the following areas: $conflictList. Please update these records before attempting to delete.",
                 ], 409);
             }
+
+            // Proceed with the deletion process if no conflicts are found.
 
             JobListing::destroy($existingIds);
 
