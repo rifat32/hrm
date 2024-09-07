@@ -556,9 +556,23 @@ class DepartmentController extends Controller
 
             ->whereIn("id",$all_manager_department_ids)
 
+            ->when(request()->filled("hide_children_for_id"), function($query) {
+               $department = Department::where("id",request()->input("hide_children_for_id"))->first();
+
+
+               if(!empty($department)) {
+            $allDescendantIds = $department->getAllDescendantIds();
+            $query->whereNotIn("id",$allDescendantIds);
+               }
+
+            })
+
+
+
+
+
 
             ->when(request()->has("not_in_rota") && intval(request()->input("not_in_rota")), function ($query) {
-
                 $query->whereDoesntHave("employee_rota");
             })
 
@@ -770,7 +784,7 @@ class DepartmentController extends Controller
      *  example="employee"
      *      ),
      *
-     *      *      *   *              @OA\Parameter(
+     *         @OA\Parameter(
      *         name="id",
      *         in="query",
      *         description="id",
@@ -831,7 +845,8 @@ class DepartmentController extends Controller
              $departments = Department::with([
                 'manager',
                 'recursiveChildren',
-                "users"
+                "users",
+                "manager",
             ])
             ->where([
                 'business_id' => $business_id,
@@ -1087,7 +1102,7 @@ class DepartmentController extends Controller
                 $conflicts[] = "Employees associated with Departments";
             }
 
-            // Check for additional conflicts if needed
+
             // Add more checks here for other related models
 
             // Return combined error message if conflicts exist

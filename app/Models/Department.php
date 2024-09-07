@@ -139,7 +139,7 @@ class Department extends Model
 
     public function recursiveChildren()
     {
-        return $this->children()->with('recursiveChildren','manager',"users");
+        return $this->children()->with('recursiveChildren','manager',"users","manager");
     }
 
     public function getTotalUsersCountAttribute()
