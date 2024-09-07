@@ -139,8 +139,20 @@ class Department extends Model
 
     public function recursiveChildren()
     {
-        return $this->children()->with('recursiveChildren','manager',"users","manager");
+        return $this->children()->with('recursiveChildren','manager');
     }
+
+    public function recursiveManager()
+    {
+        return $this->children()->with(
+        'manager',
+        "users.recursive_manager_departments"
+    );
+
+
+    }
+
+
 
     public function getTotalUsersCountAttribute()
     {
@@ -252,18 +264,21 @@ class Department extends Model
 
 
 
-
-
     public function employee_rota()
     {
         return $this->hasOne(EmployeeRota::class, "department_id" ,'id');
     }
 
 
-
-
     public function users() {
         return $this->belongsToMany(User::class, 'department_users', 'department_id', 'user_id');
+    }
+
+
+
+    public function recursive_manager_users()
+    {
+        return $this->belongsToMany(User::class, 'department_users', 'department_id', 'user_id')->with("recursive_department_users");
     }
 
 

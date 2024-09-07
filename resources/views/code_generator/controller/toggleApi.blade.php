@@ -78,100 +78,14 @@ public function toggleActive{{ $names["singular_model_name"] }}(GetIdRequest $re
 
 
 
+       $this->toggleActivation(
+        {{ $names["singular_model_name"] }}::class,
+        Disabled{{ $names["singular_model_name"] }}::class,
+        '{{ $names["singular_table_name"] }}',
+        $request_data["id"],
+        auth()->user()
+    );
 
-
-
-
-
-       $should_update = 0;
-       $should_disable = 0;
-       if (empty(auth()->user()->business_id)) {
-
-           if (auth()->user()->hasRole('superadmin')) {
-               if ((${{ $names["singular_table_name"] }}->business_id != NULL )) {
-
-                   return response()->json([
-                       "message" => "You do not have permission to update this {{ $names["singular_comment_name"] }} due to role restrictions."
-                   ], 403);
-               } else {
-                   $should_update = 1;
-               }
-           } else {
-               if (${{ $names["singular_table_name"] }}->business_id != NULL) {
-
-                   return response()->json([
-                       "message" => "You do not have permission to update this {{ $names["singular_comment_name"] }} due to role restrictions."
-                   ], 403);
-               } else if (${{ $names["singular_table_name"] }}->is_default == 0) {
-
-                   if(${{ $names["singular_table_name"] }}->created_by != auth()->user()->id) {
-
-                       return response()->json([
-                           "message" => "You do not have permission to update this {{ $names["singular_comment_name"] }} due to role restrictions."
-                       ], 403);
-                   }
-                   else {
-                       $should_update = 1;
-                   }
-
-
-
-               }
-               else {
-                $should_disable = 1;
-
-               }
-           }
-       } else {
-           if (${{ $names["singular_table_name"] }}->business_id != NULL) {
-               if ((${{ $names["singular_table_name"] }}->business_id != auth()->user()->business_id)) {
-
-                   return response()->json([
-                       "message" => "You do not have permission to update this {{ $names["singular_comment_name"] }} due to role restrictions."
-                   ], 403);
-               } else {
-                   $should_update = 1;
-               }
-           } else {
-               if (${{ $names["singular_table_name"] }}->is_default == 0) {
-                   if (${{ $names["singular_table_name"] }}->created_by != auth()->user()->created_by) {
-
-                       return response()->json([
-                           "message" => "You do not have permission to update this {{ $names["singular_comment_name"] }} due to role restrictions."
-                       ], 403);
-                   } else {
-                       $should_disable = 1;
-
-                   }
-               } else {
-                   $should_disable = 1;
-
-               }
-           }
-       }
-
-       if ($should_update) {
-           ${{ $names["singular_table_name"] }}->update([
-               'is_active' => !${{ $names["singular_table_name"] }}->is_active
-           ]);
-       }
-
-       if($should_disable) {
-           $disabled_{{ $names["singular_table_name"] }} =    Disabled{{ $names["singular_model_name"] }}::where([
-               '{{ $names["singular_table_name"] }}_id' => ${{ $names["singular_table_name"] }}->id,
-               'business_id' => auth()->user()->business_id,
-               'created_by' => auth()->user()->id,
-           ])->first();
-           if(!$disabled_{{ $names["singular_table_name"] }}) {
-               Disabled{{ $names["singular_model_name"] }}::create([
-                   '{{ $names["singular_table_name"] }}_id' => ${{ $names["singular_table_name"] }}->id,
-                   'business_id' => auth()->user()->business_id,
-                   'created_by' => auth()->user()->id,
-               ]);
-           } else {
-               $disabled_{{ $names["singular_table_name"] }}->delete();
-           }
-       }
 
 
        return response()->json(['message' => '{{ $names["singular_comment_name"] }} status updated successfully'], 200);

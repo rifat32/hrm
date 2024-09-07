@@ -183,6 +183,16 @@ class DropdownOptionsController extends Controller
             "business_id" => auth()->user()->business_id
         ]
     )
+    ->when(request()->filled("hide_children_for_id"), function($query) {
+        $query->whereNotIn("id",[request()->input("hide_children_for_id")]);
+
+       $department = Department::where("id",request()->input("hide_children_for_id"))->first();
+       if(!empty($department)) {
+    $allDescendantIds = $department->getAllDescendantIds();
+    $query->whereNotIn("id",$allDescendantIds);
+       }
+
+    })
     ->whereIn("id",$all_manager_department_ids)
         ->where('departments.is_active', 1)
         ->when(!empty($fields), function($query) use($fields) {

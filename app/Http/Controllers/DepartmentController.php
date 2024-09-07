@@ -84,39 +84,38 @@ class DepartmentController extends Controller
     {
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('department_create')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
+            if (!$request->user()->hasPermissionTo('department_create')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-                $request_data = $request->validated();
+            $request_data = $request->validated();
 
 
 
-                if (empty($request_data["parent_id"])) {
-                    $parent_department = Department::whereNull('parent_id')
+            if (empty($request_data["parent_id"])) {
+                $parent_department = Department::whereNull('parent_id')
                     ->where('departments.business_id', '=', auth()->user()->business_id)
                     ->first();
 
-                    $request_data["parent_id"] = $parent_department["id"];
-                }
+                $request_data["parent_id"] = $parent_department["id"];
+            }
 
-                $request_data["business_id"] = auth()->user()->business_id;
-                $request_data["is_active"] = true;
-                $request_data["created_by"] = $request->user()->id;
+            $request_data["business_id"] = auth()->user()->business_id;
+            $request_data["is_active"] = true;
+            $request_data["created_by"] = $request->user()->id;
 
-                $department =  Department::create($request_data);
+            $department =  Department::create($request_data);
 
-                // if(!empty($department->manager_id)) {
-                //     $department->users()->attach($department->manager_id);
-                // }
+            // if(!empty($department->manager_id)) {
+            //     $department->users()->attach($department->manager_id);
+            // }
 
-                DB::commit();
-                return response($department, 201);
-
+            DB::commit();
+            return response($department, 201);
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -189,130 +188,124 @@ class DepartmentController extends Controller
 
         DB::beginTransaction();
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-                if (!$request->user()->hasPermissionTo('department_update')) {
-                    return response()->json([
-                        "message" => "You can not perform this action"
-                    ], 401);
-                }
-                $business_id =  auth()->user()->business_id;
-                $request_data = $request->validated();
-
-
+            if (!$request->user()->hasPermissionTo('department_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  auth()->user()->business_id;
+            $request_data = $request->validated();
 
 
 
-                $department_query_params = [
-                    "id" => $request_data["id"],
-                    "business_id" => $business_id
-                ];
-                $department_prev = Department::where($department_query_params)
-                    ->first();
-                if (!$department_prev) {
 
-                    return response()->json([
-                        "message" => "no department found"
-                    ], 404);
-                }
-                $main_parent_department = Department::whereNull('parent_id')
+
+            $department_query_params = [
+                "id" => $request_data["id"],
+                "business_id" => $business_id
+            ];
+            $department_prev = Department::where($department_query_params)
+                ->first();
+            if (!$department_prev) {
+
+                return response()->json([
+                    "message" => "no department found"
+                ], 404);
+            }
+            $main_parent_department = Department::whereNull('parent_id')
                 ->where('departments.business_id', '=', auth()->user()->business_id)
                 ->first();
 
-                if (empty($main_parent_department)) {
+            if (empty($main_parent_department)) {
 
-                    return response()->json([
-                        "message" => "main parent not found."
-                    ], 409);
-                }
+                return response()->json([
+                    "message" => "main parent not found."
+                ], 409);
+            }
 
 
-                if (empty($request_data["parent_id"])) {
-                    $request_data["parent_id"] = $main_parent_department->id;
-                } else {
-                    $previous_parent_id =  $department_prev->parent_id;
-                    if(($previous_parent_id !== $request_data["parent_id"]) && !empty($department_prev->id)) {
-                        $descendantIds = $department_prev->getAllDescendantIds();
-                        if (in_array($request_data["parent_id"], $descendantIds)) {
-                         Department::where([
+            if (empty($request_data["parent_id"])) {
+                $request_data["parent_id"] = $main_parent_department->id;
+            } else {
+                $previous_parent_id =  $department_prev->parent_id;
+                if (($previous_parent_id !== $request_data["parent_id"]) && !empty($department_prev->id)) {
+                    $descendantIds = $department_prev->getAllDescendantIds();
+                    if (in_array($request_data["parent_id"], $descendantIds)) {
+                        Department::where([
                             "id" => $request_data["parent_id"]
-                          ])->update(
+                        ])->update(
                             [
                                 "parent_id" => $main_parent_department->id
                             ]
-                          );
-
-
-                        }
+                        );
                     }
-
-
                 }
+            }
 
-                if(empty($department_prev->parent_id)) {
-                  $request_data["parent_id"] = NULL;
-                  $request_data["manager_id"] = $department_prev->manager_id;
-
-                }
-
-
-                $department  =  tap(Department::where($department_query_params))->update(
-                    collect($request_data)->only([
-                        "name",
-                        "work_location_id",
-                        "description",
-                        // "is_active",
-                        "manager_id",
-                        "parent_id",
-
-                    ])->toArray()
-                )
-                    // ->with("somthing")
-
-                    ->first();
-
-                if (!$department) {
-                    return response()->json([
-                        "message" => "something went wrong."
-                    ], 500);
-                }
+            if (empty($department_prev->parent_id)) {
+                $request_data["parent_id"] = NULL;
+                $request_data["manager_id"] = $department_prev->manager_id;
+            }
 
 
+            $department  =  tap(Department::where($department_query_params))->update(
+                collect($request_data)->only([
+                    "name",
+                    "work_location_id",
+                    "description",
+                    // "is_active",
+                    "manager_id",
+                    "parent_id",
 
+                ])->toArray()
+            )
+                // ->with("somthing")
 
+                ->first();
 
-                // if ($department_prev->manager_id != $department->manager_id) {
-                //     // Remove the previous manager's relationship with the department
-                // $last_added_manager =  DepartmentUser::where([
-                //         'department_id' => $department->id,
-                //         'user_id'       => $department_prev->manager_id
-                //     ])
-                //    ->orderByDesc("id")
-                //     ->first();
-
-                //     if(!empty($last_added_manager)) {
-                //         $last_added_manager->delete();
-                //     }
-
-
-
-                //     // Attach the new manager to the department
-                //     $department->users()->attach($department->manager_id);
-                // }
+            if (!$department) {
+                return response()->json([
+                    "message" => "something went wrong."
+                ], 500);
+            }
 
 
 
 
-                DB::commit();
-                return response($department, 201);
 
+            // if ($department_prev->manager_id != $department->manager_id) {
+            //     // Remove the previous manager's relationship with the department
+            // $last_added_manager =  DepartmentUser::where([
+            //         'department_id' => $department->id,
+            //         'user_id'       => $department_prev->manager_id
+            //     ])
+            //    ->orderByDesc("id")
+            //     ->first();
+
+            //     if(!empty($last_added_manager)) {
+            //         $last_added_manager->delete();
+            //     }
+
+
+
+            //     // Attach the new manager to the department
+            //     $department->users()->attach($department->manager_id);
+            // }
+
+
+
+
+            DB::commit();
+            return response($department, 201);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e, 500, $request);
         }
     }
 
-  /**
+    /**
      *
      * @OA\Put(
      *      path="/v1.0/departments/toggle-active",
@@ -367,20 +360,20 @@ class DepartmentController extends Controller
      */
 
 
-     public function toggleActiveDepartment(GetIdRequest $request)
-     {
+    public function toggleActiveDepartment(GetIdRequest $request)
+    {
 
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('user_update')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $request_data = $request->validated();
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('user_update')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $request_data = $request->validated();
 
 
-             $all_manager_department_ids = $this->get_all_departments_of_manager();
+            $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $department = Department::where([
                 "id" => $request_data["id"],
@@ -399,23 +392,23 @@ class DepartmentController extends Controller
                     "message" => "You can not change the status of main parent department."
                 ], 409);
             }
-            if(!in_array($department->id,$all_manager_department_ids)){
+            if (!in_array($department->id, $all_manager_department_ids)) {
                 return response()->json([
                     "message" => "You don't have access to this department"
                 ], 403);
             }
 
 
-             $department->update([
-                 'is_active' => !$department->is_active
-             ]);
+            $department->update([
+                'is_active' => !$department->is_active
+            ]);
 
-             return response()->json(['message' => 'department status updated successfully'], 200);
-         } catch (Exception $e) {
-             error_log($e->getMessage());
-             return $this->sendError($e, 500, $request);
-         }
-     }
+            return response()->json(['message' => 'department status updated successfully'], 200);
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return $this->sendError($e, 500, $request);
+        }
+    }
 
 
     /**
@@ -537,7 +530,7 @@ class DepartmentController extends Controller
     public function getDepartments(Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('department_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -548,58 +541,55 @@ class DepartmentController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $departments = Department::with("work_location")
-            ->where(
-                [
-                    "business_id" => $business_id
-                ]
-            )
+                ->where(
+                    [
+                        "business_id" => $business_id
+                    ]
+                )
 
-            ->whereIn("id",$all_manager_department_ids)
+                ->whereIn("id", $all_manager_department_ids)
 
-            ->when(request()->filled("hide_children_for_id"), function($query) {
-               $department = Department::where("id",request()->input("hide_children_for_id"))->first();
+                ->when(request()->filled("hide_children_for_id"), function ($query) {
+                    $query->whereNotIn("id", [request()->input("hide_children_for_id")]);
 
-
-               if(!empty($department)) {
-            $allDescendantIds = $department->getAllDescendantIds();
-            $query->whereNotIn("id",$allDescendantIds);
-               }
-
-            })
-
+                    $department = Department::where("id", request()->input("hide_children_for_id"))->first();
+                    if (!empty($department)) {
+                        $allDescendantIds = $department->getAllDescendantIds();
+                        $query->whereNotIn("id", $allDescendantIds);
+                    }
+                })
 
 
 
 
 
-            ->when(request()->has("not_in_rota") && intval(request()->input("not_in_rota")), function ($query) {
-                $query->whereDoesntHave("employee_rota");
-            })
+
+                ->when(request()->has("not_in_rota") && intval(request()->input("not_in_rota")), function ($query) {
+                    $query->whereDoesntHave("employee_rota");
+                })
 
 
 
 
-            ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
-                if(intval($request->doesnt_have_payrun)) {
-                    return $query->whereDoesntHave("payrun_departments");
-                } else {
-                    return $query;
-                }
-
-            })
-
+                ->when(isset($request->doesnt_have_payrun), function ($query) use ($request) {
+                    if (intval($request->doesnt_have_payrun)) {
+                        return $query->whereDoesntHave("payrun_departments");
+                    } else {
+                        return $query;
+                    }
+                })
 
 
 
 
-            ->when(isset($request->hide_parent), function ($query) use ($request) {
-                if(intval($request->hide_parent)) {
-                    return $query->whereNotNull("parent_id");
-                } else {
-                    return $query;
-                }
 
-            })
+                ->when(isset($request->hide_parent), function ($query) use ($request) {
+                    if (intval($request->hide_parent)) {
+                        return $query->whereNotNull("parent_id");
+                    } else {
+                        return $query;
+                    }
+                })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -633,16 +623,17 @@ class DepartmentController extends Controller
                 }, function ($query) {
                     return $query->orderBy("departments.id", "DESC");
                 })
-                ->select('departments.*',
-                DB::raw('
+                ->select(
+                    'departments.*',
+                    DB::raw('
          COALESCE(
              (SELECT COUNT(department_users.user_id) FROM department_users WHERE department_users.department_id = departments.id),
              0
          ) AS total_users
          '),
 
-         DB::raw('IF(departments.manager_id = ' . auth()->user()->id . ', 1, 0) AS restrict_delete')
-                 )
+                    DB::raw('IF(departments.manager_id = ' . auth()->user()->id . ', 1, 0) AS restrict_delete')
+                )
                 ->when(!empty($request->per_page), function ($query) use ($request) {
                     return $query->paginate($request->per_page);
                 }, function ($query) {
@@ -657,7 +648,7 @@ class DepartmentController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
-  /**
+    /**
      *
      * @OA\Get(
      *      path="/v2.0/departments",
@@ -706,60 +697,64 @@ class DepartmentController extends Controller
      *     )
      */
 
-     public function getDepartmentsV2(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('department_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business_id =  auth()->user()->business_id;
-             $department = Department::with([
+    public function getDepartmentsV2(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('department_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  auth()->user()->business_id;
+            $department = Department::with([
 
                 "manager" => function ($query) {
-                    $query->select('users.id', 'users.first_Name','users.middle_Name',
-                    'users.last_Name');
+                    $query->select(
+                        'users.id',
+                        'users.first_Name',
+                        'users.middle_Name',
+                        'users.last_Name'
+                    );
                 },
                 'recursiveChildren.manager',
                 'recursiveChildren.recursiveChildren'
 
             ])
-            ->where(
-                 [
-                     "business_id" => $business_id,
-                    //  "parent_id" => NULL,
-                     "manager_id" => auth()->user()->id
-                 ]
-             )
+                ->where(
+                    [
+                        "business_id" => $business_id,
+                        //  "parent_id" => NULL,
+                        "manager_id" => auth()->user()->id
+                    ]
+                )
 
-                 ->orderBy("departments.id", "ASC")
-                 ->select('departments.*')
+                ->orderBy("departments.id", "ASC")
+                ->select('departments.*')
                 ->first();
 
-                if (!$department) {
+            if (!$department) {
 
-                    return response()->json([
-                        "message" => "no department found"
-                    ], 404);
-                }
+                return response()->json([
+                    "message" => "no department found"
+                ], 404);
+            }
 
 
 
-                $department->total_users_counts = User::where([
-                    "business_id" => $business_id
-                ])
+            $department->total_users_counts = User::where([
+                "business_id" => $business_id
+            ])
                 ->count();
 
 
-             return response()->json($department, 200);
-         } catch (Exception $e) {
+            return response()->json($department, 200);
+        } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
-      /**
+            return $this->sendError($e, 500, $request);
+        }
+    }
+    /**
      *
      * @OA\Get(
      *      path="/v3.0/departments",
@@ -769,7 +764,7 @@ class DepartmentController extends Controller
      *           {"bearerAuth": {}}
      *       },
 
-   *   *              @OA\Parameter(
+     *   *              @OA\Parameter(
      *         name="response_type",
      *         in="query",
      *         description="response_type: in pdf,csv,json",
@@ -831,35 +826,34 @@ class DepartmentController extends Controller
      *     )
      */
 
-     public function getDepartmentsV3(Request $request)
-     {
-         try {
-             $this->storeActivity($request, "DUMMY activity","DUMMY description");
-             if (!$request->user()->hasPermissionTo('department_view')) {
-                 return response()->json([
-                     "message" => "You can not perform this action"
-                 ], 401);
-             }
-             $business_id =  auth()->user()->business_id;
+    public function getDepartmentsV3(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('department_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+            $business_id =  auth()->user()->business_id;
 
-             $departments = Department::with([
+            $departments = Department::with([
                 'manager',
                 'recursiveChildren',
-                "users",
-                "manager",
-            ])
-            ->where([
-                'business_id' => $business_id,
-                'manager_id' => auth()->user()->id,
-            ])
-            ->when($request->filled("id"), function($query) {
-                 $query->where([
-                    "id" => request()->input("id")
-                 ]);
-            })
 
-            ->orderBy('id', 'ASC')
-            ->get();
+            ])
+                ->where([
+                    'business_id' => $business_id,
+                    'manager_id' => auth()->user()->id,
+                ])
+                ->when($request->filled("id"), function ($query) {
+                    $query->where([
+                        "id" => request()->input("id")
+                    ]);
+                })
+
+                ->orderBy('id', 'ASC')
+                ->get();
 
             foreach ($departments as $department) {
                 $department->total_users_count = $department->getTotalUsersCountAttribute();
@@ -880,14 +874,205 @@ class DepartmentController extends Controller
             } else {
                 return response()->json($departments, 200);
             }
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v4.0/departments",
+     *      operationId="getDepartmentsV4",
+     *      tags={"administrator.department"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *
+     *         @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="id",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *
+     *
+     *      summary="This method is to get departments  ",
+     *      description="This method is to get departments ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getDepartmentsV4(Request $request)
+    {
+        try {
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+            if (!$request->user()->hasPermissionTo('department_view')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            $business_id =  auth()->user()->business_id;
+
+            function prepareRecursiveDepartments($departments)
+            {
+                $modifiedDepartments = [];
+
+                foreach ($departments as $department) {
+                    // Create a modified version of the department
+
+                    $manager = $department->manager;
+
+                   $modifiedDepartment=[];
+
+
+                   $modifiedDepartment["department_id"] = $department->id;
+                   $modifiedDepartment["department"] = $department->name;
+                    $modifiedDepartment["id"] = $manager->id;
+                    $modifiedDepartment["first_Name"] = $manager->first_Name;
+                    $modifiedDepartment["middle_Name"] = $manager->middle_Name;
+                    $modifiedDepartment["last_Name"] = $manager->last_Name;
+
+                    $modifiedDepartment["roles"] = $manager->roles()->pluck("name")->toArray();
+                    $modifiedDepartment['users'] = [];
+
+
+                    // Recursively handle nested departments
+                    if ($department->recursive_department_users) {
+                        $modifiedDepartment['users'][] = prepareRecursiveDepartments($department->recursive_department_users);
+                    }
+
+                    // Modify users data if available
+                    if ($department->recursive_manager_users) {
+
+                        foreach ($department->recursive_manager_users as $user) {
+                            $modifiedDepartment['users'][] = [
+                            "department_id" =>   $department->id,
+                              "department" =>   $department->name,
+                              "id" => $user->id,
+                              "first_Name" =>   $user->first_Name,
+                              "middle_Name" =>   $user->middle_Name,
+                              "last_Name" =>   $user->last_Name,
+                              "roles" => $user->roles()->pluck("name")->toArray(),
+                              "users" => []
+
+                            ];
+                        }
+                    }
+
+                    $modifiedDepartments[] = $modifiedDepartment;
+                }
+
+                return $modifiedDepartments;
+            }
+
+            // Example usage:
+            $departments = Department::with([
+                'manager',
+                "recursive_manager_users",
+                "recursive_manager_users.recursive_department_users"
+            ])
+            ->where([
+                'business_id' => $business_id,
+                'manager_id' => auth()->user()->id,
+            ])
+            ->when($request->filled("id"), function ($query) {
+                $query->where("id", request()->input("id"));
+            })
+            ->orderBy('id', 'ASC')
+            ->get();
+
+            $modifiedData = prepareRecursiveDepartments($departments);
+
+            // Return the modified data as JSON
+            return response()->json($modifiedData);
 
 
 
-         } catch (Exception $e) {
 
-             return $this->sendError($e, 500, $request);
-         }
-     }
+
+
+
+
+
+
+
+
+
+            return response()->json($departments, 200);
+
+
+            if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                if (strtoupper($request->response_type) == 'PDF') {
+                    $pdf = PDF::loadView('pdf.org_structure', ["departments" => $departments]);
+                    return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                }
+                // elseif (strtoupper($request->response_type) === 'CSV') {
+
+                //     return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                // }
+            } else {
+                return response()->json($departments, 200);
+            }
+        } catch (Exception $e) {
+
+            return $this->sendError($e, 500, $request);
+        }
+    }
+
+
+
+
     /**
      *
      * @OA\Get(
@@ -946,7 +1131,7 @@ class DepartmentController extends Controller
     public function getDepartmentById($id, Request $request)
     {
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('department_view')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -960,14 +1145,15 @@ class DepartmentController extends Controller
                 "id" => $id,
                 "business_id" => $business_id
             ])
-            ->select('departments.*',
-            DB::raw('
+                ->select(
+                    'departments.*',
+                    DB::raw('
      COALESCE(
          (SELECT COUNT(department_users.user_id) FROM department_users WHERE department_users.department_id = departments.id),
          0
      ) AS total_users
      '),
-             )
+                )
                 ->first();
             if (!$department) {
 
@@ -975,7 +1161,7 @@ class DepartmentController extends Controller
                     "message" => "no department found"
                 ], 404);
             }
-            if(!in_array($department->id,$all_manager_department_ids)){
+            if (!in_array($department->id, $all_manager_department_ids)) {
 
                 return response()->json([
                     "message" => "You don't have access to this department"
@@ -1049,7 +1235,7 @@ class DepartmentController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity","DUMMY description");
+            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
             if (!$request->user()->hasPermissionTo('department_delete')) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -1064,14 +1250,14 @@ class DepartmentController extends Controller
             $existingIds = Department::where([
                 "business_id" => $business_id
             ])
-            ->whereNotNull('parent_id')
-            ->whereIn("id",$all_manager_department_ids)
-            ->where(function($query) {
-                $query->whereNotIn("departments.manager_id",[auth()->user()->id])
-                ->when(auth()->user()->hasRole("business_owner"), function($query) {
-                       $query->orWhereNull("departments.manager_id");
-                });
-            })
+                ->whereNotNull('parent_id')
+                ->whereIn("id", $all_manager_department_ids)
+                ->where(function ($query) {
+                    $query->whereNotIn("departments.manager_id", [auth()->user()->id])
+                        ->when(auth()->user()->hasRole("business_owner"), function ($query) {
+                            $query->orWhereNull("departments.manager_id");
+                        });
+                })
 
                 ->whereIn('id', $idsArray)
                 ->select('id')
@@ -1094,7 +1280,7 @@ class DepartmentController extends Controller
             $conflicts = [];
 
             // Check for conflicts in Users with Departments
-            $conflictingUsersExists = User::whereHas("departments", function($query) use($existingIds) {
+            $conflictingUsersExists = User::whereHas("departments", function ($query) use ($existingIds) {
                 $query->whereIn("department_id", $existingIds);
             })->exists();
 
@@ -1124,7 +1310,7 @@ class DepartmentController extends Controller
             Department::destroy($existingIds);
 
 
-            return response()->json(["message" => "data deleted sussfully","deleted_ids" => $existingIds], 200);
+            return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $existingIds], 200);
         } catch (Exception $e) {
 
             return $this->sendError($e, 500, $request);

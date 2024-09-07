@@ -237,10 +237,22 @@ class User extends Authenticatable
         return $this->belongsToMany(Department::class, 'department_users', 'user_id', 'department_id');
     }
 
+
     public function manager_departments()
     {
         return $this->hasMany(Department::class, 'manager_id', 'id');
     }
+
+    public function recursive_department_users()
+    {
+        return $this->hasMany(Department::class, 'manager_id', 'id')
+        ->whereNotNull("manager_id")
+        ->with([
+            "manager",
+            "recursive_manager_users",
+        ]);
+    }
+
 
     public function department_user()
     {

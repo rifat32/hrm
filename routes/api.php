@@ -583,6 +583,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
     Route::post('/v1.0/user-letters', [UserLetterController::class, "createUserLetter"]);
+
     Route::post('/v1.0/user-letters/generate', [UserLetterController::class, "generateUserLetter"]);
 
     Route::post('/v1.0/user-letters/download', [UserLetterController::class, "downloadUserLetter"]);
@@ -934,6 +935,7 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::get('/v1.0/departments', [DepartmentController::class, "getDepartments"]);
     Route::get('/v2.0/departments', [DepartmentController::class, "getDepartmentsV2"]);
     Route::get('/v3.0/departments', [DepartmentController::class, "getDepartmentsV3"]);
+    Route::get('/v4.0/departments', [DepartmentController::class, "getDepartmentsV4"]);
     Route::get('/v1.0/departments/{id}', [DepartmentController::class, "getDepartmentById"]);
     Route::delete('/v1.0/departments/{ids}', [DepartmentController::class, "deleteDepartmentsByIds"]);
 
