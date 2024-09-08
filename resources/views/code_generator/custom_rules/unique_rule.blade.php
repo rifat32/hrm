@@ -64,13 +64,13 @@
                 @if ($is_active && $is_default)
                 ->when(empty(auth()->user()->business_id), function ($query) use ( $created_by) {
                     $query->when(auth()->user()->hasRole('superadmin'), function ($query)  {
-                        $query->forSuperAdmin('designations');
+                        $query->forSuperAdmin('{{$names["table_name"]}}');
                     }, function ($query) use ($created_by) {
-                        $query->forNonSuperAdmin('designations', 'disabled_designations', $created_by);
+                        $query->forNonSuperAdmin('{{$names["table_name"]}}', 'disabled_{{$names["table_name"]}}', $created_by);
                     });
                 })
                 ->when(!empty(auth()->user()->business_id), function ($query) use ( $created_by) {
-                    $query->forBusiness('designations', "disabled_designations", $created_by);
+                    $query->forBusiness('{{$names["table_name"]}}', "disabled_{{$names["table_name"]}}", $created_by);
                 })
                     @else
                     ->where('{{$names["table_name"]}}.business_id', auth()->user()->business_id)

@@ -2323,19 +2323,23 @@ class DashboardManagementControllerV2 extends Controller
             $total_present_expectation += $totalHours;
         }
 
+
         $total_present =  Attendance::where([
             "is_present" => 1
         ])
-            ->whereIn("user_id", $all_manager_user_ids)
-            ->where("in_date", ">=", $start_date)
-            ->where("in_date", "<=", ($end_date . ' 23:59:59'))
-            ->sum(DB::raw('total_paid_hours - overtime_hours'));
+        ->whereIn("user_id", $all_manager_user_ids)
+        ->where("business_id", auth()->user()->business_id)
+        ->where("in_date", ">=", $start_date)
+        ->where("in_date", "<=", ($end_date))
+        ->sum(DB::raw('total_paid_hours - overtime_hours'));
 
 
         return [
             "total_present_expectation" =>  $total_present_expectation,
             "total_present" =>  $total_present,
             "total_absent" => $total_present_expectation - $total_present,
+            "start_date" =>  $start_date,
+            "end_date" =>  $end_date,
         ];
     }
 

@@ -98,23 +98,27 @@ class Business extends Model
 
     public function getIsSubscribedAttribute($value)
     {
+
         $user = auth()->user();
-        if (empty($user) || empty($user->business)) {
+        if (empty($user)) {
             return 0;
         }
 
-        $business = $user->business;
+
+
+
+
 
         // Return 0 if the business is not active
-        if (!$business->is_active) {
+        if (!$this->is_active) {
             return 0;
         }
 
         // Check for self-registered businesses
-        if ($business->is_self_registered_businesses) {
-            $validTrailDate = $this->isTrailDateValid($business->trail_end_date);
-            $latest_subscription = BusinessSubscription::where('business_id', $business->id)
-                ->where('service_plan_id', $business->service_plan_id)
+        if ($this->is_self_registered_businesses) {
+            $validTrailDate = $this->isTrailDateValid($this->trail_end_date);
+            $latest_subscription = BusinessSubscription::where('business_id', $this->id)
+                ->where('service_plan_id', $this->service_plan_id)
                 ->latest()
                 ->first();
 
@@ -125,7 +129,7 @@ class Business extends Model
         } else {
             // For non-self-registered businesses
             // If the trail date is empty or invalid, return 0
-            if (!$this->isTrailDateValid($business->trail_end_date)) {
+            if (!$this->isTrailDateValid($this->trail_end_date)) {
                 return 0;
             }
         }
