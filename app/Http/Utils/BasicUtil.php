@@ -675,7 +675,7 @@ trait BasicUtil
                 !($last_joining_date->lte($in_date) && $last_joining_date->gte($in_date))
 
             ) {
-                $failureMessage = 'User was termination date and attendance date mismatch.';
+                $failureMessage = 'User termination date and attendance date mismatch.';
                 if ($throwError) {
                     throw new Exception($failureMessage, 403);
                 }

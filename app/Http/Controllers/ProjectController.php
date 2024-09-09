@@ -13,8 +13,10 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
+use App\Models\AttendanceHistoryProject;
 use App\Models\AttendanceProject;
 use App\Models\Department;
+use App\Models\DepartmentProject;
 use App\Models\EmployeeProjectHistory;
 use App\Models\Notification;
 use App\Models\Project;
@@ -330,8 +332,8 @@ class ProjectController extends Controller
 
             foreach ($request_data['users'] as $index => $user_id) {
                 $user = User::whereHas("projects", function ($query) use ($project) {
-                        $query->where("projects.id", $project->id);
-                    })
+                    $query->where("projects.id", $project->id);
+                })
                     ->where([
                         "id" => $user_id
                     ])
@@ -378,7 +380,7 @@ class ProjectController extends Controller
             $project->users()->attach($request_data['users']);
 
 
-            $notification_data = collect($request_data['users'])->map(function($user_id) use($project) {
+            $notification_data = collect($request_data['users'])->map(function ($user_id) use ($project) {
 
                 $notification_description = "You have been assigned to a project.";
                 $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
@@ -530,8 +532,8 @@ class ProjectController extends Controller
 
             foreach ($request_data['users'] as $index => $user_id) {
                 $user = User::whereHas("projects", function ($query) use ($project) {
-                        $query->where("projects.id", $project->id);
-                    })
+                    $query->where("projects.id", $project->id);
+                })
                     ->where([
                         "id" => $user_id
                     ])
@@ -550,7 +552,7 @@ class ProjectController extends Controller
 
             $project->users()->detach($request_data['users']);
 
-            $notification_data = collect($request_data['users'])->map(function($user_id) use($project) {
+            $notification_data = collect($request_data['users'])->map(function ($user_id) use ($project) {
 
                 $notification_description = "You have been removed from a project.";
                 $notification_link = "http://example.com/projects/{$project->id}"; // Dynamic link based on project ID
@@ -691,8 +693,8 @@ class ProjectController extends Controller
 
             foreach ($request_data['projects'] as $index => $project_id) {
                 $project = Project::whereHas("users", function ($query) use ($user) {
-                        $query->where("users.id", $user->id);
-                    })
+                    $query->where("users.id", $user->id);
+                })
                     ->where([
                         "id" => $project_id
                     ])
@@ -740,7 +742,7 @@ class ProjectController extends Controller
             $user->projects()->attach($request_data['projects']);
 
 
-            $notification_data = collect($request_data['projects'])->map(function($project_id) use($user) {
+            $notification_data = collect($request_data['projects'])->map(function ($project_id) use ($user) {
 
                 $notification_description = "You have been assigned to a project.";
                 $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
@@ -874,8 +876,8 @@ class ProjectController extends Controller
 
             foreach ($request_data['projects'] as $index => $project_id) {
                 $project = Project::whereHas("users", function ($query) use ($user) {
-                        $query->where("users.id", $user->id);
-                    })
+                    $query->where("users.id", $user->id);
+                })
                     ->where([
                         "id" => $project_id
                     ])
@@ -895,7 +897,7 @@ class ProjectController extends Controller
 
             $user->projects()->detach($request_data['projects']);
 
-            $notification_data = collect($request_data['projects'])->map(function($project_id) use($user) {
+            $notification_data = collect($request_data['projects'])->map(function ($project_id) use ($user) {
 
                 $notification_description = "You have been removed from a project.";
                 $notification_link = "http://example.com/projects/{$project_id}"; // Dynamic link based on project ID
@@ -1217,7 +1219,7 @@ class ProjectController extends Controller
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
-            $user_id = intval(!empty(request()->user_id)?request()->user_id :0);
+            $user_id = intval(!empty(request()->user_id) ? request()->user_id : 0);
             $auth_user_id = auth()->user()->id;
             if (!$request->user()->hasPermissionTo('project_view') && ($auth_user_id !== $user_id)) {
                 return response()->json([
@@ -1321,26 +1323,26 @@ class ProjectController extends Controller
 
             $business_id =  auth()->user()->business_id;
             $project =  $project = Project::with(['departments', 'users'])
-            ->where([
-                'id' => $id,
-                'business_id' => $business_id
-            ])
-            ->select([
-                'projects.*', // Select all columns from the projects table
-            ])
-            ->selectSub(
-                Task::selectRaw('COUNT(*)')
-                    ->whereColumn('tasks.project_id', 'projects.id')
-                    ->where('status', 'done'),
-                'done_tasks_count'
-            )
-            ->selectSub(
-                Task::selectRaw('COUNT(*)')
-                    ->whereColumn('tasks.project_id', 'projects.id')
-                    ->where('status', 'done'),
-                'tasks_count'
-            )
-            ->first();
+                ->where([
+                    'id' => $id,
+                    'business_id' => $business_id
+                ])
+                ->select([
+                    'projects.*', // Select all columns from the projects table
+                ])
+                ->selectSub(
+                    Task::selectRaw('COUNT(*)')
+                        ->whereColumn('tasks.project_id', 'projects.id')
+                        ->where('status', 'done'),
+                    'done_tasks_count'
+                )
+                ->selectSub(
+                    Task::selectRaw('COUNT(*)')
+                        ->whereColumn('tasks.project_id', 'projects.id')
+                        ->where('status', 'done'),
+                    'tasks_count'
+                )
+                ->first();
 
             if (!$project) {
 
@@ -1453,6 +1455,40 @@ class ProjectController extends Controller
             if ($attendanceExists) {
                 $conflicts[] = "Attendance records associated with the specified Projects";
             }
+            // Check for conflicts in Attendance Projects
+            $attendanceHistoryExists = AttendanceHistoryProject::whereIn("project_id", $idsArray)->exists();
+            if ($attendanceHistoryExists) {
+                $conflicts[] = "Attendance records log associated with the specified Projects";
+            }
+
+            // Check for conflicts in Attendance Projects
+            $taskCategoryExists = TaskCategory::whereIn("project_id", $idsArray)->exists();
+            if ($taskCategoryExists) {
+                $conflicts[] = "Task category associated with the specified Projects";
+            }
+
+            // Check for conflicts in Attendance Projects
+            $taskExists = Task::whereIn("project_id", $idsArray)->exists();
+            if ($taskExists) {
+                $conflicts[] = "Task associated with the specified Projects";
+            }
+            // Check for conflicts in Attendance Projects
+            $departmentExists = DepartmentProject::whereIn("project_id", $idsArray)->exists();
+            if ($departmentExists) {
+                $conflicts[] = "Department associated with the specified Projects";
+            }
+
+            // Check for conflicts in Attendance Projects
+            $userExists = UserProject::whereIn("project_id", $idsArray)->exists();
+            if ($userExists) {
+                $conflicts[] = "User associated with the specified Projects";
+            }
+
+
+
+
+
+            // @@@@@@crc
 
             // Add more checks for other related models as needed
 
