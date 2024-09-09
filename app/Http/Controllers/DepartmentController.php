@@ -1099,7 +1099,7 @@ class DepartmentController extends Controller
 
         collect($department->users)->map(function ($user) use(&$modifiedDepartment) {
             $modifiedDepartment["users"][] = [
-              "is_department" => 1,
+              "is_department" => 0,
               "employee_name" => ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name),
               "employee_roles" => $user->roles->pluck("name")->toArray()
 
@@ -1223,7 +1223,7 @@ class DepartmentController extends Controller
 
                 return response()->json($departments, 200);
 
-           
+
 
 
              if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {

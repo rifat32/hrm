@@ -102,6 +102,7 @@ class UserPassportHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -113,6 +114,7 @@ class UserPassportHistoryController extends Controller
 
 
                 $user_passport_history =  EmployeePassportDetailHistory::create($request_data);
+
 
 
 
@@ -205,6 +207,9 @@ class UserPassportHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
+                
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -605,6 +610,13 @@ class UserPassportHistoryController extends Controller
             $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("all_passport_details",function($query) use($idsArray) {
+                $query->whereIn('employee_passport_detail_histories.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
             $existingIds = EmployeePassportDetailHistory::whereIn('id', $idsArray)
                 // ->where(["is_manual" => 1])
                 ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {

@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\User;
 use App\Models\UserEducationHistory;
 use Exception;
 use Illuminate\Http\Request;
@@ -111,6 +112,7 @@ class UserEducationHistoryController extends Controller
 
 
 
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
 
 
@@ -227,6 +229,8 @@ class UserEducationHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
+
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
 
                 $user_education_history_query_params = [
@@ -598,6 +602,13 @@ class UserEducationHistoryController extends Controller
             $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("education_histories",function($query) use($idsArray) {
+                $query->whereIn('user_education_histories.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
             $existingIds = UserEducationHistory::whereIn('id', $idsArray)
             ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);

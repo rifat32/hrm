@@ -9,6 +9,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\User;
 use App\Models\UserJobHistory;
 use Carbon\Carbon;
 use Exception;
@@ -107,6 +108,8 @@ class UserJobHistoryController extends Controller
                   }
 
                   $request_data = $request->validated();
+
+                  $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
 
 
@@ -210,7 +213,7 @@ class UserJobHistoryController extends Controller
                   $business_id =  auth()->user()->business_id;
                   $request_data = $request->validated();
 
-
+                  $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
 
                   $user_job_history_query_params = [
@@ -636,9 +639,18 @@ class UserJobHistoryController extends Controller
                       "message" => "You can not perform this action"
                   ], 401);
               }
+
               $business_id =  auth()->user()->business_id;
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
+
+              $user_ids = User::whereHas("job_histories",function($query) use($idsArray) {
+                $query->whereIn('user_job_histories.id', $idsArray);
+              })
+              ->pluck("id");
+              $this->touchUserUpdatedAt($user_ids);
+
+
               $existingIds = UserJobHistory::whereIn('id', $idsArray)
               ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
                 $query->whereIn("departments.id",$all_manager_department_ids);

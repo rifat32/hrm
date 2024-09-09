@@ -345,6 +345,12 @@ class User extends Authenticatable
             ->orderByDesc('employee_sponsorship_histories.id');
     }
 
+    public function all_sponsorship_details()
+    {
+
+        return $this->hasMany(EmployeeSponsorshipHistory::class, 'user_id', 'id')
+         ;
+    }
 
 
 
@@ -437,6 +443,15 @@ class User extends Authenticatable
         ->orderByDesc('employee_passport_detail_histories.id');
 
     }
+    public function all_passport_details()
+    {
+
+
+        return $this->hasMany(EmployeePassportDetailHistory::class, 'user_id', 'id')
+       ;
+
+    }
+
 
     public function visa_detail()
     {
@@ -477,7 +492,10 @@ class User extends Authenticatable
         })
         ->orderByDesc('employee_visa_detail_histories.id');
     }
-
+    public function all_visa_details()
+    {
+    return $this->hasMany(EmployeeVisaDetailHistory::class, 'user_id', 'id');
+    }
 
     public function right_to_work()
     {
@@ -516,6 +534,13 @@ class User extends Authenticatable
                 ->limit(1);
         })
         ->orderByDesc('employee_right_to_work_histories.id');
+    }
+
+
+    public function all_right_to_works()
+    {
+        return $this->hasMany(EmployeeRightToWorkHistory::class, 'user_id', 'id');
+
     }
 
 

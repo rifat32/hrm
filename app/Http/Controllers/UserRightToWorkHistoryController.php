@@ -102,6 +102,8 @@ class UserRightToWorkHistoryController extends Controller
 
                 $request_data = $request->validated();
 
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+
                 $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
                 $this->makeFilePermanent($request_data["right_to_work_docs"],"file_name");
 
@@ -229,6 +231,9 @@ class UserRightToWorkHistoryController extends Controller
 
 
                 $request_data = $request->validated();
+
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+
                 $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
                 $this->makeFilePermanent($request_data["right_to_work_docs"],"file_name");
                 $request_data["created_by"] = auth()->user()->id;
@@ -630,6 +635,14 @@ class UserRightToWorkHistoryController extends Controller
             $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("all_right_to_works",function($query) use($idsArray) {
+                $query->whereIn('employee_right_to_work_histories.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
+
             $existingIds = EmployeeRightToWorkHistory::whereIn('id', $idsArray)
             // ->where(["is_manual" => 1])
             ->whereHas("employee.department_user.department", function($query) use($all_manager_department_ids) {
