@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\File;
 trait BasicUtil
 {
 
+    public function touchUserUpdatedAt($userIds) {
+        User::whereIn('id', $userIds)
+        ->update(['updated_at' => now()]);
+    }
 
 
     function getLast12MonthsDates($year)

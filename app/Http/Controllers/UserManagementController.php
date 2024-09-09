@@ -4219,6 +4219,10 @@ class UserManagementController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
+
+
+            $this->touchUserUpdatedAt([$request_data["id"]]);
+
             $userQuery = User::where([
                 "id" => $request["id"]
             ]);
@@ -4626,6 +4630,7 @@ class UserManagementController extends Controller
             $request_data = $request->validated();
 
 
+            $this->touchUserUpdatedAt([$request_data["id"]]);
 
             $userQuery = User::where([
                 "id" => $request["id"]
@@ -4807,7 +4812,7 @@ class UserManagementController extends Controller
             }
             $request_data = $request->validated();
 
-
+$this->touchUserUpdatedAt([$request["id"]]);
 
             $userQuery = User::where([
                 "id" => $request["id"]
@@ -5051,7 +5056,7 @@ class UserManagementController extends Controller
             }
             $request_data = $request->validated();
 
-
+$this->touchUserUpdatedAt([$request["id"]]);
 
             $userQuery = User::where([
                 "id" => $request["id"]

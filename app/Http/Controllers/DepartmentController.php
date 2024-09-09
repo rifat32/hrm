@@ -1073,8 +1073,176 @@ class DepartmentController extends Controller
         }
     }
 
+    public function modifyDepartment($department)
+    {
+        $modifiedDepartment = [];
+
+        $modifiedDepartment["is_department"] = 1;
+        $modifiedDepartment["id"] = $department->id;
+        $modifiedDepartment["name"] = $department->name;
 
 
+        if(!empty($department->manager)) {
+            $manager = $department->manager;
+
+            $modifiedDepartment["manger_name"] = $manager->first_Name . " " . $manager->middle_Name . " " . $manager->last_Name;
+            $modifiedDepartment["manger_roles"] = $manager->roles()->pluck("name");
+        }
+
+
+
+
+
+        $modifiedDepartment["users"] = collect($department->recursiveChildren)->map(function ($child) {
+           return $this->modifyDepartment($child);
+        })->toArray();
+
+        collect($department->users)->map(function ($user) use(&$modifiedDepartment) {
+            $modifiedDepartment["users"][] = [
+              "is_department" => 1,
+              "employee_name" => ($user->first_Name . " " . $user->middle_Name . " " . $user->last_Name),
+              "employee_roles" => $user->roles->pluck("name")->toArray()
+
+
+            ];
+            return NULL;
+         });
+
+
+
+
+        return $modifiedDepartment;
+    }
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v5.0/departments",
+     *      operationId="getDepartmentsV5",
+     *      tags={"administrator.department"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+     *   *              @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *      *   *              @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *
+     *         @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="id",
+     *         required=true,
+     *  example="employee"
+     *      ),
+     *
+     *
+     *      summary="This method is to get departments  ",
+     *      description="This method is to get departments ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+     public function getDepartmentsV5(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+             if (!$request->user()->hasPermissionTo('department_view')) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+             $business_id =  auth()->user()->business_id;
+
+             $departments = Department::with([
+                 'manager',
+                 'recursiveChildren',
+                 'users'
+
+             ])
+                 ->where([
+                     'business_id' => $business_id,
+                     'manager_id' => auth()->user()->id,
+                 ])
+                 ->when($request->filled("id"), function ($query) {
+                     $query->where([
+                         "id" => request()->input("id")
+                     ]);
+                 })
+
+                 ->orderBy('id', 'ASC')
+                 ->get();
+
+
+                 $departments = $departments->map(function ($department) {
+                    return $this->modifyDepartment($department);
+                });
+
+                return response()->json($departments, 200);
+
+           
+
+
+             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                 if (strtoupper($request->response_type) == 'PDF') {
+                     $pdf = PDF::loadView('pdf.org_structure', ["departments" => $departments]);
+                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                 }
+                 // elseif (strtoupper($request->response_type) === 'CSV') {
+
+                 //     return Excel::download(new UsersExport($users), ((!empty($request->file_name) ? $request->file_name : 'employee') . '.csv'));
+                 // }
+             } else {
+                 return response()->json($departments, 200);
+             }
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
 
     /**
      *
