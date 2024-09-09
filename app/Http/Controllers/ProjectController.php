@@ -285,6 +285,7 @@ class ProjectController extends Controller
             }
             $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
+            $this->touchUserUpdatedAt([$request_data["users"]]);
 
 
 
@@ -485,6 +486,7 @@ class ProjectController extends Controller
             }
             $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
+            $this->touchUserUpdatedAt([$request_data["users"]]);
 
 
 
@@ -651,8 +653,9 @@ class ProjectController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  auth()->user()->business_id;
+
             $request_data = $request->validated();
+            $this->touchUserUpdatedAt([$request_data["id"]]);
 
             $user_query_params = [
                 "id" => $request_data["id"],
@@ -843,6 +846,7 @@ class ProjectController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
+            $this->touchUserUpdatedAt([$request_data["id"]]);
             $user_query_params = [
                 "id" => $request_data["id"],
             ];

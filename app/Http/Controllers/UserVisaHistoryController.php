@@ -102,7 +102,9 @@ class UserVisaHistoryController extends Controller
 
                 $request_data = $request->validated();
 
-                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 $request_data["visa_docs"] =   $this->storeUploadedFiles($request_data["visa_docs"],"file_name","visa_docs");
                 $this->makeFilePermanent($request_data["visa_docs"],"file_name");
@@ -226,7 +228,9 @@ class UserVisaHistoryController extends Controller
 
                 $request_data = $request->validated();
 
-                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
 
 

@@ -109,7 +109,9 @@ class UserJobHistoryController extends Controller
 
                   $request_data = $request->validated();
 
-                  $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                  if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
 
 
@@ -213,7 +215,9 @@ class UserJobHistoryController extends Controller
                   $business_id =  auth()->user()->business_id;
                   $request_data = $request->validated();
 
-                  $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                  if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
 
                   $user_job_history_query_params = [

@@ -140,8 +140,12 @@ class LeaveController extends Controller
 
 
             $request_data = $request->validated();
-
             $request_data["user_id"] = auth()->user()->id;
+
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
+
 
             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"], "", "leave_attachments");
 
@@ -299,6 +303,9 @@ class LeaveController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             $request_data = $request->validated();
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
 
 
             $user_id = intval($request_data["user_id"]);
@@ -487,10 +494,11 @@ class LeaveController extends Controller
 
                 ->first();
 
+
             if (empty($leave)) {
                 throw new Exception("No leave request found", 400);
             }
-
+            $this->touchUserUpdatedAt([$leave->user_id]);
 
 
             $request_data["created_by"] = $request->user()->id;
@@ -681,6 +689,8 @@ class LeaveController extends Controller
                     "message" => "no leave found"
                 ], 400);
             }
+            $this->touchUserUpdatedAt([$leave->user_id]);
+
             $leave->status = "approved";
             $leave->save();
 
@@ -892,6 +902,11 @@ class LeaveController extends Controller
             }
             $business_id =  auth()->user()->business_id;
             $request_data = $request->validated();
+
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
+
             $request_data["attachments"] = $this->storeUploadedFiles($request_data["attachments"], "", "leave_attachments");
             $this->makeFilePermanent($request_data["attachments"], "");
 
@@ -2524,6 +2539,16 @@ $data["data_highlights"]["employees_on_leave"] = $uniqueUserIds->count();
             $all_manager_department_ids = $this->departmentComponent->get_all_departments_of_manager();
             $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("leaves",function($query) use($idsArray) {
+                $query->whereIn('leaves.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
+
+
+
             $existingIds = Leave::where([
                 "business_id" => $business_id
             ])

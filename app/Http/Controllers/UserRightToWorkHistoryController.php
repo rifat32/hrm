@@ -102,7 +102,9 @@ class UserRightToWorkHistoryController extends Controller
 
                 $request_data = $request->validated();
 
-                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
                 $this->makeFilePermanent($request_data["right_to_work_docs"],"file_name");
@@ -232,7 +234,9 @@ class UserRightToWorkHistoryController extends Controller
 
                 $request_data = $request->validated();
 
-                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 $request_data["right_to_work_docs"] =   $this->storeUploadedFiles($request_data["right_to_work_docs"],"file_name","right_to_work_docs");
                 $this->makeFilePermanent($request_data["right_to_work_docs"],"file_name");

@@ -103,6 +103,10 @@ class UserRecruitmentProcessController extends Controller
             }
             $request_data = $request->validated();
 
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
+
             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
             $this->makeFilePermanent($request_data["recruitment_processes"],"attachments",[]);
 
@@ -244,6 +248,10 @@ class UserRecruitmentProcessController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
+
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
 
 
             $request_data["recruitment_processes"] = $this->storeUploadedFiles($request_data["recruitment_processes"],"attachments","recruitment_processes",[]);
@@ -466,6 +474,18 @@ class UserRecruitmentProcessController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("recruitment_processes",function($query) use($idsArray) {
+                $query->whereIn('user_recruitment_processes.id', $idsArray);
+              })
+              ->pluck("id");
+
+            $this->touchUserUpdatedAt($user_ids);
+
+
+
+
+
             $existingIds = UserRecruitmentProcess::whereHas("user.department_user.department", function ($query) use ($all_manager_department_ids) {
                     $query->whereIn("departments.id", $all_manager_department_ids);
                 })

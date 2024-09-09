@@ -171,9 +171,9 @@ class User extends Authenticatable
 
 
 
-    public function payrun_user()
+    public function payrun_users()
     {
-        return $this->hasOne(PayrunUser::class, "user_id", 'id');
+        return $this->hasMany(PayrunUser::class, "user_id", 'id');
     }
 
 
@@ -405,6 +405,14 @@ class User extends Authenticatable
         ->orderByDesc('employee_pension_histories.id');
     }
 
+    public function all_pension_details()
+    {
+        return $this->hasMany(EmployeePensionHistory::class, 'user_id', 'id');
+    }
+    public function payslips()
+    {
+        return $this->hasMany(Payslip::class, 'user_id', 'id');
+    }
 
 
     public function passport_detail()
@@ -564,6 +572,11 @@ class User extends Authenticatable
     public function notes()
     {
         return $this->hasMany(UserNote::class, 'user_id', 'id');
+    }
+
+    public function letters()
+    {
+        return $this->hasMany(UserLetter::class, 'user_id', 'id');
     }
 
     public function social_links()

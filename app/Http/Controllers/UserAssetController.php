@@ -13,6 +13,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\User;
 use App\Models\UserAsset;
 use App\Models\UserAssetHistory;
 use Carbon\Carbon;
@@ -113,6 +114,7 @@ class UserAssetController extends Controller
                   }
 
                   $request_data = $request->validated();
+                  $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
                   if(!empty($request_data["image"])) {
                     $request_data["image"]= $this->storeUploadedFiles([$request_data["image"]],"","assets")[0];
@@ -265,6 +267,7 @@ class UserAssetController extends Controller
                    }
 
                    $request_data = $request->validated();
+                   $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
                    $request_data["status"] = "assigned";
 
@@ -424,6 +427,9 @@ class UserAssetController extends Controller
                   }
 
                   $request_data = $request->validated();
+                  $this->touchUserUpdatedAt([$request_data["user_id"]]);
+
+
                   if(!empty($request_data["image"])) {
                     $request_data["image"]= $this->storeUploadedFiles([$request_data["image"]],"","assets");
                     $this->makeFilePermanent($request_data["image"],"");
@@ -590,7 +596,7 @@ class UserAssetController extends Controller
                    }
 
                    $request_data = $request->validated();
-
+          $this->touchUserUpdatedAt([$request_data["user_id"]]);
 
 
 
@@ -1146,6 +1152,15 @@ class UserAssetController extends Controller
 
               $all_manager_department_ids = $this->get_all_departments_of_manager();
               $idsArray = explode(',', $ids);
+
+
+            $user_ids = User::whereHas("assets",function($query) use($idsArray) {
+                $query->whereIn('user_assets.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
+
 
               $userAssets = UserAsset::whereIn('id', $idsArray)
               ->where(function($query) use($all_manager_department_ids) {

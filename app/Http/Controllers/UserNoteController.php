@@ -97,6 +97,9 @@ class UserNoteController extends Controller
                 }
 
                 $request_data = $request->validated();
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
 
                 $comment_text = $request_data["description"];
@@ -245,8 +248,12 @@ $notification_data = $mentioned_users->map(function ($mentioned_user) use ($user
                         "message" => "You can not perform this action"
                     ], 401);
                 }
-                $business_id =  auth()->user()->business_id;
+
                 $request_data = $request->validated();
+
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 $request_data["updated_by"] = $request->user()->id;
 
@@ -467,8 +474,13 @@ $user_note->mentions()->createMany($mentions_data);
                          "message" => "You can not perform this action"
                      ], 401);
                  }
-                 $business_id =  auth()->user()->business_id;
+
                  $request_data = $request->validated();
+                 
+                 if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
+
                  $request_data["updated_by"] = $request->user()->id;
 
 
@@ -947,14 +959,26 @@ $user_note->mentions()->createMany($mentions_data);
                     "message" => "You can not perform this action"
                 ], 401);
             }
-            $business_id =  auth()->user()->business_id;
+
+
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("notes",function($query) use($idsArray) {
+                $query->whereIn('user_notes.id', $idsArray);
+              })
+              ->pluck("id");
+
+            $this->touchUserUpdatedAt($user_ids);
+
             $existingIds = UserNote::
             whereIn('id', $idsArray)
             ->when( !auth()->user()->hasPermissionTo('business_owner'), function($query) {
                 $query->where('user_notes.created_by', '=', auth()->user()->id);
             })
+            ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
+                $query->whereIn("departments.id",$all_manager_department_ids);
+             })
                 ->select('id')
                 ->get()
                 ->pluck('id')

@@ -2857,6 +2857,10 @@ class UserManagementController extends Controller
             }
             $request_data = $request->validated();
 
+            if(!empty($request_data["id"])){
+                $this->touchUserUpdatedAt([$request_data["id"]]);
+            }
+
 
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
@@ -3018,6 +3022,10 @@ class UserManagementController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
+
+            if(!empty($request_data["id"])){
+                $this->touchUserUpdatedAt([$request_data["id"]]);
+            }
 
 
 
@@ -3910,6 +3918,9 @@ class UserManagementController extends Controller
                 ], 401);
             }
             $request_data = $request->validated();
+            if(!empty($request_data["id"])){
+                $this->touchUserUpdatedAt([$request_data["id"]]);
+            }
             $userQuery = User::where([
                 "id" => $request["id"]
             ]);
@@ -4221,7 +4232,9 @@ class UserManagementController extends Controller
             $request_data = $request->validated();
 
 
-            $this->touchUserUpdatedAt([$request_data["id"]]);
+            if(!empty($request_data["id"])){
+                $this->touchUserUpdatedAt([$request_data["id"]]);
+            }
 
             $userQuery = User::where([
                 "id" => $request["id"]
@@ -4630,7 +4643,9 @@ class UserManagementController extends Controller
             $request_data = $request->validated();
 
 
-            $this->touchUserUpdatedAt([$request_data["id"]]);
+            if(!empty($request_data["id"])){
+                $this->touchUserUpdatedAt([$request_data["id"]]);
+            }
 
             $userQuery = User::where([
                 "id" => $request["id"]
@@ -4812,7 +4827,9 @@ class UserManagementController extends Controller
             }
             $request_data = $request->validated();
 
-$this->touchUserUpdatedAt([$request["id"]]);
+            if(!empty($request_data["id"])){
+                $this->touchUserUpdatedAt([$request_data["id"]]);
+            }
 
             $userQuery = User::where([
                 "id" => $request["id"]
@@ -5056,7 +5073,9 @@ $this->touchUserUpdatedAt([$request["id"]]);
             }
             $request_data = $request->validated();
 
-$this->touchUserUpdatedAt([$request["id"]]);
+            if(!empty($request_data["id"])){
+                $this->touchUserUpdatedAt([$request_data["id"]]);
+            }
 
             $userQuery = User::where([
                 "id" => $request["id"]

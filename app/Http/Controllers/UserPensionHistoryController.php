@@ -106,6 +106,10 @@ class UserPensionHistoryController extends Controller
 
                 $request_data = $request->validated();
 
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
+
                 $request_data["pension_letters"] =   $this->storeUploadedFiles($request_data["pension_letters"],"file_name","pension_letters");
                 $this->makeFilePermanent($request_data["pension_letters"],"file_name");
 
@@ -229,6 +233,10 @@ DB::commit();
                 }
 
                 $request_data = $request->validated();
+
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 $request_data["pension_letters"] =   $this->storeUploadedFiles($request_data["pension_letters"],"file_name","pension_letters");
                 $this->makeFilePermanent($request_data["pension_letters"],"file_name");
@@ -730,11 +738,20 @@ DB::commit();
 
 
 
-            $business_id =  auth()->user()->business_id;
+
 
             $all_manager_department_ids = $this->get_all_departments_of_manager();
 
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("all_pension_details",function($query) use($idsArray) {
+                $query->whereIn('employee_pension_histories.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
+
+
             $existingIds = EmployeePensionHistory::whereIn('id', $idsArray)
                 // ->where(["is_manual" => 1])
                 ->whereHas("employee.department_user.department", function ($query) use ($all_manager_department_ids) {

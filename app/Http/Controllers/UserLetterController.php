@@ -111,6 +111,10 @@ class UserLetterController extends Controller
 
                 $request_data = $request->validated();
 
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
+
 
 
                 $request_data["created_by"] = $request->user()->id;
@@ -594,6 +598,9 @@ class UserLetterController extends Controller
                     ], 401);
                 }
                 $request_data = $request->validated();
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
 
 
@@ -1292,8 +1299,17 @@ class UserLetterController extends Controller
                     "message" => "You can not perform this action"
                 ], 401);
             }
-
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("letters",function($query) use($idsArray) {
+                $query->whereIn('user_letters.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
+
+
+
             $existingIds = UserLetter::whereIn('id', $idsArray)
                 ->where('user_letters.business_id', auth()->user()->business_id)
 

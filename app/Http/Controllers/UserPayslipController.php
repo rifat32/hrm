@@ -134,6 +134,10 @@ class UserPayslipController extends Controller
 
                 $request_data = $request->validated();
 
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
+
                 if(!empty($request_data["payment_record_file"])) {
                     $request_data["payment_record_file"] = $this->storeUploadedFiles($request_data["payment_record_file"],"","payment_record_file");
                     $this->makeFilePermanent($request_data["payment_record_file"],"");
@@ -333,6 +337,9 @@ DB::commit();
                 }
 
                 $request_data = $request->validated();
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 if(!empty($request_data["payment_record_file"])) {
                     $request_data["payment_record_file"] = $this->storeUploadedFiles($request_data["payment_record_file"],"","payment_record_file");
@@ -736,6 +743,14 @@ DB::commit();
             $business_id =  auth()->user()->business_id;
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("payslips",function($query) use($idsArray) {
+                $query->whereIn('payslips.id', $idsArray);
+              })
+              ->pluck("id");
+
+            $this->touchUserUpdatedAt($user_ids);
+
             $existingIds = Payslip::whereIn('id', $idsArray)
             ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
               $query->whereIn("departments.id",$all_manager_department_ids);

@@ -112,7 +112,9 @@ class UserEducationHistoryController extends Controller
 
 
 
-                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
 
 
@@ -230,7 +232,9 @@ class UserEducationHistoryController extends Controller
 
                 $request_data = $request->validated();
 
-                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
 
                 $user_education_history_query_params = [

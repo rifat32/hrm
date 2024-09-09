@@ -152,12 +152,15 @@ class AttendanceController extends Controller
 
 
 
+
+
             // Ensure the authenticated user exists and has a business_id
             $user = auth()->user();
             if (!$user || !$user->business_id) {
                 // Handle the error as needed, e.g., throw an exception or return an error response
                 throw new Exception("User or business ID not found.");
             }
+            $this->touchUserUpdatedAt([$user->id]);
 
             // Create the query parameters
             $attendance_query_params = [
@@ -431,6 +434,11 @@ class AttendanceController extends Controller
                             throw new Exception("User or business ID not found.");
                         }
 
+
+                        $this->touchUserUpdatedAt([$user->id]);
+
+
+
                         $work_location = WorkLocation::find($request_data["work_location_id"]);
 
                         if (empty($work_location)) {
@@ -596,6 +604,10 @@ class AttendanceController extends Controller
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
 
             $request_data = $request->validated();
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
+
 
             $user_id = intval($request_data["user_id"]);
 
@@ -741,6 +753,12 @@ class AttendanceController extends Controller
             }
 
             $request_data = $request->validated();
+
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
+
+
             $setting_attendance = $this->get_attendance_setting();
 
             $user = User::with("lastTermination")->where([
@@ -931,6 +949,12 @@ class AttendanceController extends Controller
 
 
             $request_data = $request->validated();
+
+            if(!empty($request_data["user_id"])){
+                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
+
+
             $request_data["is_present"] =  $this->calculate_total_present_hours($request_data["attendance_records"]) > 0;
 
 
@@ -1107,6 +1131,7 @@ class AttendanceController extends Controller
             ];
             $attendance = $this->find_attendance($attendance_query_params);
 
+            $this->touchUserUpdatedAt([$attendance->user_id]);
 
 
 
@@ -2550,6 +2575,16 @@ class AttendanceController extends Controller
             $all_manager_department_ids = $this->get_all_departments_of_manager();
             $business_id =  auth()->user()->business_id;
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("attendances",function($query) use($idsArray) {
+                $query->whereIn('attendances.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
+
+
+
             $existingIds = Attendance::where([
                 "business_id" => $business_id
             ])

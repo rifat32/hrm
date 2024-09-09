@@ -104,7 +104,10 @@ class UserSponsorshipHistoryController extends Controller
                 }
 
                 $request_data = $request->validated();
-                $this->touchUserUpdatedAt([$request_data["user_id"]]);
+
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 $request_data["created_by"] = $request->user()->id;
                 $request_data["business_id"] = auth()->user()->business_id;
@@ -210,7 +213,9 @@ class UserSponsorshipHistoryController extends Controller
 
                 $request_data = $request->validated();
 
+                if(!empty($request_data["user_id"])){
                 $this->touchUserUpdatedAt([$request_data["user_id"]]);
+            }
 
                 $request_data["created_by"] = auth()->user()->id;
                 $request_data["is_manual"] = 1;

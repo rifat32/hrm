@@ -10,6 +10,7 @@ use App\Http\Utils\BusinessUtil;
 use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Department;
+use App\Models\User;
 use App\Models\UserDocument;
 use Carbon\Carbon;
 use Exception;
@@ -97,6 +98,9 @@ class UserDocumentController extends Controller
                 }
 
                 $request_data = $request->validated();
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
 
                 if(!empty($request_data["file_name"])) {
                     $request_data["file_name"] = $this->storeUploadedFiles([$request_data["file_name"]],"","documents")[0];
@@ -207,6 +211,11 @@ class UserDocumentController extends Controller
                 }
 
                 $request_data = $request->validated();
+                if(!empty($request_data["user_id"])){
+                    $this->touchUserUpdatedAt([$request_data["user_id"]]);
+                }
+
+
                 $user_document_query_params = [
                     "id" => $request_data["id"],
                 ];
@@ -587,8 +596,16 @@ if($user_document) {
 
              $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-
             $idsArray = explode(',', $ids);
+
+            $user_ids = User::whereHas("documents",function($query) use($idsArray) {
+                $query->whereIn('user_documents.id', $idsArray);
+              })
+              ->pluck("id");
+            $this->touchUserUpdatedAt($user_ids);
+
+
+
             $existingIds = UserDocument::whereIn('id', $idsArray)
                 ->select('id')
                 ->whereHas("user.department_user.department", function($query) use($all_manager_department_ids) {
