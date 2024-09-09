@@ -978,6 +978,8 @@ class DepartmentController extends Controller
 
                    $modifiedDepartment["department_id"] = $department->id;
                    $modifiedDepartment["department"] = $department->name;
+                   $modifiedDepartment["is_department"] = 1;
+
                     $modifiedDepartment["id"] = $manager->id;
                     $modifiedDepartment["first_Name"] = $manager->first_Name;
                     $modifiedDepartment["middle_Name"] = $manager->middle_Name;
@@ -1004,7 +1006,8 @@ class DepartmentController extends Controller
                               "middle_Name" =>   $user->middle_Name,
                               "last_Name" =>   $user->last_Name,
                               "roles" => $user->roles()->pluck("name")->toArray(),
-                              "users" => []
+                              "users" => [],
+                        "is_department" => 0
 
                             ];
                         }

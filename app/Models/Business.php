@@ -126,6 +126,7 @@ class Business extends Model
             if (!$this->isValidSubscription($latest_subscription) && !$validTrailDate) {
                 return 0;
             }
+
         } else {
             // For non-self-registered businesses
             // If the trail date is empty or invalid, return 0
