@@ -11,6 +11,7 @@ use App\Http\Utils\ErrorUtil;
 use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Label;
+use App\Models\Project;
 use App\Models\TaskLabel;
 use Exception;
 use Illuminate\Http\Request;
@@ -104,7 +105,7 @@ class LabelController extends Controller
 
 
 
-                $request_data["unique_identifier"] = $this->generateUniqueId("Project",$request_data["project_id"],"Label");
+                $request_data["unique_identifier"] = $this->generateUniqueId(Project::class,$request_data["project_id"],Label::class);
 
 
                 $label =  Label::create($request_data);

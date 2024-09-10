@@ -12,6 +12,7 @@ use App\Http\Utils\ModuleUtil;
 use App\Http\Utils\UserActivityUtil;
 use App\Models\Comment;
 use App\Models\Notification;
+use App\Models\Project;
 use App\Models\Task;
 use Carbon\Carbon;
 use Exception;
@@ -121,7 +122,7 @@ class TaskController extends Controller
 
 
 
-                $request_data["unique_identifier"] = $this->generateUniqueId("Project",$request_data["project_id"],"Task");
+                $request_data["unique_identifier"] = $this->generateUniqueId(Project::class,$request_data["project_id"],Task::class);
 
 
                 $task =  Task::create($request_data);

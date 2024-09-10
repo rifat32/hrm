@@ -384,37 +384,56 @@ trait BasicUtil
 
 
 
-    public function generateUniqueId($relationModel, $relationModelId, $mainModel, $unique_identifier_column = "")
+    public function generateUniqueId(string $relationModel, int $relationModelId, string $mainModel, string $uniqueIdentifierColumn = 'unique_identifier'): string
     {
+        // Fetch the related model instance
+        $relation = $relationModel::find($relationModelId);
 
-        $relation = $this->resolveClassName($relationModel)::where(["id" => $relationModelId])->first();
+        // Generate the prefix based on the related model or the authenticated user's business
+        $prefix = $this->getPrefix($relation);
 
+        $currentNumber = 1;
 
-        $prefix = "";
-        if ($relation) {
-            preg_match_all('/\b\w/', $relation->name, $matches);
+        // Generate a unique identifier by checking for existing records
+        do {
+            $uniqueIdentifier = $prefix . '-' . str_pad($currentNumber, 4, '0', STR_PAD_LEFT);
+            $currentNumber++;
+        } while ($this->identifierExists($mainModel, $uniqueIdentifierColumn, $uniqueIdentifier));
 
-            $prefix = implode('', array_map(function ($match) {
-                return strtoupper($match[0]);
-            }, $matches[0]));
+        return $uniqueIdentifier;
+    }
+    
 
-            // If you want to get only the first two letters from each word:
-            $prefix = substr($prefix, 0, 2 * count($matches[0]));
+    protected function getPrefix(?Model $relation): string
+    {
+        // First, check if the authenticated user's business has an identifier prefix
+        $businessPrefix = optional(auth()->user()->business)->identifier_prefix;
+
+        if ($businessPrefix) {
+            return $businessPrefix;
         }
 
-        $current_number = 1; // Start from 0001
+        // If no business identifier prefix is found, generate a prefix based on the relation's name
+        if ($relation) {
+            preg_match_all('/\b\w/', $relation->name, $matches);
+            $initials = array_map(fn($match) => strtoupper($match[0]), $matches[0]);
 
-        do {
-            $unique_identifier = $prefix . "-" . str_pad($current_number, 4, '0', STR_PAD_LEFT);
-            $current_number++; // Increment the current number for the next iteration
-        } while (
-            $this->resolveClassName($mainModel)::where([
-                ($unique_identifier_column ? $unique_identifier_column : "unique_identifier") => $unique_identifier,
-                "business_id" => auth()->user()->business_id
-            ])->exists()
-        );
-        return $unique_identifier;
+            // Limit to the first two initials of each word, or as needed
+            return substr(implode('', $initials), 0, 2 * count($matches[0]));
+        }
+
+        // If both are not found, return an empty string
+        return '';
     }
+
+
+    protected function identifierExists(string $modelClass, string $column, string $value): bool
+    {
+        return $modelClass::where($column, $value)
+            ->where('business_id', auth()->user()->business_id)
+            ->exists();
+    }
+
 
 
 

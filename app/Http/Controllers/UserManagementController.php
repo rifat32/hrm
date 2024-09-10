@@ -2269,7 +2269,7 @@ class UserManagementController extends Controller
 
 
 
-                $userData["user_id"] = $this->generateUniqueId("Business", auth()->user()->business_id, "User", "user_id");
+                $userData["user_id"] = $this->generateUniqueId(Business::class, auth()->user()->business_id, User::class, "user_id");
                 $userData["role"] = "business_employee#" . auth()->user()->business_id;
                 $userData['departments'] = [$department->id];
                 $userData['work_shift_id'] = $work_shift->id;
@@ -10747,9 +10747,9 @@ class UserManagementController extends Controller
     public function generateEmployeeId(Request $request)
     {
 
-        $user_id = $this->generateUniqueId("Business", auth()->user()->business_id, "User", "user_id");
+        $userId = $this->generateUniqueId(Business::class, auth()->user()->business_id, User::class, 'user_id');
 
-        return response()->json(["user_id" => $user_id], 200);
+        return response()->json(["user_id" => $userId], 200);
     }
 
 
