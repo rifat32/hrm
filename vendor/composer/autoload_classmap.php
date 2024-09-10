@@ -58,6 +58,7 @@ return array(
     'App\\Http\\Controllers\\EmailTemplateWrapperController' => $baseDir . '/app/Http/Controllers/EmailTemplateWrapperController.php',
     'App\\Http\\Controllers\\EmployeeRotaController' => $baseDir . '/app/Http/Controllers/EmployeeRotaController.php',
     'App\\Http\\Controllers\\EmploymentStatusController' => $baseDir . '/app/Http/Controllers/EmploymentStatusController.php',
+    'App\\Http\\Controllers\\ExportImportController' => $baseDir . '/app/Http/Controllers/ExportImportController.php',
     'App\\Http\\Controllers\\FileManagementController' => $baseDir . '/app/Http/Controllers/FileManagementController.php',
     'App\\Http\\Controllers\\HistoryDetailsController' => $baseDir . '/app/Http/Controllers/HistoryDetailsController.php',
     'App\\Http\\Controllers\\HolidayController' => $baseDir . '/app/Http/Controllers/HolidayController.php',

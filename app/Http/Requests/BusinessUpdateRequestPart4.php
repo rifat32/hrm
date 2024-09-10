@@ -67,7 +67,8 @@ class BusinessUpdateRequestPart4 extends BaseFormRequest
         'business.name.max' => 'The name field may not be greater than :max characters.',
 
         'business.about.string' => 'The about field must be a string.',
-        'business.web_page.string' => 'The web page field must be a string.',
+      
+
         'business.phone.string' => 'The phone field must be a string.',
         // 'business.email.required' => 'The email field is required.',
         'business.email.email' => 'The email must be a valid email address.',

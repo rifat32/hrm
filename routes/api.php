@@ -21,6 +21,7 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\DropdownOptionsController;
 use App\Http\Controllers\EmployeeRotaController;
 use App\Http\Controllers\EmploymentStatusController;
+use App\Http\Controllers\ExportImportController;
 use App\Http\Controllers\FileManagementController;
 use App\Http\Controllers\HistoryDetailsController;
 use App\Http\Controllers\HolidayController;
@@ -808,6 +809,15 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::get('/v1.0/businesses', [BusinessController::class, "getBusinesses"]);
     Route::get('/v1.0/businesses/{id}', [BusinessController::class, "getBusinessById"]);
     Route::get('/v2.0/businesses/{id}', [BusinessController::class, "getBusinessByIdV2"]);
+
+
+
+    Route::get('/v1.0/businesses-download/{id}', [ExportImportController::class, "downloadBusinessById"]);
+
+    Route::post('/v1.0/businesses-import', [ExportImportController::class, "importBusiness"]);
+
+
+
 
     Route::get('/v1.0/business-subscriptions/{id}', [BusinessController::class, "getSubscriptionsByBusinessId"]);
 

@@ -455,7 +455,7 @@ trait BusinessUtil
         $work_location =  WorkLocation::create([
             'name' => ($business->name . " " . "Office"),
             "is_active" => 1,
-            "is_default" => 1,
+            "is_default" => 0,
             "business_id" => $business->id,
             "created_by" => $business->owner_id
         ]);

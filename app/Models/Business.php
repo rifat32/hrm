@@ -19,6 +19,7 @@ class Business extends Model
         "trail_end_date",
         "about",
         "web_page",
+        "identifier_prefix",
         "phone",
         "email",
         "additional_information",

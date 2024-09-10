@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\File;
 
 class BusinessController extends Controller
 {
@@ -76,6 +76,7 @@ class BusinessController extends Controller
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -382,6 +383,7 @@ class BusinessController extends Controller
      * "start_date":"start_date",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -539,6 +541,7 @@ class BusinessController extends Controller
      * "start_date":"start_date",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -686,6 +689,7 @@ class BusinessController extends Controller
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -856,6 +860,7 @@ class BusinessController extends Controller
                 "trail_end_date",
                 "about",
                 "web_page",
+                "identifier_prefix",
                 "phone",
                 "email",
                 "additional_information",
@@ -1417,6 +1422,7 @@ class BusinessController extends Controller
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -1525,6 +1531,7 @@ class BusinessController extends Controller
                 "start_date",
                 "about",
                 "web_page",
+                "identifier_prefix",
                 "phone",
                 "email",
                 "additional_information",
@@ -1592,6 +1599,7 @@ class BusinessController extends Controller
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -1702,7 +1710,10 @@ class BusinessController extends Controller
                 "country",
                 "postcode",
                 "start_date",
-                "web_page"
+                "web_page",
+                "identifier_prefix"
+
+
             ])->toArray());
 
             $business->save();
@@ -1768,6 +1779,7 @@ class BusinessController extends Controller
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -2197,6 +2209,8 @@ class BusinessController extends Controller
      * "name":"ABCD businesses",
      * "about":"Best businesses in Dhaka",
      * "web_page":"https://www.facebook.com/",
+     * "identifier_prefix":"identifier_prefix",
+     *
      *  "phone":"01771034383",
      *  "email":"rifatalashwad@gmail.com",
      *  "phone":"01771034383",
@@ -2281,6 +2295,7 @@ class BusinessController extends Controller
                 "start_date",
                 "about",
                 "web_page",
+                "identifier_prefix",
                 "phone",
                 "email",
                 "additional_information",
@@ -2881,7 +2896,7 @@ class BusinessController extends Controller
                     });
                 },
             )
-            ->select("id", "name", "email", "phone", "address_line_1", "city", "country", "postcode", "start_date", "web_page","reseller_id")
+            ->select("id", "name", "email", "phone", "address_line_1", "city", "country", "postcode", "start_date", "web_page",    'identifier_prefix',"reseller_id")
             ->first();
 
 
@@ -2889,9 +2904,6 @@ class BusinessController extends Controller
             if (empty($business)) {
                 throw new Exception("you are not the owner of the business or the requested business does not exist.", 401);
             }
-            return $business;
-
-
 
             return response()->json($business, 200);
         } catch (Exception $e) {
@@ -2899,6 +2911,9 @@ class BusinessController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+
     /**
      *
      * @OA\Get(

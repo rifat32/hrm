@@ -30,6 +30,8 @@ class BusinessUpdateSeparateRequest extends BaseFormRequest
             'business.name' => 'required|string|max:255',
             'business.about' => 'nullable|string',
             'business.web_page' => 'nullable|string',
+            'business.identifier_prefix' => 'nullable|string',
+
             'business.phone' => 'nullable|string',
             // 'business.email' => 'required|string|email|indisposable|max:255',
             'business.email' => 'nullable|string|email|unique:businesses,email,' . $this->business["id"] . ',id',
@@ -76,6 +78,10 @@ class BusinessUpdateSeparateRequest extends BaseFormRequest
 
             'business.about.string' => 'The about field must be a string.',
             'business.web_page.string' => 'The web page field must be a string.',
+            'business.identifier_prefix.string' => 'The identifier prefix field must be a string.',
+
+
+
             'business.phone.string' => 'The phone field must be a string.',
             // 'business.email.required' => 'The email field is required.',
             'business.email.email' => 'The email must be a valid email address.',

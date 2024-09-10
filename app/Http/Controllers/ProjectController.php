@@ -1509,7 +1509,6 @@ class ProjectController extends Controller
 
             return response()->json(["message" => "data deleted sussfully", "deleted_ids" => $canDeleteProjectIds], 200);
         } catch (Exception $e) {
-
             return $this->sendError($e, 500, $request);
         }
     }
