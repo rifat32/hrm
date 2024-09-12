@@ -18,7 +18,6 @@ class EmployeeRota extends Model
         "department_id",
         "user_id",
 
-
         "is_default",
         "is_active",
         "business_id",

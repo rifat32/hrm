@@ -46,7 +46,7 @@ $relation["singular_model_name"] = Str::studly($relation["singular_model_name"])
 
         '{{$field['name']}}' => [
         '{{$field['basic_validation_rule']}}',
-        '{{$field['type']}}',
+        '{{$field['request_validation_type']}}',
 
 
         @if ($field['is_unique'] == 1)

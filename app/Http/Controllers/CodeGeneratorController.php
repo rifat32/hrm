@@ -107,13 +107,14 @@ array_shift($relationship_table_names);
 
             if($field["type"] == "string") {
                 $field["request_validation_type"] = $string_validation_rules[$index];
+
                 $field["is_unique"] = $is_unique_values[$index];
 
                 $field["db_validation_type"] = $field["request_validation_type"];
 
                 if($field["request_validation_type"] == "text"){
                     $field["request_validation_type"] == "string";
-                    $field["db_validation_type"] == "text";
+                    $field["db_validation_type"] == "longText";
                 }
 
                 if($field["request_validation_type"] == "email" || $field["request_validation_type"] == "url" ){
@@ -175,7 +176,7 @@ array_shift($relationship_table_names);
 
           ];
 
-  
+
 
         return view('code_generator.code-generator',compact("names","fields","validationRules", "is_active", "is_default"));
 
