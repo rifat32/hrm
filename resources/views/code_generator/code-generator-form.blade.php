@@ -11,10 +11,10 @@
         <div class="row mb-5">
             <h3>Default Fields</h3>
             <div class="row"  >
-                <div class="col-md-2" id="is-active"  >
+                <div class="col-md-2" id="is-default"  >
                     <div class="form-group">
-                        <label for="is_active" class="control-label">Is Default:</label>
-                        <select name="is_active" id="is_active">
+                        <label for="is_default" class="control-label">Is Default:</label>
+                        <select name="is_default" id="is_default">
                             <option value="1" selected>Yes</option>
                             <option value="0" >No</option>
                         </select>
@@ -22,8 +22,8 @@
                 </div>
                 <div class="col-md-2" id="is-default"  >
                     <div class="form-group">
-                        <label for="is_default" class="control-label">Is Active:</label>
-                        <select name="is_default" id="is_default">
+                        <label for="is_active" class="control-label">Is Active:</label>
+                        <select name="is_active" id="is_active">
                             <option value="1" selected>Yes</option>
                             <option value="0" >No</option>
                         </select>
@@ -102,7 +102,9 @@
     function showValidationRules(value, element) {
         console.log(element.parentNode.parentNode)
         var validationType = value;
+
         var stringValidationRules = element.parentNode.parentNode.parentNode.querySelector('#string-validation-rules');
+
         var numberValidationRules = element.parentNode.parentNode.parentNode.querySelector('#number-validation-rules');
 
         var isForeignKey = element.parentNode.parentNode.parentNode.querySelector('#is-foreign-key');
@@ -121,7 +123,7 @@
             isForeignKey.style.display = 'none';
             relationshipTableName.style.display = 'none';
 
-        } else if (validationType == 'number') {
+        } else if (validationType == 'numeric') {
             stringValidationRules.style.display = 'none';
             numberValidationRules.style.display = 'block';
             isUnique.style.display = 'none';

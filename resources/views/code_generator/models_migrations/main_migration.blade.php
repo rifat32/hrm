@@ -23,9 +23,9 @@
                 @if ($field["is_foreign_key"])
 
                 $table->foreignId('{{$field['name']}}')
+                {{($field["basic_validation_rule"] == "required" || $field["basic_validation_rule"] == "filled")? "":"->nullable()"}}
                 ->constrained('{{$field['relationship_table_name']}}')
                 ->onDelete('cascade');
-
 
                 @else
 

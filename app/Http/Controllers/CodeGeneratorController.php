@@ -31,8 +31,9 @@ class CodeGeneratorController extends Controller
          ],
        ];
 
-       $is_active = 0;
-       $is_default = 0;
+       $is_active = 1;
+       $is_default = 1;
+
          return view('code_generator.code-generator', compact("names","validationRules",  "is_active", "is_default"));
      }
 
@@ -123,10 +124,10 @@ array_shift($relationship_table_names);
 
 
             }
-            else if($field["type"] == "number") {
+            else if($field["type"] == "numeric") {
                 $field["request_validation_type"] = $number_validation_rules[$index];
                 $field["is_foreign_key"] = $is_foreign_key_values[$index];
-                $field["db_validation_type"] ==  $field["request_validation_type"];
+                $field["db_validation_type"] =  $field["request_validation_type"];
 
                 if($field["is_foreign_key"] == 1) {
                     $field["request_validation_type"] == "numeric";
@@ -175,6 +176,8 @@ array_shift($relationship_table_names);
             ],
 
           ];
+
+
 
 
 

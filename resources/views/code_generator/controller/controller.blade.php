@@ -3,7 +3,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-          
+
 
             <div class="code-snippet">
                 <h3>Create Controller Using CLI</h3>
@@ -49,8 +49,10 @@
 
 @if ($is_active)
     @if ($is_default)
+    
     @include("code_generator.controller.toggleApi")
     @else
+
     @include("code_generator.controller.toggleApi2")
     @endif
 @endif

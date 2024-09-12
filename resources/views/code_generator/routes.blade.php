@@ -24,6 +24,8 @@
 Route::post('/v1.0/{{ $names["api_name"] }}', [{{ $names["controller_name"] }}::class, "create{{ $names["singular_model_name"] }}"]);
 Route::put('/v1.0/{{ $names["api_name"] }}', [{{ $names["controller_name"] }}::class, "update{{ $names["singular_model_name"] }}"]);
 
+
+
 @if ($is_active)
 Route::put('/v1.0/{{ $names["api_name"] }}/toggle-active', [{{ $names["controller_name"] }}::class, "toggleActive{{ $names["singular_model_name"] }}"]);
 @endif

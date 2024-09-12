@@ -91,13 +91,6 @@
  * required=true,
  * example="ASC"
  * ),
- * *  @OA\Parameter(
-   * name="is_single_search",
-   * in="query",
-   * description="is_single_search",
-   * required=true,
-   * example="ASC"
-   * ),
 
 
 
@@ -229,8 +222,10 @@ $query
            }, function ($query) {
                return $query->orderBy("{{ $names["table_name"] }}.id", "DESC");
            })
-           ->when($request->filled("is_single_search") && $request->boolean("is_single_search"), function ($query) use ($request) {
-             return $query->first();
+           ->when($request->filled("id"), function ($query) use ($request) {
+             return $query
+             ->where("{{ $names["table_name"] }}.id",$request->input("id"))
+             ->first();
      }, function($query) {
         return $query->when(!empty(request()->per_page), function ($query) {
              return $query->paginate(request()->per_page);
@@ -239,7 +234,7 @@ $query
          });
      });
 
-     if($request->filled("is_single_search") && empty(${{ $names["table_name"] }})){
+     if($request->filled("id") && empty(${{ $names["table_name"] }})){
 throw new Exception("No data found",404);
      }
 
