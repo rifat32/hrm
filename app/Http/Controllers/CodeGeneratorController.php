@@ -123,6 +123,10 @@ array_shift($relationship_table_names);
                 }
 
 
+
+
+
+
             }
             else if($field["type"] == "numeric") {
                 $field["request_validation_type"] = $number_validation_rules[$index];
@@ -145,6 +149,7 @@ array_shift($relationship_table_names);
                 $field["db_validation_type"] = $field["type"];
             }
 
+        
 
             $fields->push($field);
 
