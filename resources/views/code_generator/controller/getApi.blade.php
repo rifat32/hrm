@@ -165,15 +165,13 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
 
 
 
-           ->when(!empty($request->id), function ($query) use ($request) {
-             return $query->where('{{ $names["table_name"] }}.id', $request->id);
-         })
+
          @foreach ($fields->toArray() as $field)
 @if ($field["type"] == "string")
 
 @if ($field["request_validation_type"] !== "date")
 ->when(!empty($request->{{$field["name"]}}), function ($query) use ($request) {
-    return $query->where('{{ $names["table_name"] }}.id', $request->{{$field["type"]}});
+    return $query->where('{{ $names["table_name"] }}.{{$field["name"]}}', $request->{{$field["name"]}});
 })
 @else
 ->when(!empty($request->start_{{$field["name"]}}), function ($query) use ($request) {
