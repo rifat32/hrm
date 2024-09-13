@@ -114,12 +114,12 @@ array_shift($relationship_table_names);
                 $field["db_validation_type"] = $field["request_validation_type"];
 
                 if($field["request_validation_type"] == "text"){
-                    $field["request_validation_type"] == "string";
-                    $field["db_validation_type"] == "longText";
+                    $field["request_validation_type"] = "string";
+                    $field["db_validation_type"] = "longText";
                 }
 
                 if($field["request_validation_type"] == "email" || $field["request_validation_type"] == "url" ){
-                    $field["db_validation_type"] == "string";
+                    $field["db_validation_type"] = "string";
                 }
 
 
@@ -130,10 +130,10 @@ array_shift($relationship_table_names);
                 $field["db_validation_type"] =  $field["request_validation_type"];
 
                 if($field["is_foreign_key"] == 1) {
-                    $field["request_validation_type"] == "numeric";
-                    $field["db_validation_type"] == "unsignedBigInteger";
+                    $field["request_validation_type"] = "numeric";
+                    $field["db_validation_type"] = "unsignedBigInteger";
                 } else if($field["request_validation_type"] == "numeric") {
-                    $field["db_validation_type"] == "double";
+                    $field["db_validation_type"] = "double";
                 }
             }
             else if ($field["type"] == "array"){

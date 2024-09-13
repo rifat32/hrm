@@ -185,7 +185,6 @@ public function get{{ $names["plural_model_name"] }}(Request $request)
 @endif
 
 
-
 @endif
 
 @endforeach
