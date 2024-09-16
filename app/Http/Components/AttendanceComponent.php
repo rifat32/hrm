@@ -10,17 +10,19 @@ use Exception;
 
 class AttendanceComponent
 {
+
     use BasicUtil;
 
     public function checkAttendanceExists($id = "", $user_id, $date)
     {
-        $exists = Attendance::when(!empty($id), function ($query) use ($id) {
+
+        $exists  = Attendance::when(!empty($id), function ($query) use ($id) {
             $query->whereNotIn('id', [$id]);
         })
             ->where('attendances.user_id', $user_id)
             ->where('attendances.in_date', $date)
             ->where('attendances.business_id', auth()->user()->business_id)
-            ->exists();;
+            ->exists();
         return $exists;
     }
 
