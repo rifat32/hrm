@@ -188,8 +188,7 @@ class AttendanceComponent
         // Retrieve all department IDs managed by the current user.
         $all_manager_department_ids = $this->get_all_departments_of_manager();
 
-        // Retrieve attendance settings.
-        $setting_attendance = $this->get_attendance_setting();
+
 
         // Query for attendance records with related data.
         $attendancesQuery = Attendance::with([
@@ -250,28 +249,11 @@ class AttendanceComponent
         // $data['data_highlights']['total_leave_hours'] =  0;
 
         // Calculate total available hours.
-        $total_available_hours = $data['data_highlights']['total_active_hours'] - $data['data_highlights']['total_extra_hours'];
+        $data['data_highlights']["total_available_hours"] = $data['data_highlights']['total_active_hours'] - $data['data_highlights']['total_extra_hours'];
 
 
-        // Calculate work availability percentage.
-        if ($total_available_hours == 0 || $data['data_highlights']['total_schedule_hours_gone'] == 0) {
-            $data['data_highlights']['total_work_availability_per_centum'] = 0;
-        } else {
-            $data['data_highlights']['total_work_availability_per_centum'] = ($total_available_hours / $data['data_highlights']['total_schedule_hours_gone']) * 100;
-        }
 
-        // Determine work availability status based on settings.
-        if (!empty($setting_attendance->work_availability_definition)) {
-            if ($attendances->isEmpty()) {
-                $data['data_highlights']['work_availability'] = 'no data';
-            } elseif ($data['data_highlights']['total_work_availability_per_centum'] >= $setting_attendance->work_availability_definition) {
-                $data['data_highlights']['work_availability'] = 'good';
-            } else {
-                $data['data_highlights']['work_availability'] = 'bad';
-            }
-        } else {
-            $data['data_highlights']['work_availability'] = 'good';
-        }
+
 
 
 

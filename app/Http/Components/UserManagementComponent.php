@@ -1031,11 +1031,10 @@ class UserManagementComponent
 
         $weekend_dates = $this->holidayComponent->get_weekend_dates($start_date, $end_date, $user_id, $work_shift_histories);
 
-        // Process already taken leave hourly dates
-        $already_taken_leave_dates = $this->leaveComponent->get_already_taken_leave_dates($start_date, $end_date, $user_id, false);
+
 
         // Merge the collections and remove duplicates
-        $all_leaves_collection = collect($holiday_dates)->merge($weekend_dates)->merge($already_taken_leave_dates)->unique();
+        $all_leaves_collection = collect($holiday_dates)->merge($weekend_dates)->unique();
 
 
         // $result_collection now contains all unique dates from holidays and weekends
@@ -1060,20 +1059,19 @@ class UserManagementComponent
         $schedule_data = [];
         $total_capacity_hours = 0;
 
-        $all_scheduled_dates->each(function ($date) use (&$schedule_data, &$total_capacity_hours, $user_id) {
+        collect($all_scheduled_dates)->map(function ($date) use (&$schedule_data, &$total_capacity_hours, $user_id) {
 
             $work_shift_history =  $this->workShiftHistoryComponent->get_work_shift_history($date, $user_id);
             $work_shift_details =  $this->workShiftHistoryComponent->get_work_shift_details($work_shift_history, $date);
 
             if ($work_shift_details) {
+
                 if (!$work_shift_details->start_at || !$work_shift_details->end_at) {
                     return false;
                 }
                 $work_shift_start_at = Carbon::createFromFormat('H:i:s', $work_shift_details->start_at);
                 $work_shift_end_at = Carbon::createFromFormat('H:i:s', $work_shift_details->end_at);
                 $capacity_hours = $work_shift_end_at->diffInHours($work_shift_start_at);
-
-
 
                 $schedule_data[] = [
                     "date" => $date,
@@ -1087,10 +1085,13 @@ class UserManagementComponent
                 $total_capacity_hours += $capacity_hours;
             }
         });
+
         return [
             "schedule_data" => $schedule_data,
-            "total_capacity_hours" => $total_capacity_hours
+            "total_capacity_hours" => $total_capacity_hours,
+
         ];
+
     }
 
 
