@@ -8,7 +8,7 @@ class AddContractualHoursToAttendancesHistoriesTable extends Migration
 {
     public function up()
     {
-        Schema::table('attendances_histories', function (Blueprint $table) {
+        Schema::table('attendance_histories', function (Blueprint $table) {
             $table->double('contractual_hours')->nullable(); // Add nullable if you want it to be optional
         });
     }

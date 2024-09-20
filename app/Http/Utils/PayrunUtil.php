@@ -144,8 +144,8 @@ trait PayrunUtil
             ->where([
                 "business_id" => auth()->user()->business_id
             ])
-            ->where('holidays.start_date', '<=', $end_date)
-            ->where('holidays.end_date', '>=', $start_date)
+            ->whereDate('holidays.start_date', '<=', $end_date)
+            ->whereDate('holidays.end_date', '>=', $start_date)
             ->where([
                 "is_active" => 1
             ])
@@ -180,8 +180,8 @@ trait PayrunUtil
             ->where([
                 "business_id" => auth()->user()->business_id
             ])
-            ->where('holidays.start_date', '<=', $end_date)
-            ->where('holidays.end_date', '>=', $start_date)
+            ->whereDate('holidays.start_date', '<=', $end_date)
+            ->whereDate('holidays.end_date', '>=', $start_date)
             ->where([
                 "is_active" => 1
             ])

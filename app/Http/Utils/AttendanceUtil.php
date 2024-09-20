@@ -254,8 +254,8 @@ trait AttendanceUtil
             "business_id" => auth()->user()->business_id
         ])
         ->where('status','approved')
-            ->where('holidays.start_date', "<=", $in_date)
-            ->where('holidays.end_date', ">=", $in_date . ' 23:59:59')
+            ->whereDate('holidays.start_date', "<=", Carbon::parse($in_date)->startOfDay())
+            ->whereDate('holidays.end_date', ">=", Carbon::parse($in_date)->endOfDay())
             ->where(function ($query) use ($user_id, $all_parent_department_ids) {
                 $query->whereHas("users", function ($query) use ($user_id) {
                     $query->where([
@@ -265,7 +265,6 @@ trait AttendanceUtil
                     ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
                         $query->whereIn("departments.id", $all_parent_department_ids);
                     })
-
                     ->orWhere(function ($query) {
                         $query->whereDoesntHave("users")
                             ->whereDoesntHave("departments");
@@ -495,6 +494,7 @@ trait AttendanceUtil
         $all_parent_departments_of_user = $this->all_parent_departments_of_user($user->id);
 
         $holiday = $this->get_holiday_details($attendance_data["in_date"], $user->id, $all_parent_departments_of_user);
+     
 
         // Retrieve leave record details for the user and date
 
@@ -540,7 +540,9 @@ trait AttendanceUtil
         $attendance_data["work_shift_start_at"] = $work_shift_details->start_at;
         $attendance_data["work_shift_end_at"] =  $work_shift_details->end_at;
         $attendance_data["work_shift_history_id"] = $work_shift_history->id;
+
         $attendance_data["holiday_id"] = $holiday ? $holiday->id : NULL;
+
         $attendance_data["leave_record_id"] = $leave_record ? $leave_record->id : NULL;
         $attendance_data["is_weekend"] = $work_shift_details->is_weekend;
 

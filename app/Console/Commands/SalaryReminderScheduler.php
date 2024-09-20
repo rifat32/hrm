@@ -108,8 +108,8 @@ class SalaryReminderScheduler extends Command
         ->where("joining_date", "<=", ($end_date . ' 23:59:59'))
 
         ->whereDoesntHave("payrolls", function ($q) use ($start_date,$end_date) {
-            $q->where("payrolls.start_date", ">=", ($start_date .  ' 00:00:00'))
-                ->where("payrolls.end_date","<=", ($end_date . ' 23:59:59'));
+            $q->whereDate("payrolls.start_date", ">=", ($start_date))
+                ->whereDate("payrolls.end_date","<=", ($end_date ));
         })
 
         ->get();

@@ -12,8 +12,8 @@ class HolidayComponent {
             "business_id" => auth()->user()->business_id
         ])
         ->where('status','approved')
-            ->where('holidays.start_date', "<=", $in_date)
-            ->where('holidays.end_date', ">=", $in_date . ' 23:59:59')
+            ->whereDate('holidays.start_date', "<=", $in_date)
+            ->whereDate('holidays.end_date', ">=", $in_date)
             ->where(function ($query) use ($user_id, $all_parent_department_ids) {
                 $query->whereHas("users", function ($query) use ($user_id) {
                     $query->where([
@@ -45,8 +45,8 @@ class HolidayComponent {
 
         // Fetch holidays
         $holidays = Holiday::where('business_id', auth()->user()->business_id)
-            ->where('holidays.start_date', '<=', $range_end)  // Holidays can start before or on the end date
-            ->where('holidays.end_date', '>=', $range_start)  // Holidays can end after or on the start date
+            ->whereDate('holidays.start_date', '<=', $range_end)  // Holidays can start before or on the end date
+            ->whereDate('holidays.end_date', '>=', $range_start)  // Holidays can end after or on the start date
             ->where('is_active', 1)
             ->where('status','approved')
             ->where(function ($query) use ($user_id, $all_parent_department_ids) {

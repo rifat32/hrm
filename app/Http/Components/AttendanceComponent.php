@@ -34,7 +34,7 @@ class AttendanceComponent
             "user_id" => $user_id
         ])
             ->where('attendances.in_date', '>=', $start_date)
-            ->where('attendances.in_date', '<=', $end_date . ' 23:59:59')
+            ->whereDate('attendances.in_date', '<=', $end_date)
             ->get();
 
 
