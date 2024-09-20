@@ -392,7 +392,33 @@ ADD CONSTRAINT `users_designation_id_foreign` FOREIGN KEY (`designation_id`) REF
 
 
 
-hr compliance -> 60
+61. UPDATE attendances AS a
+SET contractual_hours = (
+    SELECT
+        CASE
+            WHEN sh.weekly_contractual_hours IS NULL OR sh.minimum_working_days_per_week IS NULL THEN 0
+            ELSE sh.weekly_contractual_hours / sh.minimum_working_days_per_week
+        END AS holiday_considered_hours
+    FROM salary_histories AS sh
+    WHERE sh.user_id = a.user_id
+      AND sh.from_date <= a.in_date
+      AND (sh.to_date > a.in_date OR sh.to_date IS NULL)
+    ORDER BY sh.to_date DESC
+    LIMIT 1
+)
+WHERE EXISTS (
+    SELECT 1
+    FROM salary_histories AS sh
+    WHERE sh.user_id = a.user_id
+      AND sh.from_date <= a.in_date
+      AND (sh.to_date > a.in_date OR sh.to_date IS NULL)
+);
+
+
+
+
+
+hr compliance -> 61
 
 
 hrm-> 31

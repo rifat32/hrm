@@ -10,6 +10,7 @@ class AttendanceHistory extends Model
 {
     use HasFactory;
     protected $fillable = [
+
         "attendance_id",
         "actor_id",
         "action",
@@ -17,6 +18,7 @@ class AttendanceHistory extends Model
         "attendance_created_at",
         "attendance_updated_at",
 
+        'contractual_hours',
         'note',
         "in_geolocation",
         "out_geolocation",

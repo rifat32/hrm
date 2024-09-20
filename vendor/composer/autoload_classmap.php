@@ -416,7 +416,6 @@ return array(
     'App\\Models\\ErrorLog' => $baseDir . '/app/Models/ErrorLog.php',
     'App\\Models\\ExitInterview' => $baseDir . '/app/Models/ExitInterview.php',
     'App\\Models\\Holiday' => $baseDir . '/app/Models/Holiday.php',
-    'App\\Models\\HolidayApproval' => $baseDir . '/app/Models/HolidayApproval.php',
     'App\\Models\\JobListing' => $baseDir . '/app/Models/JobListing.php',
     'App\\Models\\JobListingJobPlatforms' => $baseDir . '/app/Models/JobListingJobPlatforms.php',
     'App\\Models\\JobPlatform' => $baseDir . '/app/Models/JobPlatform.php',

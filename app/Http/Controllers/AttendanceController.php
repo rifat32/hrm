@@ -2965,6 +2965,9 @@ class AttendanceController extends Controller
                     $attendance_data["overtime_hours"] = 0;
 
                     $attendance_data["regular_hours_salary"] =   $total_paid_hours * $user_salary_info["hourly_salary"];
+
+                    $attendance_data["contractual_hours"] =   $user_salary_info["holiday_considered_hours"];
+
                     $attendance_data["overtime_hours_salary"] =   0;
 
 
@@ -3418,6 +3421,7 @@ class AttendanceController extends Controller
                     $attendance_data["overtime_hours"] = 0;
 
                     $attendance_data["regular_hours_salary"] =   $total_paid_hours * $user_salary_info["hourly_salary"];
+                    $attendance_data["contractual_hours"] =  $user_salary_info["holiday_considered_hours"];
                     $attendance_data["overtime_hours_salary"] =   0;
 
 

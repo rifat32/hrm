@@ -13,6 +13,7 @@ class Attendance extends Model
     protected $appends = ['is_in_arrears'];
 
     protected $fillable = [
+        'contractual_hours',
         'note',
         "in_geolocation",
         "out_geolocation",

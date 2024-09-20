@@ -1128,7 +1128,6 @@ class ComposerStaticInita8ba04cec0ef166981de7bab5169f939
         'App\\Models\\ErrorLog' => __DIR__ . '/../..' . '/app/Models/ErrorLog.php',
         'App\\Models\\ExitInterview' => __DIR__ . '/../..' . '/app/Models/ExitInterview.php',
         'App\\Models\\Holiday' => __DIR__ . '/../..' . '/app/Models/Holiday.php',
-        'App\\Models\\HolidayApproval' => __DIR__ . '/../..' . '/app/Models/HolidayApproval.php',
         'App\\Models\\JobListing' => __DIR__ . '/../..' . '/app/Models/JobListing.php',
         'App\\Models\\JobListingJobPlatforms' => __DIR__ . '/../..' . '/app/Models/JobListingJobPlatforms.php',
         'App\\Models\\JobPlatform' => __DIR__ . '/../..' . '/app/Models/JobPlatform.php',

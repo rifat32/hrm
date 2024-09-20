@@ -547,6 +547,8 @@ trait AttendanceUtil
         $attendance_data["overtime_hours"] = $overtime_information["overtime_hours"];
         $attendance_data["punch_in_time_tolerance"] = $setting_attendance->punch_in_time_tolerance;
         $attendance_data["regular_hours_salary"] =   $regular_work_hours * $user_salary_info["hourly_salary"];
+        $attendance_data["contractual_hours"] =  $user_salary_info["holiday_considered_hours"];
+
         $attendance_data["overtime_hours_salary"] =   $overtime_information["overtime_hours"] * $user_salary_info["overtime_salary_per_hour"];
 
         return $attendance_data;
