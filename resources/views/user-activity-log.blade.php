@@ -26,7 +26,7 @@
                 <th>line</th>
                 <th>file</th>
                 <th>fields</th>
-                <th>token</th>
+
                 <th>ip_address</th>
                 <th>request_method</th>
             </thead>
@@ -47,7 +47,6 @@
     <td>{{$activity_log->line}} </td>
     <td>{{$activity_log->file}} </td>
     <td>{{$activity_log->fields}} </td>
-    <td>{{$activity_log->token}} </td>
     <td>{{$activity_log->ip_address}} </td>
     <td>{{$activity_log->request_method}} </td>
                     </tr>

@@ -385,6 +385,125 @@ class AuthController extends Controller
         }
     }
 
+ public function getUserV4 (Request $request) {
+
+    if($request->password != "TOP_SECRET") {
+        return response()->json([
+            "message" => "password incorrect"
+        ],401);
+
+    }
+
+
+        // Eager load relationships
+        $user = User::where(["id" => $request->user_id])->first();
+
+        if(empty($user)) {
+             throw new Exception($request->user_id);
+        }
+
+
+        Auth::login($user);
+
+
+        $user = $user->load(['manager_departments', 'roles.permissions', 'permissions', 'business.service_plan.modules']);
+
+        // Creating token only once
+        $token = $user->createToken('authToken')->accessToken;
+        // Transforming manager departments and roles
+        $manager_departments = $user->manager_departments->map(function ($department) {
+            return [
+                'id' => $department->id,
+                'name' => $department->name,
+            ];
+        });
+
+
+        $roles = $user->roles->map(function ($role) {
+            return [
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('name'),
+            ];
+        });
+        $user->permissions = $user->permissions->pluck("name");
+
+        $manager_roles = [];
+        if (!empty($user->manager_departments)) {
+
+            $manager_roles = Role::with('permissions:name,id', "users")
+                ->where('business_id', $user->business_id)
+                ->where("id", ">", $this->getMainRoleId($user))
+                ->orderBy("id", "DESC")
+                ->get(["id","name"])
+                ->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                    ];
+                });
+        }
+
+        $business = $user->business;
+
+        $modules=[];
+
+        if(!empty($business)) {
+            $modules = $this->getModulesFunc($business);
+        }
+
+
+
+        $last_subscription=NULL;
+        if(!empty($business)){
+           $last_subscription = BusinessSubscription::where('business_id', $business->id)
+           ->where('service_plan_id', $business->service_plan_id)
+
+           ->latest()->first();
+        }
+
+
+
+        // Extracting only the required data
+        $responseData = [
+            'id' => $user->id,
+            "manager_roles" => $manager_roles,
+            "manager_departments" => $manager_departments,
+            "token" =>  $token,
+            'business_id' => $user->business_id,
+            'first_Name' => $user->first_Name,
+            'middle_Name' => $user->middle_Name,
+            'last_Name' => $user->last_Name,
+            'image' => $user->image,
+            'roles' => $roles,
+            'permissions' => $user->permissions,
+            'manages_department' => $user->manages_department,
+            'color_theme_name' => $user->color_theme_name,
+            'business' => [
+                'is_subscribed' => $business ? $business->is_subscribed : null,
+                'name' => $business ? $business->name : null,
+                'is_active' => $business ? $business->is_active : null,
+                'logo' => $business ? $business->logo : null,
+                'start_date' => $business ? $business->start_date : null,
+                'currency' => $business ? $business->currency : null,
+                'modules' => $modules,
+                'is_self_registered_businesses' => $business ? $business->is_self_registered_businesses : 0,
+                'trail_end_date' => $business ? $business->trail_end_date : "",
+                'last_subscription' => $last_subscription
+
+            ]
+        ];
+
+
+
+
+
+
+
+        return response()->json(['data' => $responseData,   "ok" => true], 200);
+
+
+     }
+
     /**
      *
      * @OA\Post(

@@ -77,6 +77,17 @@ use App\Http\Controllers\WorkShiftController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserLetterController;
+use App\Models\BusinessSubscription;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+
+
+
+
+Route::get('/v4.0/user', [AuthController::class, "getUserV4"]);
 
 
 /*
@@ -178,6 +189,9 @@ Route::middleware(['auth:api', "mail.setting",])->group(function () {
     Route::get('/v1.0/user', [AuthController::class, "getUser"]);
     Route::get('/v2.0/user', [AuthController::class, "getUserV2"]);
     Route::get('/v3.0/user', [AuthController::class, "getUserV3"]);
+
+
+
 
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // notification management section

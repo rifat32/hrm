@@ -11,6 +11,7 @@ class HolidayComponent {
         $holiday =   Holiday::where([
             "business_id" => auth()->user()->business_id
         ])
+        ->where('status','approved')
             ->where('holidays.start_date', "<=", $in_date)
             ->where('holidays.end_date', ">=", $in_date . ' 23:59:59')
             ->where(function ($query) use ($user_id, $all_parent_department_ids) {
@@ -36,102 +37,60 @@ class HolidayComponent {
 
         return $holiday;
     }
-    public function get_holiday_dates($start_date,$end_date,$user_id, $all_parent_department_ids)
+    public function get_holiday_dates($start_date, $end_date, $user_id, $all_parent_department_ids)
     {
+        // Convert start and end dates to Carbon instances
+        $range_start = Carbon::parse($start_date)->startOfDay(); // Start of the day for range start
+        $range_end = Carbon::parse($end_date)->endOfDay(); // End of the day for range end
 
-        $holidays = Holiday::where([
-            "business_id" => auth()->user()->business_id
-        ])
-            ->where('holidays.start_date', ">=", $start_date)
-            ->where('holidays.end_date', "<=", $end_date . ' 23:59:59')
-            ->where([
-                "is_active" => 1
-            ])
+        // Fetch holidays
+        $holidays = Holiday::where('business_id', auth()->user()->business_id)
+            ->where('holidays.start_date', '<=', $range_end)  // Holidays can start before or on the end date
+            ->where('holidays.end_date', '>=', $range_start)  // Holidays can end after or on the start date
+            ->where('is_active', 1)
+            ->where('status','approved')
             ->where(function ($query) use ($user_id, $all_parent_department_ids) {
-                $query->whereHas("users", function ($query) use ($user_id) {
-                    $query->where([
-                        "users.id" => $user_id
-                    ]);
+                $query->whereHas('users', function ($query) use ($user_id) {
+                    $query->where('users.id', $user_id);
                 })
-                    ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                        $query->whereIn("departments.id", $all_parent_department_ids);
-                    })
-
-                    ->orWhere(function ($query) {
-                        $query->whereDoesntHave("users")
-                            ->whereDoesntHave("departments");
-                    });
-            })
-            ->select("start_date","end_date")
-
-
-            ->get();
-            // Process holiday dates
-            $holiday_dates = $holidays->flatMap(function ($holiday) {
-                $start_holiday_date = Carbon::parse($holiday->start_date);
-                $end_holiday_date = Carbon::parse($holiday->end_date);
- // If the holiday is for a single day
-                if ($start_holiday_date->eq($end_holiday_date)) {
-                    return [$start_holiday_date->format('d-m-Y')];
-                }
-  // If the holiday spans multiple days
-                $date_range = $start_holiday_date->daysUntil($end_holiday_date->addDay());
-
-                return $date_range->map(function ($date) {
-                    return $date->format('d-m-Y');
+                ->orWhereHas('departments', function ($query) use ($all_parent_department_ids) {
+                    $query->whereIn('departments.id', $all_parent_department_ids);
+                })
+                ->orWhere(function ($query) {
+                    $query->whereDoesntHave('users')
+                        ->whereDoesntHave('departments');
                 });
-            });
+            })
+            ->select('id', 'start_date', 'end_date')
+            ->get();
 
-        return $holiday_dates;
+        // Collect holiday dates within the range
+        $holiday_dates = [];
+
+        foreach ($holidays as $holiday) {
+            // Parse start and end dates
+            $start_holiday_date = Carbon::parse($holiday->start_date)->startOfDay();
+            $end_holiday_date = Carbon::parse($holiday->end_date)->endOfDay();
+
+            // Adjust the holiday start and end dates based on the given range
+            if ($start_holiday_date->lt($range_start)) {
+                $start_holiday_date = $range_start;
+            }
+            if ($end_holiday_date->gt($range_end)) {
+                $end_holiday_date = $range_end;
+            }
+
+            // Collect the dates within the adjusted range
+            for ($date = $start_holiday_date->copy(); $date->lte($end_holiday_date); $date->addDay()) {
+                $holiday_dates[] = $date->toDateString(); // Collect as date strings to avoid time part
+            }
+        }
+
+        return collect($holiday_dates)->unique()->values();
     }
 
-    public function get_holiday_datesV2($start_date,$end_date,$user_id, $all_parent_department_ids)
-    {
-
-        $holidays = Holiday::where([
-            "business_id" => auth()->user()->business_id
-        ])
-            ->where('holidays.start_date', ">=", $start_date)
-            ->where('holidays.end_date', "<=", $end_date . ' 23:59:59')
-            ->where([
-                "is_active" => 1
-            ])
-            ->where(function ($query) use ($user_id, $all_parent_department_ids) {
-                $query->whereHas("users", function ($query) use ($user_id) {
-                    $query->where([
-                        "users.id" => $user_id
-                    ]);
-                })
-                    ->orWhereHas("departments", function ($query) use ($all_parent_department_ids) {
-                        $query->whereIn("departments.id", $all_parent_department_ids);
-                    })
-
-                    ->orWhere(function ($query) {
-                        $query->whereDoesntHave("users")
-                            ->whereDoesntHave("departments");
-                    });
-            })
 
 
-            ->get();
-            // Process holiday dates
-            $holiday_dates = $holidays->flatMap(function ($holiday) {
-                $start_holiday_date = Carbon::parse($holiday->start_date);
-                $end_holiday_date = Carbon::parse($holiday->end_date);
- // If the holiday is for a single day
-                if ($start_holiday_date->eq($end_holiday_date)) {
-                    return [$start_holiday_date->format('Y-m-d')];
-                }
-  // If the holiday spans multiple days
-                $date_range = $start_holiday_date->daysUntil($end_holiday_date->addDay());
-
-                return $date_range->map(function ($date) {
-                    return $date->format('Y-m-d');
-                });
-            });
-
-        return $holiday_dates;
-    }
 
     public function get_weekend_dates($start_date,$end_date,$user_id, $work_shift_histories)
     {

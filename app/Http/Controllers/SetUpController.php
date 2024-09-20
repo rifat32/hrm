@@ -132,6 +132,11 @@ return "swagger generated";
         // clear everything
         // @@@@@@@@@@@@@@@@@@@
 
+        Artisan::call('migrate:fresh', [
+            '--path' => 'database/activity_migrations',
+            '--database' => 'logs'
+        ]);
+
         Artisan::call('optimize:clear');
         Artisan::call('migrate:fresh');
         Artisan::call('migrate', ['--path' => 'vendor/laravel/passport/database/migrations']);

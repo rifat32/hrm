@@ -327,7 +327,7 @@ class LeaveComponent
         })
 
             ->where('leave_records.date', '>=', $start_date)
-            ->where('leave_records.date', '<=', $end_date . ' 23:59:59')
+            ->where('leave_records.date', '<=', Carbon::parse($end_date)->endOfDay())
 
 
 

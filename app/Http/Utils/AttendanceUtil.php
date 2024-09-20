@@ -253,6 +253,7 @@ trait AttendanceUtil
         $holiday =   Holiday::where([
             "business_id" => auth()->user()->business_id
         ])
+        ->where('status','approved')
             ->where('holidays.start_date', "<=", $in_date)
             ->where('holidays.end_date', ">=", $in_date . ' 23:59:59')
             ->where(function ($query) use ($user_id, $all_parent_department_ids) {
@@ -460,13 +461,7 @@ trait AttendanceUtil
 
 
 
-        if(isset($raw_data["is_present"])) {
-            if(!$raw_data["is_present"]) {
-                $raw_data["in_time"] = "";
-                $raw_data["out_time"] = "";
-            }
 
-        }
 
 
         // Prepare data for attendance creation

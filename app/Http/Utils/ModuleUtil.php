@@ -104,7 +104,7 @@ trait ModuleUtil
 
          $modules = Module::
            where('modules.is_enabled', 1)
-         ->when(!auth()->user()->hasRole('superadmin') && empty(auth()->user()->business_id), function ($query) {
+         ->when(!optional(auth()->user())->hasRole('superadmin') && empty(auth()->user()->business_id), function ($query) {
             $query->whereHas("reseller_modules", function($query) {
                    $query->where("reseller_modules.is_enabled", 1);
             });

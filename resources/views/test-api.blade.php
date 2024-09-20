@@ -10,7 +10,7 @@
             margin: 20px;
         }
         .form-container {
-            max-width: 500px;
+            max-width: 80%;
             margin: 0 auto;
         }
         .result {
@@ -33,6 +33,20 @@
             padding: 10px 15px;
         }
     </style>
+       <style>
+        .form-group {
+            margin: 20px 0;
+        }
+        textarea {
+            width: 100%;
+            height: 900px; /* Adjust as needed */
+            font-family: monospace; /* For better readability */
+            font-size: 16px; /* Increase font size */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <div class="form-container">
@@ -43,14 +57,6 @@
                 <input type="text" id="apiUrl" name="apiUrl" required value="{{$error_log->api_url}}">
             </div>
             <div class="form-group">
-                <label for="jwtToken">JWT Token:</label>
-                <input type="text" id="jwtToken" name="jwtToken" required value="{{$error_log->token}}">
-            </div>
-            <div class="form-group">
-                <label for="jsonBody">JSON Body:</label>
-                <textarea id="jsonBody" name="jsonBody"  required >{{!empty($error_log->fields)?$error_log->fields:"[]"}}</textarea>
-            </div>
-            <div class="form-group">
                 <label for="requestMethod">Request Method:</label>
                 <select id="requestMethod" name="requestMethod" required>
                     <option value="GET" {{ $error_log->request_method == "GET" ? 'selected' : '' }}>GET</option>
@@ -59,6 +65,33 @@
                     <option value="DELETE" {{ $error_log->request_method == "DELETE" ? 'selected' : '' }}>DELETE</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label for="jwtToken">Request time:</label>
+              {{$error_log->created_at}}
+            </div>
+            <div class="form-group">
+                <label for="jwtToken">JWT Token:</label>
+                <input type="text" id="jwtToken" name="jwtToken" required value="">
+            </div>
+
+            <div class="form-group">
+                <label for="jsonBody">JSON Body:</label>
+                <textarea id="jsonBody" name="jsonBody" required rows="20" cols="80">{{!empty($error_log->fields) ? json_encode(json_decode($error_log->fields), JSON_PRETTY_PRINT) : '[]'}}</textarea>
+                <button type="button" onclick="formatJSON()">Format JSON</button>
+            </div>
+
+            <script>
+                function formatJSON() {
+                    const textarea = document.getElementById('jsonBody');
+                    try {
+                        const json = JSON.parse(textarea.value);
+                        textarea.value = JSON.stringify(json, null, 2); // Indent with 2 spaces
+                    } catch (e) {
+                        alert('Invalid JSON. Please check your input.');
+                    }
+                }
+            </script>
+
 
             <button type="submit">Hit API</button>
         </form>

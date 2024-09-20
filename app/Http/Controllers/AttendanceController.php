@@ -247,11 +247,6 @@ class AttendanceController extends Controller
     }
 
 
-
-
-
-
-
             // Now $request_data contains the merged data
 
 
@@ -787,6 +782,7 @@ class AttendanceController extends Controller
                 }
 
                 if (empty($item["is_present"])) {
+                    $item["is_present"] = 0;
                     $item["attendance_records"] = [
                         [
                             "in_time" => "00:00:00",
@@ -2833,6 +2829,10 @@ class AttendanceController extends Controller
                 $holiday_dates =  $this->holidayComponent->get_holiday_dates($start_date, $end_date, $user->id, $all_parent_department_ids);
                 $leave_dates =  $this->leaveComponent->get_already_taken_leave_records($start_date, $end_date, $user->id, $all_parent_department_ids);
 
+
+
+
+
                 $user->existing_attendance_dates = $existingAttendanceDates;
                 $user->existing_holiday_dates = $holiday_dates;
                 $user->existing_leave_dates = $leave_dates;
@@ -2843,6 +2843,7 @@ class AttendanceController extends Controller
                     ->merge($leave_dates)
                     ->unique()
                     ->toArray();
+
 
 
                 // Create date range between start and end dates
@@ -2869,7 +2870,6 @@ class AttendanceController extends Controller
 
                     array_push($attendance_details, $temp_data);
                 }
-
 
 
 

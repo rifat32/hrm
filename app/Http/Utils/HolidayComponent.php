@@ -19,6 +19,7 @@ trait HolidayComponent
         $holidays = Holiday::where([
             "business_id" => auth()->user()->business_id
         ])
+        ->where('status','approved')
             ->where('holidays.start_date', ">=", $start_date)
             ->where('holidays.end_date', "<=", $end_date . ' 23:59:59')
             ->where([

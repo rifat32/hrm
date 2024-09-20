@@ -133,11 +133,14 @@ trait PayrunUtil
 
     public function getHolidaysV2($all_parent_department_ids, $employee, $start_date, $end_date)
     {
-        $holidays = Holiday::whereDoesntHave("payroll_holiday.payroll", function ($query) use ($employee) {
+        $holidays = Holiday::
+        whereDoesntHave("payroll_holiday.payroll", function ($query) use ($employee) {
             $query->where([
                 "payrolls.user_id" => $employee->id
             ]);
         })
+        ->where('status','approved')
+
             ->where([
                 "business_id" => auth()->user()->business_id
             ])
@@ -173,6 +176,7 @@ trait PayrunUtil
                 "payrolls.user_id" => $employee->id
             ]);
         })
+        ->where('status','approved')
             ->where([
                 "business_id" => auth()->user()->business_id
             ])
