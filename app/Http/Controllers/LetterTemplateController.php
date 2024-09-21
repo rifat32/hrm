@@ -465,9 +465,6 @@ $letter_template->save();
                 $query->forBusiness('letter_templates', "disabled_letter_templates", $created_by);
             })
 
-                ->when(!empty($request->id), function ($query) use ($request) {
-                  return $query->where('letter_templates.id', $request->id);
-              })
                 ->when(!empty($request->search_key), function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
                         $term = $request->search_key;
@@ -487,8 +484,8 @@ $letter_template->save();
                 }, function ($query) {
                     return $query->orderBy("letter_templates.id", "DESC");
                 })
-                ->when($request->filled("is_single_search") && $request->boolean("is_single_search"), function ($query) use ($request) {
-                  return $query->first();
+                ->when($request->filled("id"), function ($query) use ($request) {
+                    return $query->where('letter_templates.id', $request->id)->first();
           }, function($query) {
              return $query->when(!empty(request()->per_page), function ($query) {
                   return $query->paginate(request()->per_page);
@@ -497,7 +494,7 @@ $letter_template->save();
               });
           });
 
-          if($request->filled("is_single_search") && empty($letter_templates)){
+          if($request->filled("id") && empty($letter_templates)){
      throw new Exception("No data found",404);
           }
 
