@@ -365,6 +365,7 @@ class UpdateDatabaseController extends Controller
 
     public function moveFilesAndUpdateDatabaseForBusiness($businessId)
     {
+        // @@@missing pension
         $modelData = Business::where("id", $businessId)->get(["id", "logo", "image", "background_image"]);
 
         // Collect all file paths that need to be moved
@@ -388,7 +389,29 @@ class UpdateDatabaseController extends Controller
             ]);
         });
     }
+    public function moveFilesAndUpdateDatabaseForBusinessPension($businessId)
+    {
+        $modelData = Business::where("business_id", $businessId)->get(["id", "pension_scheme_letters"]);
 
+        $modelData->each(function ($data) use ($businessId) {
+            // Convert pension_scheme_letters to an array if it's not already one
+            $pensionSchemeLetters = is_array($data->pension_scheme_letters) ? $data->pension_scheme_letters : json_decode($data->pension_scheme_letters, true);
+
+            if (is_array($pensionSchemeLetters)) {
+                // Move files to the business folder
+                // $this->moveFilesToBusinessFolder($pensionSchemeLetters, $businessId);
+
+                // Update the paths in the database
+                $updatedLetters = collect($pensionSchemeLetters)->map(function ($letter) use ($businessId) {
+                    return  DIRECTORY_SEPARATOR . $businessId . $letter;
+                })->toArray();
+
+                $data->update([
+                    'pension_scheme_letters' => json_encode($updatedLetters)
+                ]);
+            }
+        });
+    }
     public function moveFilesAndUpdateDatabaseForBusinessPensionHistory($businessId)
     {
         $modelData = BusinessPensionHistory::where("business_id", $businessId)->get(["id", "pension_scheme_letters"]);
@@ -549,7 +572,7 @@ class UpdateDatabaseController extends Controller
         // Update the Business model with new file paths
         $modelData->each(function ($data) use ($businessId) {
             $data->update([
-                'logo' => !empty($data->logo)?DIRECTORY_SEPARATOR . $businessId . $data->file_name:""
+                'file_name' => !empty($data->logo)?DIRECTORY_SEPARATOR . $businessId . $data->file_name:""
             ]);
         });
     }
@@ -753,6 +776,7 @@ class UpdateDatabaseController extends Controller
                 $this->moveFilesAndUpdateDatabaseForBusiness($business->id);
                 echo "2" . "<br/>";
                 $this->moveFilesAndUpdateDatabaseForBusinessPensionHistory($business->id);
+                $this->moveFilesAndUpdateDatabaseForBusinessPension($business->id);
                 echo "3" . "<br/>";
                 $this->moveFilesAndUpdateDatabaseForCandidateRecruitmentProcess($business->id);
                 echo "4" . "<br/>";

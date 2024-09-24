@@ -98,6 +98,7 @@ Route::get("/subscriptions/get-failed-payment",[SubscriptionController::class,"s
 
 
 Route::get("/database-update",[UpdateDatabaseController::class,"updateDatabase"]);
+
 Route::get("/file-update",[UpdateDatabaseController::class,"updateDatabaseFilesForBusiness"]);
 
 
