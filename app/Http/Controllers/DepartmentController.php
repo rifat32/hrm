@@ -1080,6 +1080,9 @@ class DepartmentController extends Controller
         $modifiedDepartment["is_department"] = 1;
         $modifiedDepartment["id"] = $department->id;
         $modifiedDepartment["name"] = $department->name;
+        $modifiedDepartment["job_listings"] = $department->job_listings;
+
+
 
 
         if(!empty($department->manager)) {
@@ -1198,9 +1201,11 @@ class DepartmentController extends Controller
              $business_id =  auth()->user()->business_id;
 
              $departments = Department::with([
+
                  'manager',
                  'recursiveChildren',
-                 'users'
+                 'users',
+                 'job_listings',
 
              ])
                  ->where([

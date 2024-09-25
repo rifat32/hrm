@@ -23,6 +23,10 @@ class Department extends Model
     ];
 
 
+    public function job_listings()
+    {
+        return $this->hasMany(JobListing::class, 'department_id', 'id');
+    }
 
 
 
@@ -139,7 +143,7 @@ class Department extends Model
 
     public function recursiveChildren()
     {
-        return $this->children()->with('recursiveChildren','manager',"users");
+        return $this->children()->with('recursiveChildren','manager',"users","job_listings");
     }
 
     public function recursiveManager()
