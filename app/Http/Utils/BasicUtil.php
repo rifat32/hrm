@@ -402,7 +402,7 @@ trait BasicUtil
 
         return $uniqueIdentifier;
     }
-    
+
 
     protected function getPrefix(?Model $relation): string
     {
@@ -725,7 +725,7 @@ trait BasicUtil
             ->first();
 
         if (empty($work_shift)) {
-            throw new Exception("No default work shift found for the business", 500);
+            throw new Exception("No default work shift found for the business", 409);
         }
         return $work_shift;
     }

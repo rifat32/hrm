@@ -499,7 +499,7 @@ trait BusinessUtil
 
             'details' => $business->times->toArray(),
             "is_business_default" => 1,
-            "is_active",
+            "is_active"=>1,
             "is_default" => 1,
             "business_id" => $business->id,
         ];

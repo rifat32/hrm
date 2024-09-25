@@ -638,6 +638,10 @@ class WorkShiftController extends Controller
                     "message" => "no department found"
                 ], 404);
             }
+
+
+
+
             $is_active = !$work_shift->is_active;
 
             if (!$is_active) {
