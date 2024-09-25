@@ -983,6 +983,15 @@ Route::middleware(['auth:api',"mail.setting", "business.subscription.check", "au
     Route::put('/v1.0/holidays/approve', [HolidayController::class, "approveHoliday"]);
 
     Route::get('/v1.0/holidays', [HolidayController::class, "getHolidays"]);
+
+    Route::get('/v1.0/user-holidays/{user_id}', [HolidayController::class, "getUserHolidays"]);
+
+
+
+
+
+
+
     Route::get('/v1.0/holidays/{id}', [HolidayController::class, "getHolidayById"]);
     Route::delete('/v1.0/holidays/{ids}', [HolidayController::class, "deleteHolidaysByIds"]);
 

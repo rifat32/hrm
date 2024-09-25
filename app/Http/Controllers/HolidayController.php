@@ -314,6 +314,7 @@ class HolidayController extends Controller
 
          try {
              $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
              return DB::transaction(function () use ($request) {
                  if (!$request->user()->hasPermissionTo('holiday_update')) {
                      return response()->json([
@@ -499,7 +500,6 @@ class HolidayController extends Controller
         }
     }
 
-
     /**
      *
      * @OA\Get(
@@ -639,7 +639,319 @@ class HolidayController extends Controller
      *     )
      */
 
-    public function getHolidays(Request $request)
+     public function getHolidays(Request $request)
+     {
+         try {
+             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
+
+
+             if(request()->boolean("show_my_data")) {
+                 $this->isModuleEnabled("employee_login");
+             }
+
+             if (!$request->user()->hasPermissionTo('holiday_view') && !request()->boolean("show_my_data")) {
+                 return response()->json([
+                     "message" => "You can not perform this action"
+                 ], 401);
+             }
+
+
+             $business_id =  auth()->user()->business_id;
+
+             $all_manager_department_ids = $this->get_all_departments_of_manager();
+             $all_user_of_manager = $this->get_all_user_of_manager($all_manager_department_ids);
+             $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user(auth()->user()->id);
+
+
+             $holidays = Holiday::with([
+                 "creator" => function ($query) {
+                     $query->select(
+                         'users.id',
+                         'users.first_Name',
+                         'users.middle_Name',
+                         'users.last_Name'
+                     );
+                 },
+                 "departments" => function ($query) {
+                     $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
+                 },
+                 "users"
+             ])
+                 ->where(
+                     [
+                         "holidays.business_id" => $business_id
+                     ]
+                 )
+
+                 ->when(
+                     (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
+                     function ($query) use ($all_parent_department_ids) {
+
+
+                         $query->where(function ($query) use ($all_parent_department_ids) {
+                             $query->whereHas("departments", function ($query) use ($all_parent_department_ids) {
+                                 $query->whereIn("departments.id", $all_parent_department_ids);
+                             })
+                                 ->orWhereHas("users", function ($query) {
+                                     $query->whereIn(
+                                         "users.id",
+                                         [auth()->user()->id]
+                                     );
+                                 })
+                                 ->orWhere(function ($query) {
+                                     $query->whereDoesntHave("users")
+                                         ->whereDoesntHave("departments");
+                                 });
+                         });
+                     },
+                     function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
+
+                         $query->where(function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
+                             $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
+                                 $query->whereIn("departments.id", $all_manager_department_ids);
+                             })
+                                 ->orWhereHas("users", function ($query) use ($all_user_of_manager) {
+                                     $query->whereIn(
+                                         "users.id",
+                                         $all_user_of_manager
+                                     );
+                                 });
+
+                                 if (auth()->user()->hasRole('business_owner')) {
+                                     $query ->orWhere(function ($query) {
+                                         $query->whereDoesntHave("users")
+                                             ->whereDoesntHave("departments");
+                                     });
+                                 }
+
+
+
+                         });
+
+                     }
+
+                 )
+
+
+
+
+
+                 ->when(!empty($request->search_key), function ($query) use ($request) {
+                     return $query->where(function ($query) use ($request) {
+                         $term = $request->search_key;
+                         $query->where("holidays.name", "like", "%" . $term . "%")
+                             ->orWhere("holidays.description", "like", "%" . $term . "%");
+                     });
+                 })
+                 //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
+                 //        return $query->where('product_category_id', $request->product_category_id);
+                 //    })
+                 ->when(!empty($request->name), function ($query) use ($request) {
+                     return $query->where("holidays.name", "like", "%" . $request->name . "%");
+                 })
+
+                 ->when(isset($request->repeat), function ($query) use ($request) {
+                     return $query->where('holidays.repeats_annually', intval($request->repeat));
+                 })
+                 ->when(!empty($request->description), function ($query) use ($request) {
+                     return $query->where("holidays.description", "like", "%" . $request->description . "%");
+                 })
+
+                 ->when(!empty($request->department_id), function ($query) use ($request) {
+                     $idsArray = explode(',', $request->department_id);
+                     $query->whereHas('departments', function ($query) use ($idsArray) {
+                         $query->whereIn("departments.id", $idsArray);
+                     });
+                 })
+
+
+                 ->when(!empty($request->start_date), function ($query) use ($request) {
+                     return $query->where('holidays.created_at', ">=", $request->start_date);
+                 })
+                 ->when(!empty($request->end_date), function ($query) use ($request) {
+                     return $query->where('holidays.created_at', "<=", ($request->end_date . ' 23:59:59'));
+                 })
+                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
+                     return $query->orderBy("holidays.id", $request->order_by);
+                 }, function ($query) {
+                     return $query->orderBy("holidays.id", "DESC");
+                 })
+                 ->when(!empty($request->per_page), function ($query) use ($request) {
+                     return $query->paginate($request->per_page);
+                 }, function ($query) {
+                     return $query->get();
+                 });
+
+
+             if (!empty($request->response_type) && in_array(strtoupper($request->response_type), ['PDF', 'CSV'])) {
+                 if (strtoupper($request->response_type) == 'PDF') {
+                     $pdf = PDF::loadView('pdf.holidays', ["holidays" => $holidays]);
+                     return $pdf->download(((!empty($request->file_name) ? $request->file_name : 'employee') . '.pdf'));
+                 } elseif (strtoupper($request->response_type) === 'CSV') {
+
+                     return Excel::download(new HolidayExport($holidays), ((!empty($request->file_name) ? $request->file_name : 'leave') . '.csv'));
+                 }
+             } else {
+                 return response()->json($holidays, 200);
+             }
+
+
+             return response()->json($holidays, 200);
+         } catch (Exception $e) {
+
+             return $this->sendError($e, 500, $request);
+         }
+     }
+
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/user-holidays/{user_id}",
+     *      operationId="getUserHolidays",
+     *      tags={"administrator.holiday"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *
+     *       @OA\Parameter(
+     *         name="user_id",
+     *         in="path",
+     *         description="",
+     *         required=true,
+     *  example=""
+     *      ),
+     *      @OA\Parameter(
+     *         name="response_type",
+     *         in="query",
+     *         description="response_type: in pdf,csv,json",
+     *         required=true,
+     *  example="json"
+     *      ),
+     *         @OA\Parameter(
+     *         name="file_name",
+     *         in="query",
+     *         description="file_name",
+     *         required=true,
+     *  example="employee"
+     *      ),
+
+     *              @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="per_page",
+     *         required=true,
+     *  example="6"
+     *      ),
+     *
+
+     *      * *  @OA\Parameter(
+     * name="start_date",
+     * in="query",
+     * description="start_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="end_date",
+     * in="query",
+     * description="end_date",
+     * required=true,
+     * example="2019-06-29"
+     * ),
+     * *  @OA\Parameter(
+     * name="search_key",
+     * in="query",
+     * description="search_key",
+     * required=true,
+     * example="search_key"
+     * ),
+     *     * *  @OA\Parameter(
+     * name="name",
+     * in="query",
+     * description="name",
+     * required=true,
+     * example="name"
+     * ),
+     *     *     * *  @OA\Parameter(
+     * name="repeat",
+     * in="query",
+     * description="repeat",
+     * required=true,
+     * example="repeat"
+     * ),
+     *   *     *     * *  @OA\Parameter(
+     * name="description",
+     * in="query",
+     * description="description",
+     * required=true,
+     * example="description"
+     * ),
+     *
+     *     *   *     *     * *  @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="department_id",
+     * required=true,
+     * example="department_id"
+     * ),
+     *
+     *     *     *   *     *     * *  @OA\Parameter(
+     * name="show_my_data",
+     * in="query",
+     * description="show_my_data",
+     * required=true,
+     * example="show_my_data"
+     * ),
+     *
+     *
+     *
+     * *  @OA\Parameter(
+     * name="order_by",
+     * in="query",
+     * description="order_by",
+     * required=true,
+     * example="ASC"
+     * ),
+     *      summary="This method is to get holidays  ",
+     *      description="This method is to get holidays ",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+    public function getUserHolidays($user_id,Request $request)
     {
         try {
             $this->storeActivity($request, "DUMMY activity", "DUMMY description");
@@ -658,8 +970,20 @@ class HolidayController extends Controller
 
             $business_id =  auth()->user()->business_id;
 
+            $startDate = request()->input("start_date");
+            $endDate = request()->input("end_date");
+
+            // Validate if dates are provided
+            if (empty($startDate) || empty($endDate)) {
+                return response()->json(['error' => 'Start date and end date are required.'], 400);
+            }
+
+            // Convert start and end dates to Carbon instances
+            $range_start = Carbon::parse($startDate)->startOfDay();
+            $range_end = Carbon::parse($endDate)->endOfDay();
+
             $all_manager_department_ids = $this->get_all_departments_of_manager();
-            $all_user_of_manager = $this->get_all_user_of_manager($all_manager_department_ids);
+
             $all_parent_department_ids = $this->departmentComponent->all_parent_departments_of_user(auth()->user()->id);
 
 
@@ -672,105 +996,31 @@ class HolidayController extends Controller
                         'users.last_Name'
                     );
                 },
-                "departments" => function ($query) {
-                    $query->select('departments.id', 'departments.name'); // Specify the fields for the creator relationship
-                },
-                "users"
+
             ])
-                ->where(
-                    [
-                        "holidays.business_id" => $business_id
-                    ]
-                )
 
-                ->when(
-                    (request()->has('show_my_data') && intval(request()->show_my_data) == 1),
-                    function ($query) use ($all_parent_department_ids) {
-
-
-                        $query->where(function ($query) use ($all_parent_department_ids) {
-                            $query->whereHas("departments", function ($query) use ($all_parent_department_ids) {
-                                $query->whereIn("departments.id", $all_parent_department_ids);
-                            })
-                                ->orWhereHas("users", function ($query) {
-                                    $query->whereIn(
-                                        "users.id",
-                                        [auth()->user()->id]
-                                    );
-                                })
-                                ->orWhere(function ($query) {
-                                    $query->whereDoesntHave("users")
-                                        ->whereDoesntHave("departments");
-                                });
-                        });
-                    },
-                    function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
-
-                        $query->where(function ($query) use ($all_manager_department_ids, $all_user_of_manager) {
-                            $query->whereHas("departments", function ($query) use ($all_manager_department_ids) {
-                                $query->whereIn("departments.id", $all_manager_department_ids);
-                            })
-                                ->orWhereHas("users", function ($query) use ($all_user_of_manager) {
-                                    $query->whereIn(
-                                        "users.id",
-                                        $all_user_of_manager
-                                    );
-                                });
-
-                                if (auth()->user()->hasRole('business_owner')) {
-                                    $query ->orWhere(function ($query) {
-                                        $query->whereDoesntHave("users")
-                                            ->whereDoesntHave("departments");
-                                    });
-                                }
-
-
-
-                        });
-
-                    }
-
-                )
-
-
-
-
-
-                ->when(!empty($request->search_key), function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $term = $request->search_key;
-                        $query->where("holidays.name", "like", "%" . $term . "%")
-                            ->orWhere("holidays.description", "like", "%" . $term . "%");
-                    });
+            ->whereHas("users.department_user.department", function ($query) use ($all_manager_department_ids) {
+                    $query->whereIn("departments.id", $all_manager_department_ids);
                 })
-                //    ->when(!empty($request->product_category_id), function ($query) use ($request) {
-                //        return $query->where('product_category_id', $request->product_category_id);
-                //    })
-                ->when(!empty($request->name), function ($query) use ($request) {
-                    return $query->where("holidays.name", "like", "%" . $request->name . "%");
+            ->where('business_id', auth()->user()->business_id)
+            ->whereDate('holidays.start_date', '<=', $range_end)  // Holidays can start before or on the end date
+            ->whereDate('holidays.end_date', '>=', $range_start)  // Holidays can end after or on the start date
+            ->where('is_active', 1)
+            ->where('status','approved')
+            ->where(function ($query) use ($user_id, $all_parent_department_ids) {
+                $query->whereHas('users', function ($query) use ($user_id) {
+                    $query->where('users.id', $user_id);
                 })
-
-                ->when(isset($request->repeat), function ($query) use ($request) {
-                    return $query->where('holidays.repeats_annually', intval($request->repeat));
+                ->orWhereHas('departments', function ($query) use ($all_parent_department_ids) {
+                    $query->whereIn('departments.id', $all_parent_department_ids);
                 })
-                ->when(!empty($request->description), function ($query) use ($request) {
-                    return $query->where("holidays.description", "like", "%" . $request->description . "%");
-                })
-
-                ->when(!empty($request->department_id), function ($query) use ($request) {
-                    $idsArray = explode(',', $request->department_id);
-                    $query->whereHas('departments', function ($query) use ($idsArray) {
-                        $query->whereIn("departments.id", $idsArray);
-                    });
-                })
+                ->orWhere(function ($query) {
+                    $query->whereDoesntHave('users')
+                        ->whereDoesntHave('departments');
+                });
+            })
 
 
-                ->when(!empty($request->start_date), function ($query) use ($request) {
-                    return $query->where('holidays.created_at', ">=", $request->start_date);
-                })
-                ->when(!empty($request->end_date), function ($query) use ($request) {
-                    return $query->where('holidays.created_at', "<=", ($request->end_date . ' 23:59:59'));
-                })
                 ->when(!empty($request->order_by) && in_array(strtoupper($request->order_by), ['ASC', 'DESC']), function ($query) use ($request) {
                     return $query->orderBy("holidays.id", $request->order_by);
                 }, function ($query) {
@@ -802,6 +1052,11 @@ class HolidayController extends Controller
             return $this->sendError($e, 500, $request);
         }
     }
+
+
+
+
+
 
     /**
      *
