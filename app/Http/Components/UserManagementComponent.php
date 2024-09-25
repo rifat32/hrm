@@ -1021,10 +1021,12 @@ class UserManagementComponent
         $work_shift_histories = $this->workShiftHistoryComponent->get_work_shift_histories($start_date, $end_date, $user_id, false);
 
         if (empty($work_shift_histories) || !$work_shift_histories) {
+
             return [
                 "schedule_data" => [],
                 "total_capacity_hours" => 0
             ];
+
         }
 
 

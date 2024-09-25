@@ -1661,6 +1661,7 @@ class AttendanceController extends Controller
 
             $start_date = !empty($request->start_date) ? $request->start_date : Carbon::now()->startOfYear()->format('Y-m-d');
             $end_date = !empty($request->end_date) ? $request->end_date : Carbon::now()->endOfYear()->format('Y-m-d');
+
             $data = $this->attendanceComponent->getAttendanceV2Data();
 
 

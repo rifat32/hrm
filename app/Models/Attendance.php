@@ -49,41 +49,48 @@ class Attendance extends Model
     ];
 
 
-      protected $casts = [
+    protected $casts = [
         'attendance_records' => 'array',
     ];
 
+    public function getCapacityHoursAttribute($value)
+    {
+        if(!empty($this->holiday_id)) {
+              return 0;
+        }
 
+            return $value;
 
-    public function getIsInArrearsAttribute($value) {
-        if($this->status == "approved" || $this->total_paid_hours > 0){
+    }
+
+    public function getIsInArrearsAttribute($value)
+    {
+        if ($this->status == "approved" || $this->total_paid_hours > 0) {
             $attendance_arrear =   AttendanceArrear::where(["attendance_id" => $this->id])->first();
-            $payroll = Payroll::whereHas("payroll_attendances", function ($query)  {
+            $payroll = Payroll::whereHas("payroll_attendances", function ($query) {
                 $query->where("payroll_attendances.attendance_id", $this->id);
             })->first();
 
 
             if (!$payroll) {
                 if (!$attendance_arrear) {
-                        $last_payroll_exists = Payroll::where([
-                            "user_id" => $this->user_id,
-                        ])
-                            ->where("end_date", ">=", $this->in_date)
-                            ->exists();
+                    $last_payroll_exists = Payroll::where([
+                        "user_id" => $this->user_id,
+                    ])
+                        ->where("end_date", ">=", $this->in_date)
+                        ->exists();
 
-                        if ($last_payroll_exists) {
-                            AttendanceArrear::create([
-                                "attendance_id" => $this->id,
-                                "status" =>  "pending_approval",
+                    if ($last_payroll_exists) {
+                        AttendanceArrear::create([
+                            "attendance_id" => $this->id,
+                            "status" =>  "pending_approval",
 
-                            ]);
-                            return true;
-                        }
-
-                }else if($attendance_arrear->status == "pending_approval") {
-                return true;
+                        ]);
+                        return true;
+                    }
+                } else if ($attendance_arrear->status == "pending_approval") {
+                    return true;
                 }
-
             }
             return false;
         }
@@ -91,61 +98,40 @@ class Attendance extends Model
         AttendanceArrear::where([
             "attendance_id" => $this->id,
         ])
-        ->delete();
+            ->delete();
 
         return false;
+    }
 
 
-        }
-
-
-    public function arrear(){
-        return $this->hasOne(AttendanceArrear::class,'attendance_id', 'id');
+    public function arrear()
+    {
+        return $this->hasOne(AttendanceArrear::class, 'attendance_id', 'id');
     }
 
     public function payroll_attendance()
     {
-        return $this->hasOne(PayrollAttendance::class, "attendance_id" ,'id');
+        return $this->hasOne(PayrollAttendance::class, "attendance_id", 'id');
     }
 
-    public function employee(){
-        return $this->hasOne(User::class,'id', 'user_id');
+    public function employee()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 
 
 
     public function work_location()
     {
-        return $this->belongsTo(WorkLocation::class, "work_location_id" ,'id');
+        return $this->belongsTo(WorkLocation::class, "work_location_id", 'id');
     }
 
 
 
 
 
-    public function projects() {
+    public function projects()
+    {
         return $this->belongsToMany(Project::class, 'attendance_projects', 'attendance_id', 'project_id');
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
